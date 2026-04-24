@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-title Warthogs Fleet -- Deploy
+title King Karl -- Deploy
 
 :: Ir al proyecto
 cd /d "E:\Drive\CBT\MechWarrior RPG"
@@ -40,7 +40,7 @@ echo.
 echo [1/3] Subiendo a GitHub...
 git add -A
 git commit -m "!FULL_COMMIT!"
-git push
+git push -u origin HEAD
 
 if errorlevel 1 (
     echo [ERROR] El push ha fallado.
