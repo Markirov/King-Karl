@@ -1,0 +1,1450 @@
+[
+  {
+    "user": "Adhara (Trip 3040+)",
+    "sucs_id": 30,
+    "sucs_name": "Adhara",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Adhara' by coords"
+  },
+  {
+    "user": "Aer (Finnalon 2822+)",
+    "sucs_id": 35,
+    "sucs_name": "Aer",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Aer' by coords"
+  },
+  {
+    "user": "Agmond (Bornal 3130+)",
+    "sucs_id": 42,
+    "sucs_name": "Agmond",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Agmond' by coords"
+  },
+  {
+    "user": "Albion (LC)",
+    "sucs_id": 55,
+    "sucs_name": "Albion",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Albion', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Alexandria (CC)",
+    "sucs_id": 64,
+    "sucs_name": "Alexandria",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Alexandria', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Alexandria (LC)",
+    "sucs_id": 65,
+    "sucs_name": "Alexandria",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Alexandria', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Alnasi",
+    "sucs_id": 85,
+    "sucs_name": "Gamma Sagittarius",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Alphard (FWL)",
+    "sucs_id": 88,
+    "sucs_name": "Alphard",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Alphard', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Alphard (MH)",
+    "sucs_id": 2859,
+    "sucs_name": "Alphard",
+    "type": "disambiguated",
+    "dist": 0.07,
+    "note": "SUCS has 2 'Alphard', matched by coords (d=0.070)"
+  },
+  {
+    "user": "Altoona (FS)",
+    "sucs_id": 106,
+    "sucs_name": "Altoona",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Altoona', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Altoona (LC)",
+    "sucs_id": 107,
+    "sucs_name": "Altoona",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Altoona', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Alula Australis",
+    "sucs_id": 2788,
+    "sucs_name": "Xi Ursae Majoris",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Xi Ursae Majoris'"
+  },
+  {
+    "user": "Anatolia (Pillory 3130+)",
+    "sucs_id": 125,
+    "sucs_name": "Anatolia",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Anatolia' by coords"
+  },
+  {
+    "user": "Andiron (Helbrent 3025-)",
+    "sucs_id": 1082,
+    "sucs_name": "Helbrent",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Helbrent' by coords"
+  },
+  {
+    "user": "Angell II",
+    "sucs_id": 134,
+    "sucs_name": "Angell",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Angell'"
+  },
+  {
+    "user": "Antallos (Port Krin)",
+    "sucs_id": 145,
+    "sucs_name": "Antallos",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Appian",
+    "sucs_id": 3093,
+    "sucs_name": "Polybius",
+    "type": "coord_match",
+    "dist": 0.093,
+    "note": "Matched by coordinates (d=0.093)"
+  },
+  {
+    "user": "Arcadia (FS)",
+    "sucs_id": 164,
+    "sucs_name": "Arcadia",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 3 'Arcadia', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Arcadia (LC)",
+    "sucs_id": 165,
+    "sucs_name": "Arcadia",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 3 'Arcadia', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Arn (Jia Tian 3130+)",
+    "sucs_id": 181,
+    "sucs_name": "Arn",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Arn' by coords"
+  },
+  {
+    "user": "Atreus (FWL)",
+    "sucs_id": 202,
+    "sucs_name": "Atreus",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Atreus', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Austerlitz (Scauld 3130+)",
+    "sucs_id": 214,
+    "sucs_name": "Austerlitz",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Austerlitz' by coords"
+  },
+  {
+    "user": "Baltazar III (Himmels 3025-)",
+    "sucs_id": 1113,
+    "sucs_name": "Himmels",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Himmels' by coords"
+  },
+  {
+    "user": "Barlow's Folly (Cussar 2864-)",
+    "sucs_id": 637,
+    "sucs_name": "Cussar",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Cussar' by coords"
+  },
+  {
+    "user": "Belamor (Zanzor 2822+)",
+    "sucs_id": 291,
+    "sucs_name": "Belamor",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Belamor' by coords"
+  },
+  {
+    "user": "Bell (CC)",
+    "sucs_id": 292,
+    "sucs_name": "Bell",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Bell', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Bell (OA)",
+    "sucs_id": 293,
+    "sucs_name": "Bell",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Bell', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Benet III",
+    "sucs_id": 300,
+    "sucs_name": "Benet",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Benet'"
+  },
+  {
+    "user": "Blantleff (Dersidatz 3025-)",
+    "sucs_id": 2863,
+    "sucs_name": "Dersidatz",
+    "type": "renamed",
+    "dist": 0.036,
+    "note": "Rename pattern, matched 'Dersidatz' by coords"
+  },
+  {
+    "user": "Bremen (RWR)",
+    "sucs_id": 387,
+    "sucs_name": "Bremen",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Bremen', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Brocchi's Cluster (40)",
+    "sucs_id": 399,
+    "sucs_name": "Brocchi's Cluster",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Cadiz (DC)",
+    "sucs_id": 428,
+    "sucs_name": "Cadiz",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Cadiz', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Cadiz (TC)",
+    "sucs_id": 2887,
+    "sucs_name": "Cadiz",
+    "type": "disambiguated",
+    "dist": 0.094,
+    "note": "SUCS has 2 'Cadiz', matched by coords (d=0.094)"
+  },
+  {
+    "user": "Calish (Calish II, III)",
+    "sucs_id": 442,
+    "sucs_name": "Calish",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Calloway VI",
+    "sucs_id": 445,
+    "sucs_name": "Calloway",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Calloway'"
+  },
+  {
+    "user": "Cameron (FWL)",
+    "sucs_id": 451,
+    "sucs_name": "Cameron",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Cameron', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Cameron (LC)",
+    "sucs_id": 452,
+    "sucs_name": "Cameron",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Cameron', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Camlann (FWL)",
+    "sucs_id": 453,
+    "sucs_name": "Camlann",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Camlann', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Camlann (LC)",
+    "sucs_id": 454,
+    "sucs_name": "Camlann",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Camlann', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Canopus IV",
+    "sucs_id": 462,
+    "sucs_name": "Canopus",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Canopus'"
+  },
+  {
+    "user": "Carver V (Liberty 3063+)",
+    "sucs_id": 487,
+    "sucs_name": "Carver",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Chaffee (LC)",
+    "sucs_id": 511,
+    "sucs_name": "Chaffee",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Chaffee', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Chaine Cluster (7)",
+    "sucs_id": 2973,
+    "sucs_name": "Chaine Cluster",
+    "type": "coord_match",
+    "dist": 0.089,
+    "note": "Matched by coordinates (d=0.089)"
+  },
+  {
+    "user": "Chara (Pacifica)",
+    "sucs_id": 522,
+    "sucs_name": "Chara",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Chukchi III",
+    "sucs_id": 555,
+    "sucs_name": "Chukchi",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Chukchi'"
+  },
+  {
+    "user": "Clayborne II (Green Stone 3025-)",
+    "sucs_id": 1003,
+    "sucs_name": "Green Stone",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Green Stone' by coords"
+  },
+  {
+    "user": "Corridan IV",
+    "sucs_id": 604,
+    "sucs_name": "Corridan",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Corridan'"
+  },
+  {
+    "user": "Crevedia",
+    "sucs_id": 2643,
+    "sucs_name": "Vaj",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Vaj'"
+  },
+  {
+    "user": "Dagda (LC)",
+    "sucs_id": 646,
+    "sucs_name": "Dagda",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Dagda', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Dahar IV",
+    "sucs_id": 647,
+    "sucs_name": "Dahar",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Dahar'"
+  },
+  {
+    "user": "Dark Nebula",
+    "sucs_id": null,
+    "sucs_name": null,
+    "type": "no_match",
+    "dist": null,
+    "note": "coords=(-137.44,424.06)"
+  },
+  {
+    "user": "Davetal (Davetal II, III)",
+    "sucs_id": 2896,
+    "sucs_name": "Davetal",
+    "type": "coord_match",
+    "dist": 0.097,
+    "note": "Matched by coordinates (d=0.097)"
+  },
+  {
+    "user": "Diedre's Den (Iolas 3025-)",
+    "sucs_id": 1205,
+    "sucs_name": "Iolas",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Iolas' by coords"
+  },
+  {
+    "user": "Dromini VI",
+    "sucs_id": 742,
+    "sucs_name": "Dromini",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Dromini'"
+  },
+  {
+    "user": "Dunklewälderdunklerflüssenschattenwelt (Bob 2822+)",
+    "sucs_id": 754,
+    "sucs_name": "Dunklewälderdunklerflüssenschattenwelt",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Dunklewälderdunklerflüssenschattenwelt' by coords"
+  },
+  {
+    "user": "Edirne (Brank 3130+)",
+    "sucs_id": 770,
+    "sucs_name": "Edirne",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Edirne' by coords"
+  },
+  {
+    "user": "Elbing (FWL)",
+    "sucs_id": 785,
+    "sucs_name": "Elbing",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Elbing', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Elgin (Chisholm 2878-)",
+    "sucs_id": 545,
+    "sucs_name": "Chisholm",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Chisholm' by coords"
+  },
+  {
+    "user": "Elidere IV",
+    "sucs_id": 789,
+    "sucs_name": "Elidere",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Elidere'"
+  },
+  {
+    "user": "Emris IV",
+    "sucs_id": 801,
+    "sucs_name": "Emris",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Emris'"
+  },
+  {
+    "user": "Enders Cluster (10)",
+    "sucs_id": 803,
+    "sucs_name": "Enders Cluster",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Fallon II",
+    "sucs_id": 845,
+    "sucs_name": "Fallon",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Fallon'"
+  },
+  {
+    "user": "Falsterbo (DC)",
+    "sucs_id": 848,
+    "sucs_name": "Falsterbo",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Falsterbo', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Fellanin II",
+    "sucs_id": 859,
+    "sucs_name": "Fellanin",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Fellanin'"
+  },
+  {
+    "user": "Ferris (OA)",
+    "sucs_id": 865,
+    "sucs_name": "Ferris",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Ferris', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Ferris (OC)",
+    "sucs_id": 2902,
+    "sucs_name": "Ferris",
+    "type": "disambiguated",
+    "dist": 0.079,
+    "note": "SUCS has 2 'Ferris', matched by coords (d=0.079)"
+  },
+  {
+    "user": "Flannagan's Nebulea",
+    "sucs_id": null,
+    "sucs_name": null,
+    "type": "no_match",
+    "dist": null,
+    "note": "coords=(183.34,-393.55)"
+  },
+  {
+    "user": "Fletcher (CC)",
+    "sucs_id": 882,
+    "sucs_name": "Fletcher",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Fletcher', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Fletcher (FWL)",
+    "sucs_id": 883,
+    "sucs_name": "Fletcher",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Fletcher', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Frobisher",
+    "sucs_id": 3074,
+    "sucs_name": "SLSC K5IV.5002",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'SLSC K5IV.5002'"
+  },
+  {
+    "user": "Galatia III",
+    "sucs_id": 919,
+    "sucs_name": "Galatia",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Galatia'"
+  },
+  {
+    "user": "Galedon V",
+    "sucs_id": 921,
+    "sucs_name": "Galedon",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Galedon'"
+  },
+  {
+    "user": "Galtor III",
+    "sucs_id": 927,
+    "sucs_name": "Galtor",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Galtor'"
+  },
+  {
+    "user": "Gibraltar",
+    "sucs_id": 952,
+    "sucs_name": "Britannia",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Britannia'"
+  },
+  {
+    "user": "Gotterdammerung",
+    "sucs_id": 986,
+    "sucs_name": "Götterdämmerung",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Graham IV",
+    "sucs_id": 990,
+    "sucs_name": "Graham",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Graham'"
+  },
+  {
+    "user": "Gulf Breeze (Commonwealth Mining Outpost 26 3057-)",
+    "sucs_id": 582,
+    "sucs_name": "Commonwealth Mining Outpost 26",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Commonwealth Mining Outpost 26' by coords"
+  },
+  {
+    "user": "Halloran V",
+    "sucs_id": 1043,
+    "sucs_name": "Halloran",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Halloran'"
+  },
+  {
+    "user": "Hamilton (FWL)",
+    "sucs_id": 1047,
+    "sucs_name": "Hamilton",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Hamilton', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Hamilton (LC)",
+    "sucs_id": 1048,
+    "sucs_name": "Hamilton",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Hamilton', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Hansii (Itsbur 2822+)",
+    "sucs_id": 1053,
+    "sucs_name": "Hansii",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Hansii' by coords"
+  },
+  {
+    "user": "Herat (FS)",
+    "sucs_id": 1095,
+    "sucs_name": "Herat",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 1 'Herat', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Hesperus II",
+    "sucs_id": 1105,
+    "sucs_name": "Hesperus",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Hesperus'"
+  },
+  {
+    "user": "Huanghuadian (Tincalunas 3130+)",
+    "sucs_id": 1149,
+    "sucs_name": "Huanghuadian",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Huanghuadian' by coords"
+  },
+  {
+    "user": "Idrmach/Idrmarch",
+    "sucs_id": 2976,
+    "sucs_name": "Idrmach",
+    "type": "coord_match",
+    "dist": 0.092,
+    "note": "Matched by coordinates (d=0.092)"
+  },
+  {
+    "user": "Ildrong (Sanurcha 2750-)",
+    "sucs_id": 2233,
+    "sucs_name": "Sanurcha",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Sanurcha' by coords"
+  },
+  {
+    "user": "Imbros III",
+    "sucs_id": 1189,
+    "sucs_name": "Imbros",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Imbros'"
+  },
+  {
+    "user": "Inglesmond",
+    "sucs_id": 1819,
+    "sucs_name": "New Britain",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Jardine (Herakleion 2822+)",
+    "sucs_id": 1237,
+    "sucs_name": "Jardine",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Jardine' by coords"
+  },
+  {
+    "user": "Kalmar (CC)",
+    "sucs_id": 1285,
+    "sucs_name": "Kalmar",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Kalmar', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Kandersteg",
+    "sucs_id": 1289,
+    "sucs_name": "Matahari",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Matahari'"
+  },
+  {
+    "user": "Kentares IV",
+    "sucs_id": 1330,
+    "sucs_name": "Kentares",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Kentares'"
+  },
+  {
+    "user": "Kesai (Kesai IV)",
+    "sucs_id": 1335,
+    "sucs_name": "Kesai",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Kimball II",
+    "sucs_id": 1355,
+    "sucs_name": "Kimball",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Kimball'"
+  },
+  {
+    "user": "Kirkvåg (Toch Zu 2822+)",
+    "sucs_id": 1365,
+    "sucs_name": "Kirkvåg",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Kirkvåg' by coords"
+  },
+  {
+    "user": "Kleinwelt",
+    "sucs_id": 1377,
+    "sucs_name": "SLSC K3V.10599",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'SLSC K3V.10599'"
+  },
+  {
+    "user": "Kooken's Pleasure Pit",
+    "sucs_id": 1397,
+    "sucs_name": "Kookens Pleasure Pit",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Kupang (CC)",
+    "sucs_id": 1423,
+    "sucs_name": "Kupang",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Kupang', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Kupang (RWR)",
+    "sucs_id": 1424,
+    "sucs_name": "Kupang",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Kupang', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Köln (FWL)",
+    "sucs_id": 1390,
+    "sucs_name": "Köln",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Köln', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Lamu (Tunlmar 2822+)",
+    "sucs_id": 1449,
+    "sucs_name": "Lamu",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Lamu' by coords"
+  },
+  {
+    "user": "Lancaster (FWL)",
+    "sucs_id": 1450,
+    "sucs_name": "Lancaster",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Lancaster', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Lancaster (LC)",
+    "sucs_id": 1451,
+    "sucs_name": "Lancaster",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Lancaster', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Liao (Cynthiana 2202-)",
+    "sucs_id": 641,
+    "sucs_name": "Cynthiana",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Cynthiana' by coords"
+  },
+  {
+    "user": "Lushun (Jibbet 3130+)",
+    "sucs_id": 1539,
+    "sucs_name": "Lushun",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Lushun' by coords"
+  },
+  {
+    "user": "Lywick (Ferreusvirgo 3130+)",
+    "sucs_id": 1549,
+    "sucs_name": "Lywick",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Lywick' by coords"
+  },
+  {
+    "user": "McEvedy's Folly",
+    "sucs_id": 2972,
+    "sucs_name": "Project Sagitarius Umbrella",
+    "type": "coord_match",
+    "dist": 0.101,
+    "note": "Matched by coordinates (d=0.101)"
+  },
+  {
+    "user": "Mesartim (Conway)",
+    "sucs_id": 1692,
+    "sucs_name": "Mesartim",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Midden",
+    "sucs_id": 3080,
+    "sucs_name": "SLSC A1V.0960",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'SLSC A1V.0960'"
+  },
+  {
+    "user": "Mineite",
+    "sucs_id": null,
+    "sucs_name": null,
+    "type": "no_match",
+    "dist": null,
+    "note": "coords=(475.18,-31.3)"
+  },
+  {
+    "user": "Murris (Kalindam 2822+)",
+    "sucs_id": 1778,
+    "sucs_name": "Murris",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Murris' by coords"
+  },
+  {
+    "user": "Neukirchen (Jodipur 3025-)",
+    "sucs_id": 1256,
+    "sucs_name": "Jodipur",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Jodipur' by coords"
+  },
+  {
+    "user": "New Earth (Tau Ceti 2116-)",
+    "sucs_id": 2499,
+    "sucs_name": "Tau Ceti",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Tau Ceti' by coords"
+  },
+  {
+    "user": "Niles (OA)",
+    "sucs_id": 1872,
+    "sucs_name": "Niles",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Niles', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Niops (Niops V, VI, VII)",
+    "sucs_id": 1876,
+    "sucs_name": "Niops",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Nyserta",
+    "sucs_id": 2886,
+    "sucs_name": "Blackbone",
+    "type": "coord_match",
+    "dist": 0.077,
+    "note": "Matched by coordinates (d=0.077)"
+  },
+  {
+    "user": "Oberon VI",
+    "sucs_id": 1917,
+    "sucs_name": "Oberon",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Oberon'"
+  },
+  {
+    "user": "Odessa ('The Ruins of Gabriel')",
+    "sucs_id": 1923,
+    "sucs_name": "Odessa",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Oporto (Veil 3075+)",
+    "sucs_id": 1944,
+    "sucs_name": "Oporto",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Oporto' by coords"
+  },
+  {
+    "user": "Orkney (LC)",
+    "sucs_id": 1950,
+    "sucs_name": "Orkney",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Orkney', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Orkney (TC)",
+    "sucs_id": 2916,
+    "sucs_name": "Orkney",
+    "type": "disambiguated",
+    "dist": 0.088,
+    "note": "SUCS has 2 'Orkney', matched by coords (d=0.088)"
+  },
+  {
+    "user": "Ouagadougou (Silence 3130+)",
+    "sucs_id": 1960,
+    "sucs_name": "Ouagadougou",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Ouagadougou' by coords"
+  },
+  {
+    "user": "Pain (Dijonne 3050-)",
+    "sucs_id": 717,
+    "sucs_name": "Dijonne",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Dijonne' by coords"
+  },
+  {
+    "user": "Pike IV",
+    "sucs_id": 2028,
+    "sucs_name": "Pike",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Pike'"
+  },
+  {
+    "user": "Pioche",
+    "sucs_id": null,
+    "sucs_name": null,
+    "type": "no_match",
+    "dist": null,
+    "note": "coords=(-392.36,-497.51)"
+  },
+  {
+    "user": "Pirates Haven (50) (Badlands Cluster 3025-)",
+    "sucs_id": 236,
+    "sucs_name": "Badlands Cluster",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Pleiades Cluster (100)",
+    "sucs_id": 2039,
+    "sucs_name": "Pleiades Cluster",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Preston (CC)",
+    "sucs_id": 2066,
+    "sucs_name": "Preston",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Preston', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Preston (FWL)",
+    "sucs_id": 2067,
+    "sucs_name": "Preston",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Preston', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Qualip (Kerensky's Vision 3130+)",
+    "sucs_id": 2088,
+    "sucs_name": "Qualip",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Qualip' by coords"
+  },
+  {
+    "user": "Quimper (Chirac 3130+)",
+    "sucs_id": 2099,
+    "sucs_name": "Quimper",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Quimper' by coords"
+  },
+  {
+    "user": "Rhodos (Runrig 2822+)",
+    "sucs_id": 2151,
+    "sucs_name": "Rhodos",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Rhodos' by coords"
+  },
+  {
+    "user": "Rodigo",
+    "sucs_id": 2169,
+    "sucs_name": "Alsace",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Alsace'"
+  },
+  {
+    "user": "Rosetta",
+    "sucs_id": 2180,
+    "sucs_name": "Ptolemy",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Ptolemy'"
+  },
+  {
+    "user": "Sakhalin (CC)",
+    "sucs_id": 2211,
+    "sucs_name": "Sakhalin",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Sakhalin', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Sakhalin (LC)",
+    "sucs_id": 2212,
+    "sucs_name": "Sakhalin",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Sakhalin', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Santander V (Santander's World)",
+    "sucs_id": 2922,
+    "sucs_name": "Santander",
+    "type": "coord_match",
+    "dist": 0.074,
+    "note": "Matched by coordinates (d=0.074)"
+  },
+  {
+    "user": "Santiago (OA)",
+    "sucs_id": 2231,
+    "sucs_name": "Santiago",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 1 'Santiago', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Sartu (Bastille 3130+)",
+    "sucs_id": 2246,
+    "sucs_name": "Sartu",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Sartu' by coords"
+  },
+  {
+    "user": "Seven Lands (Garotte 3130+)",
+    "sucs_id": 2287,
+    "sucs_name": "Seven Lands",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Seven Lands' by coords"
+  },
+  {
+    "user": "Shaobuon (Liu's Memory 3130+)",
+    "sucs_id": 2292,
+    "sucs_name": "Shaobuon",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Shaobuon' by coords"
+  },
+  {
+    "user": "Sharpe (Obeedah 3025+)",
+    "sucs_id": 2294,
+    "sucs_name": "Sharpe",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Sharpe' by coords"
+  },
+  {
+    "user": "Shaula (Perrot 3025-)",
+    "sucs_id": 2016,
+    "sucs_name": "Perrot",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Perrot' by coords"
+  },
+  {
+    "user": "Shaun (Burl 2822+)",
+    "sucs_id": 2298,
+    "sucs_name": "Shaun",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Shaun' by coords"
+  },
+  {
+    "user": "Sheridan (FWL)",
+    "sucs_id": 2305,
+    "sucs_name": "Sheridan",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Sheridan', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Shiro III",
+    "sucs_id": 2320,
+    "sucs_name": "Shiro",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Shiro'"
+  },
+  {
+    "user": "Skyfog",
+    "sucs_id": 2074,
+    "sucs_name": "SLSC M8V.8476",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Sonnia",
+    "sucs_id": 2924,
+    "sucs_name": "Rahway",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Rahway'"
+  },
+  {
+    "user": "Star's End (Novo Cressidas)",
+    "sucs_id": 2402,
+    "sucs_name": "Star's End",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Sterope (New Taurus)",
+    "sucs_id": 2412,
+    "sucs_name": "Sterope",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Stettin (FWL)",
+    "sucs_id": 2413,
+    "sucs_name": "Stettin",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Stettin', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Suk II",
+    "sucs_id": 2431,
+    "sucs_name": "Suk",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Suk'"
+  },
+  {
+    "user": "Takata (New Start 3130+)",
+    "sucs_id": 2467,
+    "sucs_name": "Takata",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Takata' by coords"
+  },
+  {
+    "user": "Tancredi IV",
+    "sucs_id": 2478,
+    "sucs_name": "Tancredi",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Tancredi'"
+  },
+  {
+    "user": "Tangerz (Mayadi 2822+)",
+    "sucs_id": 2479,
+    "sucs_name": "Tangerz",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Tangerz' by coords"
+  },
+  {
+    "user": "Telos IV",
+    "sucs_id": 2512,
+    "sucs_name": "Telos",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Telos'"
+  },
+  {
+    "user": "Terra",
+    "sucs_id": 2371,
+    "sucs_name": "Sol",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Sol'"
+  },
+  {
+    "user": "Thamel (Wyeth's Glory 3130+)",
+    "sucs_id": 2525,
+    "sucs_name": "Thamel",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Thamel' by coords"
+  },
+  {
+    "user": "The Rack (Port Vail 3050-)",
+    "sucs_id": 2055,
+    "sucs_name": "Port Vail",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Port Vail' by coords"
+  },
+  {
+    "user": "Tiber (FWL)",
+    "sucs_id": 2543,
+    "sucs_name": "Tiber",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Tiber', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Trell I",
+    "sucs_id": 2579,
+    "sucs_name": "Trell",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Trondheim (DC)",
+    "sucs_id": 2589,
+    "sucs_name": "Trondheim",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Trondheim', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Trondheim (JF)",
+    "sucs_id": 3102,
+    "sucs_name": "Trondheim",
+    "type": "disambiguated",
+    "dist": 0.076,
+    "note": "SUCS has 2 'Trondheim', matched by coords (d=0.076)"
+  },
+  {
+    "user": "Trznadel Cluster (60)",
+    "sucs_id": 2592,
+    "sucs_name": "Trznadel Cluster",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Tsamma",
+    "sucs_id": 2593,
+    "sucs_name": "Tsunami",
+    "type": "alt_name",
+    "dist": 0,
+    "note": "Matches SUCS alt name of 'Tsunami'"
+  },
+  {
+    "user": "Tsinghai (New Sarna)",
+    "sucs_id": 1851,
+    "sucs_name": "New Sarna",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Tyrfing",
+    "sucs_id": 2464,
+    "sucs_name": "Tabit",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Untran (Achtur 2822+)",
+    "sucs_id": 2632,
+    "sucs_name": "Untran",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Untran' by coords"
+  },
+  {
+    "user": "Versailles (Taussen 2822+)",
+    "sucs_id": 2679,
+    "sucs_name": "Versailles",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Versailles' by coords"
+  },
+  {
+    "user": "Verthandi (Norn)",
+    "sucs_id": 1893,
+    "sucs_name": "Norn",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Victoria (CC)",
+    "sucs_id": 2685,
+    "sucs_name": "Victoria",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 1 'Victoria', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Victoria (Meglan 2537-)",
+    "sucs_id": 1659,
+    "sucs_name": "Meglan",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Von Strang's World (Erin 2830-)",
+    "sucs_id": 817,
+    "sucs_name": "Erin",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Erin' by coords"
+  },
+  {
+    "user": "Wernke (Talon)",
+    "sucs_id": 2747,
+    "sucs_name": "Wernke",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Winfield (FS)",
+    "sucs_id": 2763,
+    "sucs_name": "Winfield",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 1 'Winfield', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Winfield (Treeline 2863-)",
+    "sucs_id": 2578,
+    "sucs_name": "Treeline",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Yance I (Agador)",
+    "sucs_id": 38,
+    "sucs_name": "Agador",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "York (LC)",
+    "sucs_id": 2804,
+    "sucs_name": "York",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'York', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Zara (FWL)",
+    "sucs_id": 2821,
+    "sucs_name": "Zara",
+    "type": "disambiguated",
+    "dist": 0.0,
+    "note": "SUCS has 2 'Zara', matched by coords (d=0.000)"
+  },
+  {
+    "user": "Zathras/Zatharas",
+    "sucs_id": 2822,
+    "sucs_name": "Zathras",
+    "type": "coord_match",
+    "dist": 0.0,
+    "note": "Matched by coordinates (d=0.000)"
+  },
+  {
+    "user": "Zhaomaon (Cluff's Stand 3130+)",
+    "sucs_id": 2837,
+    "sucs_name": "Zhaomaon",
+    "type": "renamed",
+    "dist": 0.0,
+    "note": "Rename pattern, matched 'Zhaomaon' by coords"
+  }
+]

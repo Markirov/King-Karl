@@ -1,0 +1,9 @@
+import { PagePlaceholder } from '@/components/ui/PagePlaceholder';
+
+export function TROPage() {
+  return (
+    <div className="p-6 animate-[fadeInUp_0.3s_ease]">
+      <PagePlaceholder icon="📖" label="TRO" description="Technical Readout — Fase 3" />
+    </div>
+  );
+}

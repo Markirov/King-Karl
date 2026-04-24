@@ -1,0 +1,38 @@
+{
+  "name": "King Karl Kurassiers",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=5173",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit",
+    "build:data": "tsx scripts/build-systems-data.ts",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "@xmldom/xmldom": "^0.8.11",
+    "d3-delaunay": "^6.0.4",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.1.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/d3-delaunay": "^6.0.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "gh-pages": "^5.0.0",
+    "tailwindcss": "^4.1.14",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "xlsx": "^0.18.5"
+  }
+}

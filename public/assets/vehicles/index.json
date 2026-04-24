@@ -1,0 +1,1080 @@
+[
+  {
+    "name": "AC2 Carrier",
+    "bv2": 403,
+    "file": "AC2 Carrier.saw",
+    "type": "Tracked",
+    "year": 2520
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 193,
+    "file": "Armored Personnel Carrier (Hover LRM).saw",
+    "type": "Hovercraft",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 114,
+    "file": "Armored Personnel Carrier (Hover MG).saw",
+    "type": "Hovercraft",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 78,
+    "file": "Armored Personnel Carrier (Hover Sensors).saw",
+    "type": "Hovercraft",
+    "year": 2620
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 131,
+    "file": "Armored Personnel Carrier (Hover SRM).saw",
+    "type": "Hovercraft",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 102,
+    "file": "Armored Personnel Carrier (Hover).saw",
+    "type": "Hovercraft",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 208,
+    "file": "Armored Personnel Carrier (Tracked LRM).saw",
+    "type": "Tracked",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 157,
+    "file": "Armored Personnel Carrier (Tracked MG).saw",
+    "type": "Tracked",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 168,
+    "file": "Armored Personnel Carrier (Tracked SRM).saw",
+    "type": "Tracked",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 142,
+    "file": "Armored Personnel Carrier (Tracked).saw",
+    "type": "Tracked",
+    "year": 2500
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 194,
+    "file": "Armored Personnel Carrier (Wheeled LRM).saw",
+    "type": "Wheeled",
+    "year": 2400
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 172,
+    "file": "Armored Personnel Carrier (Wheeled MG).saw",
+    "type": "Wheeled",
+    "year": 2300
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 176,
+    "file": "Armored Personnel Carrier (Wheeled SRM).saw",
+    "type": "Wheeled",
+    "year": 2300
+  },
+  {
+    "name": "Armored Personnel Carrier",
+    "bv2": 157,
+    "file": "Armored Personnel Carrier (Wheeled).saw",
+    "type": "Wheeled",
+    "year": 2300
+  },
+  {
+    "name": "Axel Heavy Tank",
+    "bv2": 931,
+    "file": "Axel Heavy Tank Mk 1.saw",
+    "type": "Tracked",
+    "year": 3036
+  },
+  {
+    "name": "Axel Heavy Tank",
+    "bv2": 902,
+    "file": "Axel Heavy Tank Mk 2.saw",
+    "type": "Tracked",
+    "year": 3036
+  },
+  {
+    "name": "Behemoth Heavy Tank",
+    "bv2": 1406,
+    "file": "Behemoth Heavy Tank (Armor).saw",
+    "type": "Tracked",
+    "year": 2952
+  },
+  {
+    "name": "Behemoth Heavy Tank",
+    "bv2": 1130,
+    "file": "Behemoth Heavy Tank (Flamer).saw",
+    "type": "Tracked",
+    "year": 2981
+  },
+  {
+    "name": "Behemoth Heavy Tank",
+    "bv2": 1173,
+    "file": "Behemoth Heavy Tank.saw",
+    "type": "Tracked",
+    "year": 2952
+  },
+  {
+    "name": "Bulldog Medium Tank",
+    "bv2": 556,
+    "file": "Bulldog Medium Tank (AC2).saw",
+    "type": "Tracked",
+    "year": 2812
+  },
+  {
+    "name": "Bulldog Medium Tank",
+    "bv2": 748,
+    "file": "Bulldog Medium Tank (LRM).saw",
+    "type": "Tracked",
+    "year": 2793
+  },
+  {
+    "name": "Bulldog Medium Tank",
+    "bv2": 605,
+    "file": "Bulldog Medium Tank.saw",
+    "type": "Tracked",
+    "year": 2673
+  },
+  {
+    "name": "Condor Heavy Hover Tank",
+    "bv2": 577,
+    "file": "Condor Heavy Hover Tank (Davion).saw",
+    "type": "Hovercraft",
+    "year": 2952
+  },
+  {
+    "name": "Condor Heavy Hover Tank",
+    "bv2": 715,
+    "file": "Condor Heavy Hover Tank (Flamer).saw",
+    "type": "Hovercraft",
+    "year": 3025
+  },
+  {
+    "name": "Condor Heavy Hover Tank",
+    "bv2": 765,
+    "file": "Condor Heavy Hover Tank (Liao).saw",
+    "type": "Hovercraft",
+    "year": 2878
+  },
+  {
+    "name": "Condor Heavy Hover Tank",
+    "bv2": 653,
+    "file": "Condor Heavy Hover Tank.saw",
+    "type": "Hovercraft",
+    "year": 2564
+  },
+  {
+    "name": "Coolant Truck",
+    "bv2": 347,
+    "file": "Coolant Truck (Hover).saw",
+    "type": "Hovercraft",
+    "year": 2602
+  },
+  {
+    "name": "Coolant Truck",
+    "bv2": 357,
+    "file": "Coolant Truck (Tracked).saw",
+    "type": "Tracked",
+    "year": 2592
+  },
+  {
+    "name": "Coolant Truck",
+    "bv2": 321,
+    "file": "Coolant Truck 135-K Lifesaver.saw",
+    "type": "Wheeled",
+    "year": 2583
+  },
+  {
+    "name": "Demolisher Heavy Tank",
+    "bv2": 891,
+    "file": "Demolisher Heavy Tank (Defensive).saw",
+    "type": "Tracked",
+    "year": 2823
+  },
+  {
+    "name": "Demolisher Heavy Tank",
+    "bv2": 981,
+    "file": "Demolisher Heavy Tank (Mk. I).saw",
+    "type": "Tracked",
+    "year": 2803
+  },
+  {
+    "name": "Demolisher Heavy Tank",
+    "bv2": 981,
+    "file": "Demolisher Heavy Tank (Mk. II).saw",
+    "type": "Tracked",
+    "year": 2823
+  },
+  {
+    "name": "Devastator Heavy Tank",
+    "bv2": 1037,
+    "file": "Devastator Heavy Tank.saw",
+    "type": "Tracked",
+    "year": 3003
+  },
+  {
+    "name": "Drillson Heavy Hover Tank",
+    "bv2": 926,
+    "file": "Drillson Heavy Hover Tank (SRM).saw",
+    "type": "Hovercraft",
+    "year": 3028
+  },
+  {
+    "name": "Drillson Heavy Hover Tank",
+    "bv2": 949,
+    "file": "Drillson Heavy Hover Tank.saw",
+    "type": "Hovercraft",
+    "year": 3025
+  },
+  {
+    "name": "Engineering Vehicle",
+    "bv2": 423,
+    "file": "Engineering Vehicle (Autocannon).saw",
+    "type": "Tracked",
+    "year": 2500
+  },
+  {
+    "name": "Engineering Vehicle",
+    "bv2": 196,
+    "file": "Engineering Vehicle (Flamer).saw",
+    "type": "Tracked",
+    "year": 2525
+  },
+  {
+    "name": "Engineering Vehicle",
+    "bv2": 194,
+    "file": "Engineering Vehicle.saw",
+    "type": "Tracked",
+    "year": 2443
+  },
+  {
+    "name": "Ferret Light Scout VTOL",
+    "bv2": 103,
+    "file": "Ferret Light Scout VTOL (Armor) Wild Weasel.saw",
+    "type": "VTOL",
+    "year": 2967
+  },
+  {
+    "name": "Ferret Light Scout VTOL",
+    "bv2": 17,
+    "file": "Ferret Light Scout VTOL (Cargo).saw",
+    "type": "VTOL",
+    "year": 2972
+  },
+  {
+    "name": "Ferret Light Scout VTOL",
+    "bv2": 58,
+    "file": "Ferret Light Scout VTOL.saw",
+    "type": "VTOL",
+    "year": 2901
+  },
+  {
+    "name": "Goblin Medium Tank",
+    "bv2": 656,
+    "file": "Goblin Medium Tank (LRM).saw",
+    "type": "Tracked",
+    "year": 2569
+  },
+  {
+    "name": "Goblin Medium Tank",
+    "bv2": 527,
+    "file": "Goblin Medium Tank (MG).saw",
+    "type": "Tracked",
+    "year": 2569
+  },
+  {
+    "name": "Goblin Medium Tank",
+    "bv2": 647,
+    "file": "Goblin Medium Tank (SRM).saw",
+    "type": "Tracked",
+    "year": 2569
+  },
+  {
+    "name": "Goblin Medium Tank",
+    "bv2": 555,
+    "file": "Goblin Medium Tank.saw",
+    "type": "Tracked",
+    "year": 2569
+  },
+  {
+    "name": "Harasser Laser Platform",
+    "bv2": 321,
+    "file": "Harasser Laser Platform.saw",
+    "type": "Hovercraft",
+    "year": 2957
+  },
+  {
+    "name": "Harasser Missile Platform",
+    "bv2": 365,
+    "file": "Harasser Missile Platform (Flamer).saw",
+    "type": "Hovercraft",
+    "year": 2851
+  },
+  {
+    "name": "Harasser Missile Platform",
+    "bv2": 412,
+    "file": "Harasser Missile Platform (LRM).saw",
+    "type": "Hovercraft",
+    "year": 2821
+  },
+  {
+    "name": "Harasser Missile Platform",
+    "bv2": 300,
+    "file": "Harasser Missile Platform Leaping Lisa.saw",
+    "type": "Hovercraft",
+    "year": 2815
+  },
+  {
+    "name": "Harasser Missile Platform",
+    "bv2": 351,
+    "file": "Harasser Missile Platform Mini-Peggy.saw",
+    "type": "Hovercraft",
+    "year": 3028
+  },
+  {
+    "name": "Harasser Missile Platform",
+    "bv2": 413,
+    "file": "Harasser Missile Platform.saw",
+    "type": "Hovercraft",
+    "year": 2811
+  },
+  {
+    "name": "Hetzer Wheeled Assault Gun",
+    "bv2": 536,
+    "file": "Hetzer Wheeled Assault Gun (AC10).saw",
+    "type": "Wheeled",
+    "year": 2893
+  },
+  {
+    "name": "Hetzer Wheeled Assault Gun",
+    "bv2": 520,
+    "file": "Hetzer Wheeled Assault Gun (Laser).saw",
+    "type": "Wheeled",
+    "year": 2889
+  },
+  {
+    "name": "Hetzer Wheeled Assault Gun",
+    "bv2": 657,
+    "file": "Hetzer Wheeled Assault Gun (LRM).saw",
+    "type": "Wheeled",
+    "year": 3001
+  },
+  {
+    "name": "Hetzer Wheeled Assault Gun",
+    "bv2": 544,
+    "file": "Hetzer Wheeled Assault Gun (Scout).saw",
+    "type": "Wheeled",
+    "year": 3014
+  },
+  {
+    "name": "Hetzer Wheeled Assault Gun",
+    "bv2": 630,
+    "file": "Hetzer Wheeled Assault Gun (SRM).saw",
+    "type": "Wheeled",
+    "year": 2957
+  },
+  {
+    "name": "Hetzer Wheeled Assault Gun",
+    "bv2": 574,
+    "file": "Hetzer Wheeled Assault Gun.saw",
+    "type": "Wheeled",
+    "year": 2887
+  },
+  {
+    "name": "Hi-Scout Drone Carrier",
+    "bv2": 347,
+    "file": "Hi-Scout Drone Carrier.saw",
+    "type": "Tracked",
+    "year": 3000
+  },
+  {
+    "name": "Hunter Light Support Tank",
+    "bv2": 675,
+    "file": "Hunter Light Support Tank (Ammo).saw",
+    "type": "Tracked",
+    "year": 2960
+  },
+  {
+    "name": "Hunter Light Support Tank",
+    "bv2": 645,
+    "file": "Hunter Light Support Tank (LRM10).saw",
+    "type": "Tracked",
+    "year": 2954
+  },
+  {
+    "name": "Hunter Light Support Tank",
+    "bv2": 599,
+    "file": "Hunter Light Support Tank (LRM15).saw",
+    "type": "Tracked",
+    "year": 2956
+  },
+  {
+    "name": "Hunter Light Support Tank",
+    "bv2": 648,
+    "file": "Hunter Light Support Tank.saw",
+    "type": "Tracked",
+    "year": 2937
+  },
+  {
+    "name": "J-27 Ordnance Transport",
+    "bv2": 70,
+    "file": "J-27 Ordnance Transport (Armor).saw",
+    "type": "Tracked",
+    "year": 2833
+  },
+  {
+    "name": "J-27 Ordnance Transport",
+    "bv2": 47,
+    "file": "J-27 Ordnance Transport (Fusion).saw",
+    "type": "Tracked",
+    "year": 2578
+  },
+  {
+    "name": "J-27 Ordnance Transport",
+    "bv2": 44,
+    "file": "J-27 Ordnance Transport (Trailer).saw",
+    "type": "Tracked",
+    "year": 2650
+  },
+  {
+    "name": "J-27 Ordnance Transport",
+    "bv2": 170,
+    "file": "J-27 Ordnance Transport Killjoy.saw",
+    "type": "Tracked",
+    "year": 2847
+  },
+  {
+    "name": "J-27 Ordnance Transport",
+    "bv2": 47,
+    "file": "J-27 Ordnance Transport.saw",
+    "type": "Tracked",
+    "year": 2650
+  },
+  {
+    "name": "J. Edgar Light Hover Tank",
+    "bv2": 459,
+    "file": "J. Edgar Light Hover Tank (Flamer).saw",
+    "type": "Hovercraft",
+    "year": 2793
+  },
+  {
+    "name": "J. Edgar Light Hover Tank",
+    "bv2": 433,
+    "file": "J. Edgar Light Hover Tank (ICE).saw",
+    "type": "Hovercraft",
+    "year": 2854
+  },
+  {
+    "name": "J. Edgar Light Hover Tank",
+    "bv2": 482,
+    "file": "J. Edgar Light Hover Tank (MG).saw",
+    "type": "Hovercraft",
+    "year": 2794
+  },
+  {
+    "name": "J. Edgar Light Hover Tank",
+    "bv2": 544,
+    "file": "J. Edgar Light Hover Tank.saw",
+    "type": "Hovercraft",
+    "year": 2722
+  },
+  {
+    "name": "Karnov UR Transport",
+    "bv2": 556,
+    "file": "Karnov UR Transport (AC).saw",
+    "type": "VTOL",
+    "year": 2920
+  },
+  {
+    "name": "Karnov UR Transport",
+    "bv2": 227,
+    "file": "Karnov UR Transport (Artillery).saw",
+    "type": "VTOL",
+    "year": 2920
+  },
+  {
+    "name": "Karnov UR Transport",
+    "bv2": 221,
+    "file": "Karnov UR Transport (Gunship).saw",
+    "type": "VTOL",
+    "year": 2920
+  },
+  {
+    "name": "Karnov UR Transport",
+    "bv2": 125,
+    "file": "Karnov UR Transport.saw",
+    "type": "VTOL",
+    "year": 2920
+  },
+  {
+    "name": "Laser Carrier",
+    "bv2": 566,
+    "file": "Laser Carrier.saw",
+    "type": "Tracked",
+    "year": 2874
+  },
+  {
+    "name": "LRM Carrier",
+    "bv2": 833,
+    "file": "LRM Carrier.saw",
+    "type": "Tracked",
+    "year": 2407
+  },
+  {
+    "name": "M.A.S.H. Truck",
+    "bv2": 213,
+    "file": "M.A.S.H. Truck (ICE).saw",
+    "type": "Wheeled",
+    "year": 2810
+  },
+  {
+    "name": "M.A.S.H. Truck",
+    "bv2": 220,
+    "file": "M.A.S.H. Truck.saw",
+    "type": "Wheeled",
+    "year": 2671
+  },
+  {
+    "name": "Manticore Heavy Tank",
+    "bv2": 993,
+    "file": "Manticore Heavy Tank.saw",
+    "type": "Tracked",
+    "year": 2668
+  },
+  {
+    "name": "Maxim Hover Transport",
+    "bv2": 763,
+    "file": "Maxim Hover Transport (SRM2).saw",
+    "type": "Hovercraft",
+    "year": 2967
+  },
+  {
+    "name": "Maxim Hover Transport",
+    "bv2": 682,
+    "file": "Maxim Hover Transport (SRM4).saw",
+    "type": "Hovercraft",
+    "year": 2875
+  },
+  {
+    "name": "Maxim Hover Transport",
+    "bv2": 764,
+    "file": "Maxim Hover Transport.saw",
+    "type": "Hovercraft",
+    "year": 2689
+  },
+  {
+    "name": "Mobile Headquarters",
+    "bv2": 319,
+    "file": "Mobile Headquarters (ICE).saw",
+    "type": "Wheeled",
+    "year": 2850
+  },
+  {
+    "name": "Mobile Headquarters",
+    "bv2": 249,
+    "file": "Mobile Headquarters (ICE-LL).saw",
+    "type": "Wheeled",
+    "year": 2850
+  },
+  {
+    "name": "Mobile Headquarters",
+    "bv2": 387,
+    "file": "Mobile Headquarters (ICE-LRM).saw",
+    "type": "Wheeled",
+    "year": 2850
+  },
+  {
+    "name": "Mobile Headquarters",
+    "bv2": 435,
+    "file": "Mobile Headquarters (LL).saw",
+    "type": "Wheeled",
+    "year": 2620
+  },
+  {
+    "name": "Mobile Headquarters",
+    "bv2": 402,
+    "file": "Mobile Headquarters (LRM).saw",
+    "type": "Wheeled",
+    "year": 2620
+  },
+  {
+    "name": "Mobile Headquarters",
+    "bv2": 319,
+    "file": "Mobile Headquarters.saw",
+    "type": "Wheeled",
+    "year": 2620
+  },
+  {
+    "name": "Mobile Long Tom Artillery",
+    "bv2": 253,
+    "file": "Mobile Long Tom Artillery (Ammo Carriage).saw",
+    "type": "Tracked",
+    "year": 2602
+  },
+  {
+    "name": "Mobile Long Tom Artillery",
+    "bv2": 135,
+    "file": "Mobile Long Tom Artillery (Support Carriage).saw",
+    "type": "Tracked",
+    "year": 2602
+  },
+  {
+    "name": "Mobile Long Tom Artillery",
+    "bv2": 515,
+    "file": "Mobile Long Tom Artillery LT-MOB-25.saw",
+    "type": "Tracked",
+    "year": 2602
+  },
+  {
+    "name": "Monitor Naval Vessel",
+    "bv2": 799,
+    "file": "Monitor Naval Vessel.saw",
+    "type": "Naval (Displacement)",
+    "year": 2910
+  },
+  {
+    "name": "Neptune Submarine",
+    "bv2": 1104,
+    "file": "Neptune Submarine (LRT).saw",
+    "type": "Naval (Submarine)",
+    "year": 2950
+  },
+  {
+    "name": "Neptune Submarine",
+    "bv2": 1075,
+    "file": "Neptune Submarine (SRT).saw",
+    "type": "Naval (Submarine)",
+    "year": 2955
+  },
+  {
+    "name": "Neptune Submarine",
+    "bv2": 963,
+    "file": "Neptune Submarine.saw",
+    "type": "Naval (Submarine)",
+    "year": 2950
+  },
+  {
+    "name": "Ontos Heavy Tank",
+    "bv2": 1287,
+    "file": "Ontos Heavy Tank (Fusion).saw",
+    "type": "Tracked",
+    "year": 2863
+  },
+  {
+    "name": "Ontos Heavy Tank",
+    "bv2": 1164,
+    "file": "Ontos Heavy Tank (LRM).saw",
+    "type": "Tracked",
+    "year": 2876
+  },
+  {
+    "name": "Ontos Heavy Tank",
+    "bv2": 930,
+    "file": "Ontos Heavy Tank.saw",
+    "type": "Tracked",
+    "year": 2832
+  },
+  {
+    "name": "Packrat MRPV",
+    "bv2": 294,
+    "file": "Packrat MRPV PKR-T5 (ICE).saw",
+    "type": "Wheeled",
+    "year": 2846
+  },
+  {
+    "name": "Packrat MRPV",
+    "bv2": 501,
+    "file": "Packrat MRPV PKR-T5 (ML).saw",
+    "type": "Wheeled",
+    "year": 2798
+  },
+  {
+    "name": "Packrat MRPV",
+    "bv2": 263,
+    "file": "Packrat MRPV PKR-T5 (SRM2).saw",
+    "type": "Wheeled",
+    "year": 2824
+  },
+  {
+    "name": "Packrat MRPV",
+    "bv2": 344,
+    "file": "Packrat MRPV PKR-T5.saw",
+    "type": "Wheeled",
+    "year": 2650
+  },
+  {
+    "name": "Partisan Heavy Tank",
+    "bv2": 580,
+    "file": "Partisan Heavy Tank (AC2).saw",
+    "type": "Tracked",
+    "year": 3002
+  },
+  {
+    "name": "Partisan Heavy Tank",
+    "bv2": 1021,
+    "file": "Partisan Heavy Tank (LRM).saw",
+    "type": "Tracked",
+    "year": 3017
+  },
+  {
+    "name": "Partisan Heavy Tank",
+    "bv2": 673,
+    "file": "Partisan Heavy Tank.saw",
+    "type": "Tracked",
+    "year": 2791
+  },
+  {
+    "name": "Patton Tank",
+    "bv2": 961,
+    "file": "Patton Tank.saw",
+    "type": "Tracked",
+    "year": 3027
+  },
+  {
+    "name": "Pegasus Scout Hover Tank",
+    "bv2": 678,
+    "file": "Pegasus Scout Hover Tank (Missle).saw",
+    "type": "Hovercraft",
+    "year": 2854
+  },
+  {
+    "name": "Pegasus Scout Hover Tank",
+    "bv2": 571,
+    "file": "Pegasus Scout Hover Tank (Sensors).saw",
+    "type": "Hovercraft",
+    "year": 2798
+  },
+  {
+    "name": "Pegasus Scout Hover Tank",
+    "bv2": 317,
+    "file": "Pegasus Scout Hover Tank (Unarmed).saw",
+    "type": "Hovercraft",
+    "year": 2873
+  },
+  {
+    "name": "Pegasus Scout Hover Tank",
+    "bv2": 640,
+    "file": "Pegasus Scout Hover Tank.saw",
+    "type": "Hovercraft",
+    "year": 2791
+  },
+  {
+    "name": "Pike Support Vehicle",
+    "bv2": 715,
+    "file": "Pike Support Vehicle (AC5).saw",
+    "type": "Tracked",
+    "year": 3004
+  },
+  {
+    "name": "Pike Support Vehicle",
+    "bv2": 943,
+    "file": "Pike Support Vehicle (Missile).saw",
+    "type": "Tracked",
+    "year": 2993
+  },
+  {
+    "name": "Pike Support Vehicle",
+    "bv2": 648,
+    "file": "Pike Support Vehicle.saw",
+    "type": "Tracked",
+    "year": 2987
+  },
+  {
+    "name": "Rommel Tank",
+    "bv2": 933,
+    "file": "Rommel Tank.saw",
+    "type": "Tracked",
+    "year": 3027
+  },
+  {
+    "name": "Saladin Assault Hover Tank",
+    "bv2": 594,
+    "file": "Saladin Assault Hover Tank (Armor).saw",
+    "type": "Hovercraft",
+    "year": 2960
+  },
+  {
+    "name": "Saladin Assault Hover Tank",
+    "bv2": 596,
+    "file": "Saladin Assault Hover Tank.saw",
+    "type": "Hovercraft",
+    "year": 2942
+  },
+  {
+    "name": "Saracen Medium Hover Tank",
+    "bv2": 673,
+    "file": "Saracen Medium Hover Tank.saw",
+    "type": "Hovercraft",
+    "year": 2932
+  },
+  {
+    "name": "Savannah Master Hovercraft",
+    "bv2": 131,
+    "file": "Savannah Master Hovercraft (SL).saw",
+    "type": "Hovercraft",
+    "year": 3033
+  },
+  {
+    "name": "Savannah Master Hovercraft",
+    "bv2": 215,
+    "file": "Savannah Master Hovercraft.saw",
+    "type": "Hovercraft",
+    "year": 3025
+  },
+  {
+    "name": "Schrek AC Carrier",
+    "bv2": 773,
+    "file": "Schrek AC Carrier.saw",
+    "type": "Tracked",
+    "year": 2916
+  },
+  {
+    "name": "Schrek PPC Carrier",
+    "bv2": 881,
+    "file": "Schrek PPC Carrier (Anti-Infantry).saw",
+    "type": "Tracked",
+    "year": 2833
+  },
+  {
+    "name": "Schrek PPC Carrier",
+    "bv2": 935,
+    "file": "Schrek PPC Carrier.saw",
+    "type": "Tracked",
+    "year": 2813
+  },
+  {
+    "name": "Scimitar Medium Hover Tank",
+    "bv2": 711,
+    "file": "Scimitar Medium Hover Tank (Missile).saw",
+    "type": "Hovercraft",
+    "year": 2957
+  },
+  {
+    "name": "Scimitar Medium Hover Tank",
+    "bv2": 532,
+    "file": "Scimitar Medium Hover Tank.saw",
+    "type": "Hovercraft",
+    "year": 2937
+  },
+  {
+    "name": "Scorpion Light Tank",
+    "bv2": 425,
+    "file": "Scorpion Light Tank (LRM).saw",
+    "type": "Tracked",
+    "year": 2813
+  },
+  {
+    "name": "Scorpion Light Tank",
+    "bv2": 320,
+    "file": "Scorpion Light Tank (ML).saw",
+    "type": "Tracked",
+    "year": 2875
+  },
+  {
+    "name": "Scorpion Light Tank",
+    "bv2": 373,
+    "file": "Scorpion Light Tank (SRM).saw",
+    "type": "Tracked",
+    "year": 2840
+  },
+  {
+    "name": "Scorpion Light Tank",
+    "bv2": 306,
+    "file": "Scorpion Light Tank.saw",
+    "type": "Tracked",
+    "year": 2807
+  },
+  {
+    "name": "Sea Skimmer Hydrofoil",
+    "bv2": 363,
+    "file": "Sea Skimmer Hydrofoil (SRM2).saw",
+    "type": "Naval (Hydrofoil)",
+    "year": 2867
+  },
+  {
+    "name": "Sea Skimmer Hydrofoil",
+    "bv2": 321,
+    "file": "Sea Skimmer Hydrofoil (SRM6).saw",
+    "type": "Naval (Hydrofoil)",
+    "year": 2867
+  },
+  {
+    "name": "Sea Skimmer Hydrofoil",
+    "bv2": 288,
+    "file": "Sea Skimmer Hydrofoil.saw",
+    "type": "Naval (Hydrofoil)",
+    "year": 2867
+  },
+  {
+    "name": "Skulker Wheeled Scout Tank",
+    "bv2": 252,
+    "file": "Skulker Wheeled Scout Tank (MG).saw",
+    "type": "Wheeled",
+    "year": 2897
+  },
+  {
+    "name": "Skulker Wheeled Scout Tank",
+    "bv2": 319,
+    "file": "Skulker Wheeled Scout Tank (SRM).saw",
+    "type": "Wheeled",
+    "year": 2901
+  },
+  {
+    "name": "Skulker Wheeled Scout Tank",
+    "bv2": 314,
+    "file": "Skulker Wheeled Scout Tank.saw",
+    "type": "Wheeled",
+    "year": 2659
+  },
+  {
+    "name": "SRM Carrier",
+    "bv2": 816,
+    "file": "SRM Carrier.saw",
+    "type": "Tracked",
+    "year": 2407
+  },
+  {
+    "name": "Striker Light Tank",
+    "bv2": 605,
+    "file": "Striker Light Tank (LRM).saw",
+    "type": "Wheeled",
+    "year": 3022
+  },
+  {
+    "name": "Striker Light Tank",
+    "bv2": 583,
+    "file": "Striker Light Tank (SRM).saw",
+    "type": "Wheeled",
+    "year": 3011
+  },
+  {
+    "name": "Striker Light Tank",
+    "bv2": 564,
+    "file": "Striker Light Tank.saw",
+    "type": "Wheeled",
+    "year": 3006
+  },
+  {
+    "name": "Sturmfeur Heavy Tank",
+    "bv2": 1390,
+    "file": "Sturmfeur Heavy Tank (SRM).saw",
+    "type": "Tracked",
+    "year": 3023
+  },
+  {
+    "name": "Sturmfeur Heavy Tank",
+    "bv2": 1400,
+    "file": "Sturmfeur Heavy Tank.saw",
+    "type": "Tracked",
+    "year": 3018
+  },
+  {
+    "name": "Swift Wind Scout Car",
+    "bv2": 81,
+    "file": "Swift Wind Scout Car (ICE - Cargo).saw",
+    "type": "Wheeled",
+    "year": 2845
+  },
+  {
+    "name": "Swift Wind Scout Car",
+    "bv2": 39,
+    "file": "Swift Wind Scout Car (ICE - Speed).saw",
+    "type": "Wheeled",
+    "year": 2891
+  },
+  {
+    "name": "Swift Wind Scout Car",
+    "bv2": 83,
+    "file": "Swift Wind Scout Car (ICE).saw",
+    "type": "Wheeled",
+    "year": 2841
+  },
+  {
+    "name": "Swift Wind Scout Car",
+    "bv2": 83,
+    "file": "Swift Wind Scout Car.saw",
+    "type": "Wheeled",
+    "year": 2817
+  },
+  {
+    "name": "Vedette Medium Tank",
+    "bv2": 458,
+    "file": "Vedette Medium Tank (AC2).saw",
+    "type": "Tracked",
+    "year": 2962
+  },
+  {
+    "name": "Vedette Medium Tank",
+    "bv2": 495,
+    "file": "Vedette Medium Tank (Liao).saw",
+    "type": "Tracked",
+    "year": 2968
+  },
+  {
+    "name": "Vedette Medium Tank",
+    "bv2": 475,
+    "file": "Vedette Medium Tank.saw",
+    "type": "Tracked",
+    "year": 2943
+  },
+  {
+    "name": "Von Luckner Heavy Tank",
+    "bv2": 1001,
+    "file": "Von Luckner Heavy Tank VNL-K100.saw",
+    "type": "Tracked",
+    "year": 3002
+  },
+  {
+    "name": "Von Luckner Heavy Tank",
+    "bv2": 1100,
+    "file": "Von Luckner Heavy Tank VNL-K65N.saw",
+    "type": "Tracked",
+    "year": 2612
+  },
+  {
+    "name": "Von Luckner Heavy Tank",
+    "bv2": 1060,
+    "file": "Von Luckner Heavy Tank VNL-K70.saw",
+    "type": "Tracked",
+    "year": 3008
+  },
+  {
+    "name": "Warrior Attack Helicopter",
+    "bv2": 295,
+    "file": "Warrior Attack Helicopter H-7.saw",
+    "type": "VTOL",
+    "year": 2957
+  },
+  {
+    "name": "Warrior Attack Helicopter",
+    "bv2": 292,
+    "file": "Warrior Attack Helicopter H-7A.saw",
+    "type": "VTOL",
+    "year": 2965
+  },
+  {
+    "name": "Warrior Attack Helicopter",
+    "bv2": 446,
+    "file": "Warrior Attack Helicopter H-7C.saw",
+    "type": "VTOL",
+    "year": 2965
+  }
+]

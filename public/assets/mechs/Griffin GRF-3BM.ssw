@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<mech name="Griffin" model="GRF-3BM" tons="55" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1416</battle_value>
+    <cost>1.0132106666666668E7</cost>
+    <rules_level>1</rules_level>
+    <era>2</era>
+    <productionera>4</productionera>
+    <mech_type>BattleMech</mech_type>
+    <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
+    <year restricted="FALSE">3052</year>
+    <motive_type>Biped</motive_type>
+    <structure manufacturer="Unknown" techbase="2">
+        <type>Standard Structure</type>
+    </structure>
+    <engine rating="275" manufacturer="Unknown" lsstart="0" rsstart="0" techbase="0">XL Engine</engine>
+    <gyro techbase="2">Standard Gyro</gyro>
+    <cockpit>
+        <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
+    </cockpit>
+    <armor manufacturer="Unknown" techbase="2">
+        <type>Standard Armor</type>
+        <hd>9</hd>
+        <ct>23</ct>
+        <ctr>6</ctr>
+        <lt>19</lt>
+        <ltr>5</ltr>
+        <rt>19</rt>
+        <rtr>5</rtr>
+        <la>14</la>
+        <ra>14</ra>
+        <ll>19</ll>
+        <rl>19</rl>
+    </armor>
+    <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE">
+        <source>RS3085u-PP</source>
+        <info>Griffin GRF-3BM 55t, 5/8/5, XLFE, Std; 9.5T/82% Armor; 17 SHS; 1 LRM15, 1 ERPPC</info>
+        <battleforce pv="14" wt="2" mv="5j" s="2" m="2" l="2" e="0" ov="0" armor="5" internal="3" abilities="CASE, SRCH, ES, SEAL, SOA, IF 1" />
+        <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
+        <clancase>FALSE</clancase>
+        <jumpjets number="5">
+            <type>Standard Jump Jet</type>
+            <location index="8">LT</location>
+            <location index="3">RT</location>
+            <location index="7">LT</location>
+            <location index="4">RT</location>
+            <location index="10">CT</location>
+        </jumpjets>
+        <heatsinks number="17" techbase="2">
+            <type>Single Heat Sink</type>
+
+            <location index="6">RT</location>
+            <location index="5">RT</location>
+            <location index="7">RT</location>
+            <location index="8">RT</location>
+            <location index="9">RT</location>
+            <location index="10">RT</location>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(IS) ER PPC</name>
+            <type>energy</type>
+            <location index="4">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) LRM-15</name>
+            <type>missile</type>
+            <location index="3">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15 (Artemis IV Capable)</name>
+            <type>ammunition</type>
+            <location index="9">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">CASE</name>
+            <type>CASE</type>
+            <location index="10">LT</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model>Unknown</jumpjet_model>
+        <commsystem>Unknown</commsystem>
+        <tandtsystem>Unknown</tandtsystem>
+    </fluff>
+</mech>
