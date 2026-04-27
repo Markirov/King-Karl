@@ -36,8 +36,10 @@ export function App() {
       if (year  && year > 0)  patch.campaignYear  = year;
       if (month && month > 0) patch.campaignMonth = month;
       if (d['COMPANIA_NOMBRE']) patch.unitName = d['COMPANIA_NOMBRE'];
-      const pilotMechs = [1, 2, 3, 4].map(i => d[`PILOTO_${i}_MECH`] || '');
+      const pilotMechs = [1, 2, 3, 4, 5, 6].map(i => d[`PILOTO_${i}_MECH`] || '');
       if (pilotMechs.some(m => m)) patch.pilotMechs = pilotMechs;
+      const pilotNames = [1, 2, 3, 4, 5, 6].map(i => d[`PILOTO_${i}_NOMBRE`] || '');
+      if (pilotNames.some(n => n)) patch.pilotNames = pilotNames;
       if (d['CONTRATO_VALOR']) patch.contratoValor = d['CONTRATO_VALOR'];
       if (d['VALOR_UNIDAD'])   patch.valorUnidad   = d['VALOR_UNIDAD'];
       if (d['TOTAL_MECHS'])    patch.totalMechs    = d['TOTAL_MECHS'];

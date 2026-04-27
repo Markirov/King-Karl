@@ -32,6 +32,7 @@ export const useAppStore = create<AppState>((set) => ({
     campaignMonth: 1,
     unitName: "King Karl's Kürassiers",
     scriptUrl: localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM') || DEFAULT_SCRIPT_URL,
+    pilotNames: [],
     pilotMechs: [],
     contratoValor: '',
     valorUnidad:   '',

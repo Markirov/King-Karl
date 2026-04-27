@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<mech name="Cicada" model="CDA-3C Salazar" tons="40" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>885</battle_value>
+    <cost>3318933.333333333</cost>
+    <rules_level>0</rules_level>
+    <era>1</era>
+    <productionera>2</productionera>
+    <mech_type>BattleMech</mech_type>
+    <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
+    <year restricted="FALSE">2840</year>
+    <motive_type>Biped</motive_type>
+    <structure manufacturer="Unknown" techbase="2">
+        <type>Standard Structure</type>
+    </structure>
+    <engine rating="280" manufacturer="Unknown" lsstart="-1" rsstart="-1" techbase="2">Fusion Engine</engine>
+    <gyro techbase="2">Standard Gyro</gyro>
+    <cockpit>
+        <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
+    </cockpit>
+    <armor manufacturer="Unknown" techbase="2">
+        <type>Standard Armor</type>
+        <hd>9</hd>
+        <ct>13</ct>
+        <ctr>4</ctr>
+        <lt>13</lt>
+        <ltr>3</ltr>
+        <rt>13</rt>
+        <rtr>3</rtr>
+        <la>8</la>
+        <ra>8</ra>
+        <ll>11</ll>
+        <rl>11</rl>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
+        <source>Salazar</source>
+        <info>Cicada CDA-3C Salazar 40t, 7/11/0, Std FE, Std; 6.0T/70% Armor; 11 SHS; 1 PPC</info>
+        <battleforce pv="9" wt="2" mv="7" s="1" m="1" l="1" e="0" ov="0" armor="3" internal="3" abilities="ENE, SRCH, ES, SEAL, SOA" />
+        <actuators lla="FALSE" lh="FALSE" rla="FALSE" rh="FALSE"/>
+        <clancase>FALSE</clancase>
+        <heatsinks number="11" techbase="2">
+            <type>Single Heat Sink</type>
+
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(IS) PPC</name>
+            <type>energy</type>
+            <location index="0">RT</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model>None</jumpjet_model>
+        <commsystem>Unknown</commsystem>
+        <tandtsystem>Unknown</tandtsystem>
+    </fluff>
+</mech>

@@ -11,10 +11,18 @@ const BASE = import.meta.env.BASE_URL;
 
 type Tab = 'ficha' | 'combate';
 
-// Slots 0-3: jugadores fijos (siempre cargan desde Sheets, solo permiten exportar JSON)
-// Slots 4-5: libres (Sheets manual, importar/exportar JSON)
-const FIXED_PLAYERS = ['Marcos', 'Jaime', 'Joan', 'Alex'] as const;
-const FIXED_COUNT = FIXED_PLAYERS.length; // 4
+function imageSlug(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Slots 0-5: jugadores fijos (siempre cargan desde Sheets, solo permiten exportar JSON)
+const DEFAULT_FIXED_PLAYERS = ['Marcos', 'Jaime', 'Joan', 'Alex', 'Zhao', 'Erik'] as const;
+const FIXED_COUNT = DEFAULT_FIXED_PLAYERS.length; // 6
 
 export function BarraconesPage() {
   const sim = useBarracones();
@@ -23,22 +31,26 @@ export function BarraconesPage() {
   const [showSheets, setShowSheets] = useState(false);
   const [tab, setTab] = useState<Tab>('ficha');
 
-  const { barraconesPortada, setBarraconesPortada } = useAppStore();
+  const { barraconesPortada, setBarraconesPortada, campaign } = useAppStore();
+  const fixedPlayers = DEFAULT_FIXED_PLAYERS.map((fallback, i) => {
+    const fromConfig = campaign.pilotNames?.[i]?.trim();
+    return fromConfig || fallback;
+  });
   const isFixed = activeIdx < FIXED_COUNT;
 
   const handleSlotClick = async (i: number) => {
     sim.setActiveIdx(i);
     if (i < FIXED_COUNT) {
-      await sim.sheetsQuickLoad(FIXED_PLAYERS[i], i);
+      await sim.sheetsQuickLoad(fixedPlayers[i], i);
     }
   };
 
   const handlePortadaSelect = async (name: string) => {
-    const i = FIXED_PLAYERS.indexOf(name as typeof FIXED_PLAYERS[number]);
+    const i = fixedPlayers.indexOf(name);
     if (i === -1) return;
     setBarraconesPortada(false);
     sim.setActiveIdx(i);
-    await sim.sheetsQuickLoad(FIXED_PLAYERS[i], i);
+    await sim.sheetsQuickLoad(fixedPlayers[i], i);
   };
 
   if (barraconesPortada) {
@@ -66,7 +78,7 @@ export function BarraconesPage() {
         {/* Slot selector */}
         <div className="flex items-center gap-2 flex-wrap">
           {slots.map((s, i) => {
-            const fixedName = i < FIXED_COUNT ? FIXED_PLAYERS[i] : undefined;
+            const fixedName = i < FIXED_COUNT ? fixedPlayers[i] : undefined;
             const label = s
               ? (s.callsign ? s.callsign.slice(0, 2).toUpperCase() : '?')
               : fixedName
@@ -210,12 +222,15 @@ export function BarraconesPage() {
           {tab === 'ficha' && (
             <FichaHeraldica
               pilot={pilot}
-              pilotImg={activeIdx < FIXED_COUNT ? `${BASE}pilot-${FIXED_PLAYERS[activeIdx].toLowerCase()}.png` : undefined}
+              pilotImg={activeIdx < FIXED_COUNT ? `${BASE}pilot-${imageSlug(fixedPlayers[activeIdx])}.png` : undefined}
               onAddQuirk={sim.addQuirk}
               onSetWeapon={sim.setWeapon}
               onSetArmadura={sim.setArmadura}
               onSetArmadura2={sim.setArmadura2}
               onSetNotas={sim.setNotas}
+              onUpgradeSkill={sim.upgradeSkill}
+              onUpgradeAttr={sim.upgradeAttr}
+              onAddSkill={sim.addSkill}
             />
           )}
 

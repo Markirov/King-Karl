@@ -70,7 +70,11 @@ function nowTime() {
 
 // ─── Component ────────────────────────────────────────────────
 export function CombatePanel({ pilot, onSetHpDmg, onSetWeapon }: Props) {
-  const attrAvg   = calcAttrAvg(pilot.fue, pilot.des, pilot.int, pilot.car);
+  const baseFue = pilot.fue - (pilot.attrUpgrades?.fue ?? 0);
+  const baseDes = pilot.des - (pilot.attrUpgrades?.des ?? 0);
+  const baseInt = pilot.int - (pilot.attrUpgrades?.int ?? 0);
+  const baseCar = pilot.car - (pilot.attrUpgrades?.car ?? 0);
+  const attrAvg = calcAttrAvg(baseFue, baseDes, baseInt, baseCar);
   const hpLocs    = calcHp(pilot.fue);
   const armorByLoc = calcArmorByLoc(pilot);
 

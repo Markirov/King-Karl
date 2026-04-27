@@ -37,7 +37,7 @@ export function SecretMenu({ open, onClose }: Props) {
   const [faction, setFaction]   = useState('');
   const [prompt, setPrompt]     = useState('');
   const [pilots, setPilots]     = useState<{ name: string; rank: string; mech: string }[]>(
-    Array(4).fill(null).map(() => ({ name: '', rank: '', mech: '' })),
+    Array(6).fill(null).map(() => ({ name: '', rank: '', mech: '' })),
   );
   const [combat, setCombat]     = useState(COMBAT_DEFAULTS);
 
@@ -64,7 +64,7 @@ export function SecretMenu({ open, onClose }: Props) {
       setFaction(cfg['FACCION_ACTUAL'] || '');
       setPrompt(cfg['PROMPT_INSTRUCCIONES'] || '');
 
-      const p = [1, 2, 3, 4].map(i => ({
+      const p = [1, 2, 3, 4, 5, 6].map(i => ({
         name: cfg[`PILOTO_${i}_NOMBRE`] || '',
         rank: cfg[`PILOTO_${i}_RANGO`] || '',
         mech: cfg[`PILOTO_${i}_MECH`] || '',
@@ -105,6 +105,7 @@ export function SecretMenu({ open, onClose }: Props) {
     pilots.forEach((p, i) => {
       config[`PILOTO_${i + 1}_NOMBRE`] = p.name;
       config[`PILOTO_${i + 1}_RANGO`] = p.rank;
+      config[`PILOTO_${i + 1}_MECH`] = p.mech;
     });
 
     try { await saveConfigBatch(config); } catch {}
@@ -233,7 +234,7 @@ export function SecretMenu({ open, onClose }: Props) {
                   {/* ─ Pilotos ─ */}
                   <div className="lg:col-span-2 bg-green-400/5 border border-green-400/20 p-3 space-y-2">
                     <div className="font-mono text-[10px] font-bold text-green-400 uppercase tracking-[2px]">Pilotos (Crónicas)</div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                       {pilots.map((p, i) => (
                         <div key={i} className="space-y-1.5">
                           <input value={p.name} onChange={e => updatePilot(i, 'name', e.target.value)}

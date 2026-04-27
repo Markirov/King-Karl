@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<mech name="Blitzkrieg" model="BTZ-3F" tons="50" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1296</battle_value>
+    <cost>1.07575E7</cost>
+    <rules_level>1</rules_level>
+    <era>2</era>
+    <productionera>5</productionera>
+    <mech_type>BattleMech</mech_type>
+    <techbase manufacturer="Coventry Metal Works" location="Coventry">Inner Sphere</techbase>
+    <year restricted="FALSE">3061</year>
+    <motive_type>Biped</motive_type>
+    <structure manufacturer="Coventry BTZ-VII [endo steel]" techbase="0">
+        <type>Endo-Steel</type>
+        <location index="3">HD</location>
+        <location index="4">LL</location>
+        <location index="4">RL</location>
+        <location index="7">RA</location>
+        <location index="8">LA</location>
+        <location index="8">RA</location>
+        <location index="9">RT</location>
+        <location index="9">LA</location>
+        <location index="9">RA</location>
+        <location index="10">RT</location>
+        <location index="10">LA</location>
+        <location index="10">RA</location>
+        <location index="11">CT</location>
+        <location index="11">RT</location>
+    </structure>
+    <engine rating="350" manufacturer="Magna 350 XL" lsstart="0" rsstart="0" techbase="0">XL Engine</engine>
+    <gyro techbase="2">Standard Gyro</gyro>
+    <cockpit>
+        <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
+    </cockpit>
+    <armor manufacturer="Lexington Ltd. High Grade Ferro-Fibrous" techbase="0">
+        <type>Ferro-Fibrous</type>
+        <hd>9</hd>
+        <ct>20</ct>
+        <ctr>5</ctr>
+        <lt>17</lt>
+        <ltr>5</ltr>
+        <rt>17</rt>
+        <rtr>5</rtr>
+        <la>12</la>
+        <ra>12</ra>
+        <ll>16</ll>
+        <rl>16</rl>
+        <location index="2">LA</location>
+        <location index="2">RA</location>
+        <location index="3">LA</location>
+        <location index="3">RA</location>
+        <location index="4">LA</location>
+        <location index="4">RA</location>
+        <location index="5">LA</location>
+        <location index="5">RA</location>
+        <location index="6">RT</location>
+        <location index="6">LA</location>
+        <location index="6">RA</location>
+        <location index="7">RT</location>
+        <location index="7">LA</location>
+        <location index="8">RT</location>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
+        <source>RS3060u</source>
+        <info>Blitzkrieg BTZ-3F 50t, 7/11/0, XLFE, ES; 7.5T/79% FF Armor; 10 DHS; 1 UAC20</info>
+        <battleforce pv="13" wt="2" mv="7" s="3" m="3" l="0" e="0" ov="0" armor="4" internal="2" abilities="SRCH, ES, SEAL, SOA" />
+        <actuators lla="FALSE" lh="FALSE" rla="FALSE" rh="FALSE"/>
+        <clancase>FALSE</clancase>
+        <heatsinks number="10" techbase="0">
+            <type>Double Heat Sink</type>
+
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(IS) Ultra AC/20</name>
+            <type>ballistic</type>
+            <splitlocation index="3" number="9">LT</splitlocation>
+            <splitlocation index="10" number="1">CT</splitlocation>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ Ultra AC/20</name>
+            <type>ammunition</type>
+            <location index="4">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ Ultra AC/20</name>
+            <type>ammunition</type>
+            <location index="3">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ Ultra AC/20</name>
+            <type>ammunition</type>
+            <location index="5">RT</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <quirks>
+            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="true">
+                <Name>Directional Torso Mount</Name>
+                <Cost>2</Cost>
+                <Description>A well-known feature of the original Goliath, a Directional Torso Mount acts as a somewhat more restrictive BattleMech shoulder turret, allowing any weapons in the mount to shoot in either the front arc or the rear arc, depending on the mountâ€™s current facing. The mountâ€™s facing is set at the start of the game, and can be changed at the same time torso twists are made. However, unlike a torso twist, it does not reset at each End Phase: the arc chosen remains until deliberately changed. The mount rotates with any torso twist as normal.  Each time a location with a Directional Torso Mount takes a hit (Front or Rear), the player must roll 2D6. A result of 9+ means the mount is destroyed and its weapon locked in its current arc, in addition to the normal effects of the attack.  The 3-point version of this quirk is available only to quad â€™Mechs. In this case, the mount operates as a full turret, capable of rotating a full 360 degrees.  No weapon with location placement restrictions (such as a heavy Gauss rifle) can be placed in a Directional Torso Mount</Description>
+            </quirk>
+        </quirks>
+        <jumpjet_model>None</jumpjet_model>
+        <commsystem>TharHes Muse 54-58K</commsystem>
+        <tandtsystem>Cyclops 9b</tandtsystem>
+    </fluff>
+</mech>

@@ -11,6 +11,8 @@ import { getDossierForOrigin } from '@/data/faction-dossier';
 import {
   calcHp, getVeterancy,
   SKILLS_CATALOG, QUIRKS_DATABASE, ARMOR_TABLE,
+  attrUpgradeCost, skillUpgradeCost,
+  ATTR_LABELS, calcAttrAvg, calcTIR,
 } from '@/lib/barracones-data';
 import { INFANTRY_WEAPON_TABLE } from '@/lib/barracones-weapons';
 
@@ -109,21 +111,28 @@ function SectionHead({ num, title, tail, center }: {
   );
 }
 
-function AttrBox({ k, v }: { k: string; v: number }) {
+function AttrBox({ k, v, upgrades = 0, onUpgrade }: { k: string; v: number; upgrades?: number; onUpgrade?: () => void }) {
   return (
-    <div style={{
-      border: '1.5px solid #1a1208', padding: '3px 4px', textAlign: 'center',
-      background: '#d4c59a33',
-    }}>
-      <div style={{
-        fontSize: 8, letterSpacing: 2, color: '#6b4a1a',
-        fontFamily: '"Share Tech Mono", monospace',
-      }}>{k}</div>
-      <div style={{
-        fontFamily: '"Cormorant Garamond", serif',
-        fontStyle: 'italic', fontSize: 26, fontWeight: 700,
-        lineHeight: 1, color: C.redDeep,
-      }}>{v}</div>
+    <div
+      onClick={onUpgrade}
+      style={{
+        border: '1.5px solid #1a1208', padding: '3px 4px', textAlign: 'center',
+        background: '#d4c59a33', cursor: onUpgrade ? 'pointer' : 'default',
+      }}
+    >
+      <div style={{ fontSize: 8, letterSpacing: 2, color: '#6b4a1a', fontFamily: '"Share Tech Mono", monospace' }}>{k}</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, flexShrink: 0 }}>
+          {[0,1,2,3].map(i => (
+            <div key={i} style={{
+              width: 6, height: 6,
+              border: '1px solid #6b4a1a',
+              background: i < upgrades ? '#6b4a1a' : 'transparent',
+            }} />
+          ))}
+        </div>
+        <div style={{ fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic', fontSize: 26, fontWeight: 700, lineHeight: 1, color: C.redDeep }}>{v}</div>
+      </div>
     </div>
   );
 }
@@ -306,14 +315,17 @@ const MELEE_WEAPONS = INFANTRY_WEAPON_TABLE.filter(w =>
   ['melee', 'espada', 'granada'].includes(w.tipo.toLowerCase())
 );
 
-export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSetArmadura, onSetArmadura2, onSetNotas }: {
+export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSetArmadura, onSetArmadura2, onSetNotas, onUpgradeSkill, onUpgradeAttr, onAddSkill }: {
   pilot: Pilot;
   pilotImg?: string;
-  onAddQuirk?:    (quirkId: string, mechName: string) => void;
-  onSetWeapon?:   (idx: number, slot: Partial<Pilot['armas'][0]>) => void;
+  onAddQuirk?:     (quirkId: string, mechName: string) => void;
+  onSetWeapon?:    (idx: number, slot: Partial<Pilot['armas'][0]>) => void;
   onSetArmadura?:  (a: Pilot['armadura'])  => void;
   onSetArmadura2?: (a: Pilot['armadura2']) => void;
-  onSetNotas?:    (v: string) => void;
+  onSetNotas?:     (v: string) => void;
+  onUpgradeSkill?: (nombre: string, cost: number) => void;
+  onUpgradeAttr?:  (attr: 'fue' | 'des' | 'int' | 'car', cost: number) => void;
+  onAddSkill?:     (nombre: string) => void;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -321,6 +333,11 @@ export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSet
   const [showPicker, setShowPicker]     = useState(false);
   const [pickQuirkId, setPickQuirkId]   = useState('');
   const [pickMech, setPickMech]         = useState('');
+
+  type AttrKey = 'fue' | 'des' | 'int' | 'car';
+  const [attrPopup, setAttrPopup]     = useState<AttrKey | null>(null);
+  const [showSkillPicker, setShowSkillPicker] = useState(false);
+  const [pickSkillName, setPickSkillName]     = useState('');
 
   // Extrae el chasis eliminando el código de variante (ej. "Marauder MAD-3D" → "Marauder")
   function extractChassis(mech: string): string {
@@ -343,19 +360,24 @@ export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSet
     dmg: pilot.hpDmg[h.loc] ?? 0,
   }));
 
-  const attrMap: Record<string, number> = {
-    fue: pilot.fue, des: pilot.des, int: pilot.int, car: pilot.car,
+  const baseAttr = {
+    fue: pilot.fue - (pilot.attrUpgrades?.fue ?? 0),
+    des: pilot.des - (pilot.attrUpgrades?.des ?? 0),
+    int: pilot.int - (pilot.attrUpgrades?.int ?? 0),
+    car: pilot.car - (pilot.attrUpgrades?.car ?? 0),
   };
+
+  const attrAvg = calcAttrAvg(baseAttr.fue, baseAttr.des, baseAttr.int, baseAttr.car);
 
   const skills = pilot.habilidades.map(s => {
     const def = SKILLS_CATALOG.find(sc => sc.nombre === s.nombre);
     const attrKey = def?.attr ?? 'des';
-    const attrVal = attrMap[attrKey] ?? 6;
     return {
       nombre: s.nombre,
       attr: attrKey.toUpperCase(),
       nivel: s.nivel,
-      tir: attrVal - s.nivel,
+      upgrades: s.upgrades ?? 0,
+      tir: calcTIR(attrAvg, s.nivel),
     };
   });
 
@@ -535,13 +557,34 @@ export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSet
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
               <SectionHead num="I" title="Atributos" />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
-                <AttrBox k="FUE" v={pilot.fue} />
-                <AttrBox k="DES" v={pilot.des} />
-                <AttrBox k="INT" v={pilot.int} />
-                <AttrBox k="CAR" v={pilot.car} />
+                <AttrBox k="FUE" v={pilot.fue} upgrades={pilot.attrUpgrades?.fue ?? 0} onUpgrade={onUpgradeAttr ? () => setAttrPopup('fue') : undefined} />
+                <AttrBox k="DES" v={pilot.des} upgrades={pilot.attrUpgrades?.des ?? 0} onUpgrade={onUpgradeAttr ? () => setAttrPopup('des') : undefined} />
+                <AttrBox k="INT" v={pilot.int} upgrades={pilot.attrUpgrades?.int ?? 0} onUpgrade={onUpgradeAttr ? () => setAttrPopup('int') : undefined} />
+                <AttrBox k="CAR" v={pilot.car} upgrades={pilot.attrUpgrades?.car ?? 0} onUpgrade={onUpgradeAttr ? () => setAttrPopup('car') : undefined} />
               </div>
 
-              <SectionHead num="II" title="Habilidades" tail="TIR = ATR − NIVEL" />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <SectionHead num="II" title="Habilidades" tail="TIR = ATR − NIVEL" />
+                {onAddSkill && (() => {
+                  const atMax = pilot.habilidades.length >= pilot.int;
+                  return (
+                    <button
+                      onClick={() => { if (!atMax) { setPickSkillName(''); setShowSkillPicker(true); } }}
+                      title={atMax ? `Máx habilidades (INT ${pilot.int})` : `Añadir habilidad (${pilot.habilidades.length}/${pilot.int})`}
+                      style={{
+                        width: 16, height: 16, flexShrink: 0,
+                        border: `1px solid ${atMax ? '#1a120844' : C.redDeep}`,
+                        background: 'transparent',
+                        color: atMax ? '#1a120844' : C.redDeep,
+                        fontFamily: '"Share Tech Mono", monospace',
+                        fontSize: 13, lineHeight: 1,
+                        cursor: atMax ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >+</button>
+                  );
+                })()}
+              </div>
               <div style={{ overflow: 'hidden', flex: 1 }}>
                 <table style={{
                   width: '100%', borderCollapse: 'collapse',
@@ -553,19 +596,36 @@ export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSet
                       <th style={{ ...TH, width: 36, textAlign: 'center' }}>atr</th>
                       <th style={{ ...TH, width: 50, textAlign: 'center' }}>niv</th>
                       <th style={{ ...TH, width: 30, textAlign: 'center' }}>tir</th>
+                      {onUpgradeSkill && <th style={{ ...TH, width: 18 }} />}
                     </tr>
                   </thead>
                   <tbody>
                     {skills.length === 0 && (
                       <tr>
-                        <td colSpan={4} style={{ ...TD, color: '#6b4a1a', fontStyle: 'italic', padding: '8px 2px' }}>
+                        <td colSpan={onUpgradeSkill ? 5 : 4} style={{ ...TD, color: '#6b4a1a', fontStyle: 'italic', padding: '8px 2px' }}>
                           Sin habilidades registradas
                         </td>
                       </tr>
                     )}
-                    {skills.map((s, idx) => (
+                    {skills.map((s, idx) => {
+                      const upgCost = skillUpgradeCost(s.nivel);
+                      const canUp   = s.nivel < 6 && pilot.xpDisponible >= upgCost;
+                      return (
                       <tr key={idx} style={{ borderBottom: '1px dotted #1a120855' }}>
-                        <td style={TD}>{s.nombre}</td>
+                        <td style={TD}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, flexShrink: 0 }}>
+                              {[0,1,2,3].map(i => (
+                                <div key={i} style={{
+                                  width: 6, height: 6,
+                                  border: '1px solid #6b4a1a',
+                                  background: i < s.upgrades ? '#6b4a1a' : 'transparent',
+                                }} />
+                              ))}
+                            </div>
+                            {s.nombre}
+                          </div>
+                        </td>
                         <td style={{ ...TD, textAlign: 'center', color: '#6b4a1a', fontSize: 10 }}>{s.attr}</td>
                         <td style={{ ...TD, textAlign: 'center' }}>
                           <PipsParch n={s.nivel} max={9} />
@@ -577,8 +637,27 @@ export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSet
                         }}>
                           {s.tir}
                         </td>
+                        {onUpgradeSkill && (
+                          <td style={{ ...TD, textAlign: 'center', padding: '2px 0' }}>
+                            <button
+                              onClick={() => canUp && onUpgradeSkill(s.nombre, upgCost)}
+                              title={canUp ? `+1 niv · −${upgCost} XP` : s.nivel >= 6 ? 'Máx' : `XP insuf. (${upgCost})`}
+                              style={{
+                                width: 16, height: 16,
+                                border: `1px solid ${canUp ? C.redDeep : '#1a120844'}`,
+                                background: 'transparent',
+                                color: canUp ? C.redDeep : '#1a120844',
+                                fontFamily: '"Share Tech Mono", monospace',
+                                fontSize: 12, lineHeight: 1,
+                                cursor: canUp ? 'pointer' : 'not-allowed',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}
+                            >+</button>
+                          </td>
+                        )}
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -928,6 +1007,109 @@ export function FichaHeraldica({ pilot, pilotImg, onAddQuirk, onSetWeapon, onSet
                     padding: '7px 18px',
                     cursor: pickQuirkId && pickMech.trim() ? 'pointer' : 'not-allowed',
                   }}
+                >Añadir</button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* Attr upgrade popup */}
+        {attrPopup && onUpgradeAttr && createPortal(
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(10,13,18,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => setAttrPopup(null)}
+          >
+            <div
+              style={{
+                background: '#c8b88a',
+                backgroundImage: 'radial-gradient(ellipse at 20% 10%, #d4c59a 0%, #c8b88a 40%, #b8a775 100%)',
+                border: '2px solid #6b4a1a',
+                boxShadow: '0 4px 32px #00000099, inset 0 0 0 1px #6b4a1a55',
+                padding: '22px 28px', minWidth: 300,
+                fontFamily: '"Special Elite", monospace', color: '#1a1208',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 17, fontStyle: 'italic', color: C.redDeep, fontWeight: 700, marginBottom: 18, borderBottom: '1px solid #1a1208', paddingBottom: 8 }}>
+                § I — Subir {ATTR_LABELS[attrPopup] ?? attrPopup.toUpperCase()}
+              </div>
+              {(() => {
+                const cur  = pilot[attrPopup];
+                const cost = attrUpgradeCost(attrPopup, cur);
+                const canUp = cur < 12 && pilot.xpDisponible >= cost;
+                return (
+                  <>
+                    <div style={{ display: 'flex', gap: 24, marginBottom: 18, alignItems: 'flex-end' }}>
+                      <div>
+                        <div style={{ fontSize: 8, letterSpacing: 3, color: '#6b4a1a', fontFamily: '"Share Tech Mono", monospace', textTransform: 'uppercase', marginBottom: 3 }}>Actual</div>
+                        <div style={{ fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic', fontSize: 36, fontWeight: 700, lineHeight: 1, color: C.redDeep }}>{cur}</div>
+                      </div>
+                      <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 16, color: '#6b4a1a', paddingBottom: 4 }}>→</div>
+                      <div>
+                        <div style={{ fontSize: 8, letterSpacing: 3, color: '#6b4a1a', fontFamily: '"Share Tech Mono", monospace', textTransform: 'uppercase', marginBottom: 3 }}>Nuevo</div>
+                        <div style={{ fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic', fontSize: 36, fontWeight: 700, lineHeight: 1, color: cur < 12 ? C.redDeep : '#1a120844' }}>{cur < 12 ? cur + 1 : '—'}</div>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: 18, fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: 1 }}>
+                      <div style={{ color: '#6b4a1a' }}>COSTE: <span style={{ color: '#1a1208', fontWeight: 700 }}>{cur < 12 ? cost.toLocaleString('es-ES') : '—'} XP</span></div>
+                      <div style={{ color: '#6b4a1a', marginTop: 4 }}>DISPONIBLE: <span style={{ color: canUp ? '#1a1208' : C.redDeep, fontWeight: 700 }}>{pilot.xpDisponible.toLocaleString('es-ES')} XP</span></div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                      <button onClick={() => setAttrPopup(null)} style={{ background: 'transparent', border: '1px solid #6b4a1a', color: '#6b4a1a', fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', padding: '7px 18px', cursor: 'pointer' }}>Cancelar</button>
+                      <button
+                        disabled={!canUp}
+                        onClick={() => { if (canUp) { onUpgradeAttr(attrPopup, cost); setAttrPopup(null); } }}
+                        style={{ background: canUp ? C.redDeep : '#6b4a1a55', border: 'none', color: canUp ? '#c8b88a' : '#c8b88a77', fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', padding: '7px 18px', cursor: canUp ? 'pointer' : 'not-allowed' }}
+                      >{cur >= 12 ? 'Máximo' : canUp ? 'Confirmar' : 'XP insuf.'}</button>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* Skill picker popup */}
+        {showSkillPicker && onAddSkill && createPortal(
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(10,13,18,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => setShowSkillPicker(false)}
+          >
+            <div
+              style={{
+                background: '#c8b88a',
+                backgroundImage: 'radial-gradient(ellipse at 20% 10%, #d4c59a 0%, #c8b88a 40%, #b8a775 100%)',
+                border: '2px solid #6b4a1a', boxShadow: '0 4px 32px #00000099, inset 0 0 0 1px #6b4a1a55',
+                padding: '22px 28px', minWidth: 320,
+                fontFamily: '"Special Elite", monospace', color: '#1a1208',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 17, fontStyle: 'italic', color: C.redDeep, fontWeight: 700, marginBottom: 18, borderBottom: '1px solid #1a1208', paddingBottom: 8 }}>
+                § II — Adquirir Habilidad
+              </div>
+              <div style={{ marginBottom: 6, fontSize: 8, letterSpacing: 3, color: '#6b4a1a', fontFamily: '"Share Tech Mono", monospace', textTransform: 'uppercase' }}>
+                Habilidades: {pilot.habilidades.length} / {pilot.int}
+              </div>
+              <select
+                value={pickSkillName}
+                onChange={e => setPickSkillName(e.target.value)}
+                style={{ width: '100%', boxSizing: 'border-box', background: '#d4c59a', border: '1px solid #6b4a1a', color: '#1a1208', fontFamily: '"Special Elite", monospace', fontSize: 13, padding: '6px 8px', outline: 'none', marginBottom: 18 }}
+              >
+                <option value="">— seleccionar —</option>
+                {SKILLS_CATALOG
+                  .filter(sc => !pilot.habilidades.some(h => h.nombre === sc.nombre))
+                  .map(sc => <option key={sc.nombre} value={sc.nombre}>{sc.nombre} ({sc.attr.toUpperCase()})</option>)
+                }
+              </select>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => setShowSkillPicker(false)} style={{ background: 'transparent', border: '1px solid #6b4a1a', color: '#6b4a1a', fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', padding: '7px 18px', cursor: 'pointer' }}>Cancelar</button>
+                <button
+                  disabled={!pickSkillName}
+                  onClick={() => { if (pickSkillName) { onAddSkill(pickSkillName); setShowSkillPicker(false); } }}
+                  style={{ background: pickSkillName ? C.redDeep : '#6b4a1a55', border: 'none', color: pickSkillName ? '#c8b88a' : '#c8b88a77', fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', padding: '7px 18px', cursor: pickSkillName ? 'pointer' : 'not-allowed' }}
                 >Añadir</button>
               </div>
             </div>

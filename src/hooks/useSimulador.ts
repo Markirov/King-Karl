@@ -17,7 +17,7 @@ import {
   vehicleApplyCritEffect,
 } from '@/lib/combat-data';
 
-const MECH_SLOTS = 5;
+const MECH_SLOTS = 6;
 const VEHICLE_SLOTS = 5;
 const INF_SLOTS = 4;
 const BA_SLOTS = 4;

@@ -42,6 +42,7 @@ export interface Pilot {
   des: number;
   int: number;
   car: number;
+  attrUpgrades: Record<string, number>; // veces subido con XP por atributo
 
   // HP actual por localización (daño acumulado)
   hpDmg: Record<string, number>; // loc → puntos perdidos
@@ -75,6 +76,7 @@ export function emptyPilot(): Pilot {
     decade: 0, yearBorn: 0, ageRoll: 0,
     altura: '', peso: '', pelo: '', ojos: '', origen: '', notas: '',
     fue: 6, des: 6, int: 6, car: 6,
+    attrUpgrades: {},
     hpDmg: {},
     habilidades: [],
     xpTotal: 0, xpDisponible: 0,

@@ -14,16 +14,28 @@ interface PlayerDef {
   color:   string;
 }
 
-const PLAYERS: PlayerDef[] = [
-  { name: 'Marcos',   display: 'MARCOS',   color: '#4ade80' },
-  { name: 'Jaime',    display: 'JAIME',    color: '#60a5fa' },
-  { name: 'Joan',     display: 'JOAN',     color: '#fbbf24' },
-  { name: 'Alex', display: 'ALEX', color: '#c084fc' },
-];
+const DEFAULT_PLAYERS = ['Marcos', 'Jaime', 'Joan', 'Alex', 'Zhao', 'Erik'] as const;
+const PLAYER_COLORS = ['#4ade80', '#60a5fa', '#fbbf24', '#c084fc', '#f87171', '#34d399'] as const;
+const PILOT_SCALE: Record<string, number> = {
+  zhao: 0.84,
+  erik: 0.18,
+};
+const PILOT_BOTTOM: Record<string, string> = {
+  erik: '-10px',
+};
 
 /** "Grasshopper 5H" → "grasshopper" */
 function mechChassis(mechName: string): string {
   return mechName.trim().toLowerCase().split(/\s+/)[0];
+}
+
+function imageSlug(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /**
@@ -42,11 +54,23 @@ function parseAltura(s: string): number {
   return n > 10 ? n / 100 : n; // si viene en cm, convierte a metros
 }
 
+function scalePercent(pct: string, factor: number): string {
+  const n = parseFloat(pct.replace('%', ''));
+  if (isNaN(n)) return pct;
+  return `${Math.round(n * factor)}%`;
+}
+
 /** Devuelve el ancho como string CSS porcentual según la altura del piloto */
-function pilotWidth(pilot: Pilot | null): string {
+function pilotWidth(pilot: Pilot | null, name: string, compact: boolean): string {
   const h = parseAltura(pilot?.altura ?? '');
   const scale = h > 0 ? h / BASE_HEIGHT_M : 1;
-  return `${Math.round(BASE_PILOT_WIDTH * scale)}%`;
+  const slug = imageSlug(name);
+  const tune = PILOT_SCALE[slug] ?? 1;
+  const compactFactor = compact ? 0.72 : 1;
+  const width = Math.round(BASE_PILOT_WIDTH * scale * tune * compactFactor);
+  const min = compact ? 44 : 56;
+  const max = compact ? 80 : 104;
+  return `${Math.max(min, Math.min(width, max))}%`;
 }
 
 interface Props {
@@ -56,19 +80,33 @@ interface Props {
 
 export function BarraconesPortada({ onSelect, pilotSlots }: Props) {
   const { campaign } = useAppStore();
+  const players: PlayerDef[] = DEFAULT_PLAYERS.map((fallback, i) => {
+    const name = campaign.pilotNames?.[i]?.trim() || fallback;
+    return {
+      name,
+      display: name.toUpperCase(),
+      color: PLAYER_COLORS[i] ?? '#9ca3af',
+    };
+  });
   const pilotMechs = campaign.pilotMechs ?? [];
+  const compactMode = players.length > 4;
+  const mechBottom = compactMode ? '56px' : '90px';
+  const mechLeft = compactMode ? '66%' : '70%';
+  const mechScale = compactMode ? 0.75 : 1;
 
   return (
     <div className="flex flex-col items-center justify-center" style={{ minHeight: '80vh' }}>
       <div className="grid grid-cols-2 gap-4 w-full max-w-4xl" style={{ height: '80vh' }}>
-        {PLAYERS.map((p, i) => {
+        {players.map((p, i) => {
           const mechName    = pilotMechs[i] ?? '';
           const chassis     = mechName ? mechChassis(mechName) : '';
-          const pilotImg    = `${BASE}pilot-${p.name.toLowerCase()}.png`;
+          const pilotImg    = `${BASE}pilot-${imageSlug(p.name)}.png`;
           const mechImg     = chassis ? `${BASE}mech-${chassis}.png` : null;
-          const mechImgW    = MECH_WIDTH[chassis] ?? '36%';
+          const mechImgW    = scalePercent(MECH_WIDTH[chassis] ?? '36%', mechScale);
           const hasLayers   = !!mechImg;
-          const imgWidth  = pilotWidth(pilotSlots[i] ?? null);
+          const slug = imageSlug(p.name);
+          const imgWidth  = pilotWidth(pilotSlots[i] ?? null, p.name, compactMode);
+          const pilotBottom = PILOT_BOTTOM[slug] ?? '0px';
 
           return (
             <button
@@ -98,8 +136,8 @@ export function BarraconesPortada({ onSelect, pilotSlots }: Props) {
                   style={{
                     width: mechImgW,
                     height: 'auto',
-                    bottom: '90px',
-                    left: '70%',
+                    bottom: mechBottom,
+                    left: mechLeft,
                     transform: 'translateX(-50%)',
                     transformOrigin: 'bottom center',
                   }}
@@ -112,7 +150,7 @@ export function BarraconesPortada({ onSelect, pilotSlots }: Props) {
                 style={{
                   width: imgWidth,
                   height: 'auto',
-                  bottom: '0px',
+                  bottom: pilotBottom,
                   left: '50%',
                   transform: 'translateX(-50%)',
                   transformOrigin: 'bottom center',

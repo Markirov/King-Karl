@@ -68,15 +68,32 @@ function sheetsDataToPilot(d: any): Pilot {
 
   // Skills — extraSkills may arrive as array, JSON string, or comma-separated
   const rawSkills = parseSheetArray(d.extraSkills);
+  // Flat fallback map in case nested upgrades were stripped by Apps Script
+  let skillUpgradesMap: Record<string, number> = {};
+  if (d.skillUpgrades) {
+    try {
+      const raw = typeof d.skillUpgrades === 'string' ? JSON.parse(d.skillUpgrades) : d.skillUpgrades;
+      if (raw && typeof raw === 'object') skillUpgradesMap = raw;
+    } catch {}
+  }
   if (rawSkills.length > 0) {
     p.habilidades = rawSkills
       .map((s: any) => {
-        if (typeof s === 'string') return { nombre: s, nivel: 1, upgrades: 0 };
-        const nivel = Math.max(1, parseInt(s.level ?? s.nivel) || 1);
-        const upgrades = parseInt(s.upgrades) || 0;
-        return { nombre: s.name || s.nombre || '', nivel, upgrades };
+        if (typeof s === 'string') return { nombre: s, nivel: 1, upgrades: skillUpgradesMap[s] ?? 0 };
+        const nombre   = s.name || s.nombre || '';
+        const nivel    = Math.max(1, parseInt(s.level ?? s.nivel) || 1);
+        const upgrades = parseInt(s.upgrades) || skillUpgradesMap[nombre] || 0;
+        return { nombre, nivel, upgrades };
       })
       .filter((s: any) => s.nombre.trim() !== '');
+  }
+
+  // attrUpgrades
+  if (d.attrUpgrades) {
+    try {
+      const raw = typeof d.attrUpgrades === 'string' ? JSON.parse(d.attrUpgrades) : d.attrUpgrades;
+      if (raw && typeof raw === 'object') p.attrUpgrades = raw;
+    } catch {}
   }
 
   // Weapons — armas may arrive as array or JSON string
@@ -163,6 +180,9 @@ function pilotToSheets(pilot: Pilot): Record<string, any> {
     origen: pilot.origen,
     notas:  pilot.notas,
     extraSkills: pilot.habilidades.map(h => ({ name: h.nombre, level: h.nivel, upgrades: h.upgrades ?? 0 })),
+    // Flat fallback in case Apps Script strips nested upgrades fields
+    skillUpgrades: Object.fromEntries(pilot.habilidades.map(h => [h.nombre, h.upgrades ?? 0])),
+    attrUpgrades:  pilot.attrUpgrades ?? {},
     armas:       pilot.armas.map(a => ({ select: a.nombre, munActual: a.munActual })),
     armaduraInfanteria: { tipo: pilot.armadura.tipo, piezas: pilot.armadura.piezas },
     estadoFisico,
@@ -275,7 +295,12 @@ export function useBarracones() {
         tipo: 'attr',
         desc: `${attr.toUpperCase()} ${p[attr]} → ${p[attr] + 1} (−${cost} XP)`,
       });
-      return { ...p, [attr]: p[attr] + 1, xpDisponible: p.xpDisponible - cost };
+      return {
+        ...p,
+        [attr]: p[attr] + 1,
+        xpDisponible: p.xpDisponible - cost,
+        attrUpgrades: { ...(p.attrUpgrades ?? {}), [attr]: ((p.attrUpgrades ?? {})[attr] ?? 0) + 1 },
+      };
     });
   }, [slots, activeIdx, updatePilot]);
 
@@ -306,7 +331,7 @@ export function useBarracones() {
     updatePilot(p => {
       if (p.xpDisponible < cost) return p;
       const skill = p.habilidades.find(h => h.nombre === nombre);
-      if (!skill || skill.nivel >= 9) return p;
+      if (!skill || skill.nivel >= 6) return p;
       appendLog({
         pilot: pilot?.callsign || pilot?.nombre || '?',
         tipo: 'skill',

@@ -11,12 +11,16 @@ import { readLog, loadLogFromSheets, relTime } from '@/lib/barracones-log';
 import type { LogEntry } from '@/lib/barracones-log';
 
 const SLOTS_KEY = 'barracones_slots_v1';
+const SLOT_COUNT = 6;
 
 // Per-chassis display tweaks (image scale/offset) for known mechs
 const MECH_META: Record<string, { weight: number; bv: number; imgScale?: number; imgOffsetX?: number }> = {
   'marauder':    { weight: 75, bv: 1519 },
   'grasshopper': { weight: 70, bv: 1569 },
   'thunderbolt': { weight: 65, bv: 1335 },
+  'cataphract':  { weight: 70, bv: 1299, imgScale: 1.05, imgOffsetX: -8 },
+  'crusader':    { weight: 65, bv: 1440, imgScale: 1.02, imgOffsetX: -5 },
+  'enforcer':    { weight: 50, bv: 1128, imgScale: 1.06, imgOffsetX: -4 },
   'warhammer':   { weight: 70, bv: 1580 },
   'catapult':    { weight: 65, bv: 1399, imgScale: 1.85, imgOffsetX: -23 },
   'griffin':     { weight: 55, bv: 1272 },
@@ -38,6 +42,9 @@ function mechImage(mech: string, base: string): string {
   if (m.includes('marauder'))    return `${base}mech-marauder.png`;
   if (m.includes('grasshopper')) return `${base}mech-grasshopper.png`;
   if (m.includes('thunderbolt')) return `${base}mech-thunderbolt.png`;
+  if (m.includes('cataphract'))  return `${base}mech-cataphract.png`;
+  if (m.includes('crusader'))    return `${base}mech-crusader.png`;
+  if (m.includes('enforcer'))    return `${base}mech-enforcer.png`;
   if (m.includes('catapult'))    return `${base}mech-catapult.png`;
   return `${base}mech-blueprint.png`;
 }
@@ -289,31 +296,38 @@ export function ComisionPage() {
   const valorUnidadFmt = fmtValor(campaign.valorUnidad);
 
   // Load pilot slots from localStorage (same key as useBarracones)
-  const [slots, setSlots] = useState<(Pilot | null)[]>([null, null, null, null]);
+  const [slots, setSlots] = useState<(Pilot | null)[]>(Array(SLOT_COUNT).fill(null));
   useEffect(() => {
     try {
       const raw = localStorage.getItem(SLOTS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setSlots(parsed);
+        if (Array.isArray(parsed)) {
+          const next = Array(SLOT_COUNT).fill(null) as (Pilot | null)[];
+          parsed.slice(0, SLOT_COUNT).forEach((p, i) => { next[i] = p; });
+          setSlots(next);
+        }
       }
     } catch { /* silent */ }
   }, []);
 
-  // Build the 4 mech cards from fixed slots (0-3), in Barracones order
-  const mechCards = slots.slice(0, 4).map((p) => {
-    if (!p) return null;
+  // Build the 6 mech cards from fixed slots (0-5), in Barracones order
+  const mechCards = slots.slice(0, SLOT_COUNT).map((p, i) => {
+    const mechFromConfig = campaign.pilotMechs?.[i] ?? '';
+    const nameFromConfig = campaign.pilotNames?.[i] ?? '';
+    if (!p && !mechFromConfig && !nameFromConfig) return null;
     try {
-      const dmgPct   = calcDamagePct(p);
+      const dmgPct   = p ? calcDamagePct(p) : 0;
       const status   = dmgPct > 30 ? 'REPARACIÓN' : 'READY';
-      const mech     = p.mech ?? '';
-      const nombre   = p.nombre ?? '';
+      const mech     = p?.mech ?? mechFromConfig;
+      const nombre   = p?.nombre ?? nameFromConfig;
       const key      = mechKey(mech);
       const meta     = MECH_META[key] ?? { weight: 0, bv: 0 };
-      const apellido = nombre ? (nombre.split(' ').slice(-1)[0] || nombre) : (p.callsign ?? '?');
+      const fallbackCall = nombre ? nombre.toUpperCase().slice(0, 2) : '?';
+      const apellido = nombre ? (nombre.split(' ').slice(-1)[0] || nombre) : (p?.callsign ?? '?');
       return {
         pilot:      apellido,
-        call:       p.callsign ?? '?',
+        call:       p?.callsign ?? fallbackCall,
         chassis:    mech || '—',
         weight:     meta.weight,
         bv:         meta.bv,
@@ -441,7 +455,7 @@ export function ComisionPage() {
           </div>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gridTemplateRows: 'repeat(2, 1fr)',
             gap: 14, flex: 1,
           }}>

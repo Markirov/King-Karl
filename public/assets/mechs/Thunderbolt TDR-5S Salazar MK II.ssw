@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<mech name="Thunderbolt" model="TDR-5S Salazar Mk II" tons="65" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1560</battle_value>
+    <cost>5897810.0</cost>
+    <rules_level>2</rules_level>
+    <era>2</era>
+    <productionera>0</productionera>
+    <mech_type>BattleMech</mech_type>
+    <techbase manufacturer="Earthwerks Incorporated" location="Keystone">Inner Sphere</techbase>
+    <year restricted="FALSE">3070</year>
+    <motive_type>Biped</motive_type>
+    <structure manufacturer="Earthwerks TDR" techbase="2">
+        <type>Standard Structure</type>
+    </structure>
+    <engine rating="260" manufacturer="Magna" lsstart="-1" rsstart="-1" techbase="2">Fusion Engine</engine>
+    <gyro techbase="2">Standard Gyro</gyro>
+    <cockpit>
+        <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
+    </cockpit>
+    <armor manufacturer="Ryerson 150" techbase="2">
+        <type>Standard Armor</type>
+        <hd>9</hd>
+        <ct>31</ct>
+        <ctr>8</ctr>
+        <lt>22</lt>
+        <ltr>8</ltr>
+        <rt>22</rt>
+        <rtr>8</rtr>
+        <la>20</la>
+        <ra>20</ra>
+        <ll>26</ll>
+        <rl>26</rl>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
+        <source>Salazar</source>
+        <info>Thunderbolt TDR-5S Salazar Mk II 65t, 4/6/0, Std FE, Std; 12.5T/95% Armor; 15 DHS; 4 ML, 1 LRM15, 1 ERPPC, 1 SRM2</info>
+        <battleforce pv="16" wt="3" mv="4" s="4" m="4" l="2" e="0" ov="0" armor="7" internal="5" abilities="CASE, SRCH, ES, SEAL, SOA, IF 1" />
+        <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
+        <clancase>FALSE</clancase>
+        <heatsinks number="15" techbase="0">
+            <type>Double Heat Sink</type>
+
+            <location index="6">RT</location>
+            <location index="4">LT</location>
+            <location index="4">LA</location>
+            <location index="7">RA</location>
+            <location index="7">LT</location>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="Diverse Optics Type 18">(IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="2">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Diverse Optics Type 18">(IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="1">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Delta Dart Long Range Missile 15 Rack">(IS) LRM-15</name>
+            <type>missile</type>
+            <location index="0">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15</name>
+            <type>ammunition</type>
+            <location index="3">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="3">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">@ SRM-2 (Inferno)</name>
+            <type>ammunition</type>
+            <location index="5">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="0">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) SRM-2</name>
+            <type>missile</type>
+            <location index="4">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) ER PPC</name>
+            <type>energy</type>
+            <location index="4">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">CASE</name>
+            <type>CASE</type>
+            <location index="11">RT</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model>None</jumpjet_model>
+        <commsystem>Neil 8000</commsystem>
+        <tandtsystem>RCA Instatrac Mark X</tandtsystem>
+    </fluff>
+</mech>

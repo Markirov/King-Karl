@@ -24,8 +24,8 @@ export function attrUpgradeCost(attr: string, from: number): number {
 // ── XP: Coste de subir habilidad al nivel destino ──
 // (coste TOTAL acumulado desde 0)
 export const SKILL_XP_COST: Record<number, number> = {
-  0: 0, 1: 750, 2: 1750, 3: 2500, 4: 3500,
-  5: 5000, 6: 7000, 7: 10000, 8: 14000, 9: 19000,
+  0: 0, 1: 750, 2: 1750, 3: 3000, 4: 4750,
+  5: 7250, 6: 10500,
 };
 
 // Coste marginal de subir 1 nivel
@@ -118,7 +118,7 @@ export function calcAttrAvg(fue: number, des: number, int: number, car: number):
 }
 
 export function calcTIR(attrAvg: number, skillLevel: number): number {
-  return attrAvg - skillLevel;
+  return 14 - (attrAvg + skillLevel);
 }
 
 export const ATTR_LABELS: Record<string, string> = {

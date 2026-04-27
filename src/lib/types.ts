@@ -134,7 +134,8 @@ export interface CampaignConfig {
   campaignMonth: number;
   unitName: string;
   scriptUrl: string;
-  pilotMechs: string[]; // PILOTO_1_MECH … PILOTO_4_MECH from config
+  pilotNames: string[]; // PILOTO_1_NOMBRE … PILOTO_6_NOMBRE from config
+  pilotMechs: string[]; // PILOTO_1_MECH … PILOTO_6_MECH from config
   contratoValor: string; // CONTRATO_VALOR from config (e.g. "5.000.000 ₡")
   valorUnidad:   string; // VALOR_UNIDAD from config (e.g. "7.480")
   totalMechs:    string; // TOTAL_MECHS from config

@@ -1,4 +1,4 @@
-# King Karl's Kürassiers — Fleet Command
+# King Karl's Kürassiers
 
 Comisión de Revisión y Fianza de Mercenarios.  
 App de gestión de campaña BattleTech con React + TypeScript + Tailwind v4.
