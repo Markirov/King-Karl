@@ -117,10 +117,14 @@ export function getWeaponSkill(weaponName: string): string | null {
 export function getWeaponSkillCandidates(weaponName: string): string[] {
   const w = INFANTRY_WEAPON_TABLE.find(x => x.name === weaponName);
   if (!w) return [];
-  if (w.habilidad) return [w.habilidad]; // melee/granadas: habilidad directa
+  if (w.habilidad) {
+    // En la lista maestra no existe "Armas Arrojadizas": usar Pelea para granadas.
+    if (w.habilidad.toLowerCase().includes('arrojad')) return ['Pelea'];
+    return [w.habilidad]; // melee: habilidad directa
+  }
   const tipo = w.tipo.toLowerCase();
-  if (tipo === 'pistola') return ['Pistola', 'Armas Pequeñas'];
-  if (tipo === 'rifle')   return ['Rifle', 'Armas Pequeñas', 'Armas de Apoyo'];
+  if (tipo === 'pistola') return ['Pistola'];
+  if (tipo === 'rifle')   return ['Rifle'];
   if (tipo === 'arco')    return ['Arco'];
   return [];
 }

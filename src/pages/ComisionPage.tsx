@@ -9,27 +9,30 @@ import type { Pilot } from '@/lib/barracones-types';
 import { calcHp } from '@/lib/barracones-data';
 import { readLog, loadLogFromSheets, relTime } from '@/lib/barracones-log';
 import type { LogEntry } from '@/lib/barracones-log';
+import { readCronicas, loadCronicasFromSheets, sortCronicas, type CronicaEntry } from '@/lib/cronicas-store';
+import { stripMarkdownLite } from '@/lib/markdown-lite';
+import { readPartes, loadPartesFromSheets, type ParteEntry, type ParteTone } from '@/lib/parte-store';
 
 const SLOTS_KEY = 'barracones_slots_v1';
 const SLOT_COUNT = 6;
 
 // Per-chassis display tweaks (image scale/offset) for known mechs
-const MECH_META: Record<string, { weight: number; bv: number; imgScale?: number; imgOffsetX?: number }> = {
-  'marauder':    { weight: 75, bv: 1519 },
-  'grasshopper': { weight: 70, bv: 1569 },
-  'thunderbolt': { weight: 65, bv: 1335 },
-  'cataphract':  { weight: 70, bv: 1299, imgScale: 1.05, imgOffsetX: -8 },
-  'crusader':    { weight: 65, bv: 1440, imgScale: 1.02, imgOffsetX: -5 },
-  'enforcer':    { weight: 50, bv: 1128, imgScale: 1.06, imgOffsetX: -4 },
-  'warhammer':   { weight: 70, bv: 1580 },
-  'catapult':    { weight: 65, bv: 1399, imgScale: 1.85, imgOffsetX: -23 },
-  'griffin':     { weight: 55, bv: 1272 },
-  'wolverine':   { weight: 55, bv: 1176 },
-  'hunchback':   { weight: 50, bv:  983 },
-  'centurion':   { weight: 50, bv: 1135 },
-  'orion':       { weight: 75, bv: 1533 },
-  'archer':      { weight: 70, bv: 1399 },
-  'shadow hawk': { weight: 55, bv: 1195 },
+const MECH_META: Record<string, { weight: number; bv: number; cost: number; imgScale?: number; imgOffsetX?: number }> = {
+  'marauder':    { weight: 75, bv: 1470, cost: 6597500 },
+  'grasshopper': { weight: 70, bv: 1417, cost: 5983573 },
+  'thunderbolt': { weight: 65, bv: 1335, cost: 5356560 },
+  'cataphract':  { weight: 70, bv: 1365, cost: 6231853, imgScale: 1.05, imgOffsetX: -8 },
+  'crusader':    { weight: 65, bv: 1355, cost: 5617910, imgScale: 1.02, imgOffsetX: -5 },
+  'enforcer':    { weight: 50, bv: 1043, cost: 3524500, imgScale: 1.06, imgOffsetX: -4 },
+  'warhammer':   { weight: 70, bv: 1580, cost: 6051383 },
+  'catapult':    { weight: 65, bv: 1399, cost: 5751125, imgScale: 1.85, imgOffsetX: -23 },
+  'griffin':     { weight: 55, bv: 1272, cost: 4924107 },
+  'wolverine':   { weight: 55, bv: 1176, cost: 4810357 },
+  'hunchback':   { weight: 50, bv:  983, cost: 3457875 },
+  'centurion':   { weight: 50, bv: 1135, cost: 3455500 },
+  'orion':       { weight: 75, bv: 1533, cost: 6600250 },
+  'archer':      { weight: 70, bv: 1399, cost: 6300973 },
+  'shadow hawk': { weight: 55, bv: 1195, cost: 4505557 },
 };
 
 function mechKey(mech: string): string {
@@ -47,6 +50,76 @@ function mechImage(mech: string, base: string): string {
   if (m.includes('enforcer'))    return `${base}mech-enforcer.png`;
   if (m.includes('catapult'))    return `${base}mech-catapult.png`;
   return `${base}mech-blueprint.png`;
+}
+
+interface MechFileStats {
+  tons?: number;
+  bv?: number;
+  cost?: number;
+}
+
+function parseMechFileStats(text: string): MechFileStats {
+  const tonsS = text.match(/<mech[^>]*\stons="([^"]+)"/i)?.[1] ?? '';
+  const bvS = text.match(/<battle_value>([^<]+)<\/battle_value>/i)?.[1] ?? '';
+  const costS = text.match(/<cost>([^<]+)<\/cost>/i)?.[1] ?? '';
+  const tons = parseInt(tonsS, 10);
+  const bv = parseInt(bvS, 10);
+  const cost = parseFloat(costS);
+  return {
+    ...(Number.isFinite(tons) ? { tons } : {}),
+    ...(Number.isFinite(bv) ? { bv } : {}),
+    ...(Number.isFinite(cost) ? { cost } : {}),
+  };
+}
+
+function mechWeightCategory(tons: number): string {
+  if (tons <= 35) return 'LIGERO';
+  if (tons <= 55) return 'MEDIO';
+  if (tons <= 75) return 'PESADO';
+  return 'ASALTO';
+}
+
+function formatCzar(n: number): string {
+  const rounded = Math.round((n + Number.EPSILON) * 100) / 100;
+  const hasDecimals = Math.abs(rounded % 1) > 0.001;
+  return `${rounded.toLocaleString('es-ES', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  })} ₡`;
+}
+
+function parseCurrencyValue(raw: string | undefined): number | null {
+  const s = String(raw ?? '').trim();
+  if (!s) return null;
+  const cleaned = s.replace(/[^\d.,-]/g, '');
+  if (!cleaned) return null;
+  const lastComma = cleaned.lastIndexOf(',');
+  const lastDot = cleaned.lastIndexOf('.');
+  const sep = Math.max(lastComma, lastDot);
+  if (sep === -1) {
+    const n = Number(cleaned.replace(/[^\d-]/g, ''));
+    return Number.isFinite(n) ? n : null;
+  }
+  const intRaw = cleaned.slice(0, sep);
+  const intPart = intRaw.replace(/[.,]/g, '');
+  const decPart = cleaned.slice(sep + 1).replace(/[^\d]/g, '');
+  const hasGroupSepBefore = /[.,]/.test(intRaw);
+  const decSep = lastComma > lastDot ? ',' : '.';
+  if (decPart.length === 1 || decPart.length === 2) {
+    const n = Number(`${intPart || '0'}.${decPart}`);
+    return Number.isFinite(n) ? n : null;
+  }
+  // Caso típico de coma flotante (p.ej. "2100783.900000024"): un único separador y muchos decimales.
+  // Debe leerse como decimal, no como miles concatenados.
+  if (!hasGroupSepBefore && decPart.length > 2) {
+    const normalized = decSep === ','
+      ? cleaned.replace(/\./g, '').replace(',', '.')
+      : cleaned.replace(/,/g, '');
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : null;
+  }
+  const n = Number(cleaned.replace(/[^\d-]/g, ''));
+  return Number.isFinite(n) ? n : null;
 }
 
 function calcDamagePct(pilot: Pilot): number {
@@ -111,13 +184,13 @@ function AgendaRow({ num, label, note, tone = 'neutral' }: AgendaRowProps) {
 
 interface MechAssetProps {
   pilot: string; call: string; chassis: string;
-  weight: number; bv: number; status: string; damage: number;
+  weight: number; weightClass: string; bv: number; price: number; status: string; damage: number;
   img: string; imgScale?: number; imgOffsetX?: number;
 }
-function MechAsset({ pilot, call, chassis, weight, bv, status, damage, img, imgScale = 1, imgOffsetX = 0 }: MechAssetProps) {
+function MechAsset({ pilot, call, chassis, weight, weightClass, bv, price, status, damage, img, imgScale = 1, imgOffsetX = 0 }: MechAssetProps) {
   const warn = status !== 'READY';
   const statusColor = warn ? T.bloodLight : T.ice;
-  const dmgColor = damage > 30 ? T.bloodLight : damage > 0 ? T.cream : T.outline;
+  const infoColor = warn ? T.bloodLight : T.outline;
 
   return (
     <article style={{
@@ -207,15 +280,15 @@ function MechAsset({ pilot, call, chassis, weight, bv, status, damage, img, imgS
             fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1.5,
           }}>
             <span style={{ color: statusColor }}>{status}</span>
-            <span style={{ color: dmgColor }}>{damage === 0 ? 'INTACT' : `-${damage}%`}</span>
+            <span style={{ color: statusColor }}>{weightClass}</span>
           </div>
           <div style={{
             display: 'flex', justifyContent: 'space-between', marginTop: 2,
             fontFamily: '"Share Tech Mono", monospace', fontSize: 9,
             color: T.outline, letterSpacing: 1.5,
           }}>
-            <span>BV {bv.toLocaleString('es-ES')}</span>
-            <span>PESADO</span>
+            <span style={{ color: infoColor }}>PRECIO {formatCzar(price)}</span>
+            <span>BV {bv.toLocaleString('es-ES', { useGrouping: 'always' })}</span>
           </div>
         </div>
       </div>
@@ -240,12 +313,194 @@ const TIPO_TONE: Record<string, 'ok' | 'warn' | 'neutral'> = {
   mech:  'warn',
 };
 
+const ATTR_LABEL: Record<string, string> = {
+  FUE: 'Fuerza',
+  DES: 'Destreza',
+  INT: 'Inteligencia',
+  CAR: 'Carisma',
+};
+
+const ATTR_FLAVOR: Record<string, ((pilot: string) => string)[]> = {
+  FUE: [
+    p => `${p} forjó su cuerpo bajo cargas punitivas y robusteció su Fuerza.`,
+    p => `${p} dejó la cantina por el gimnasio y multiplicó su Fuerza.`,
+    p => `${p} arrastró carga de combate hasta el límite y elevó su Fuerza.`,
+  ],
+  DES: [
+    p => `${p} afinó reflejos en simulador hasta el agotamiento y mejoró su Destreza.`,
+    p => `${p} repitió maniobras evasivas hasta dominarlas y aumentó su Destreza.`,
+    p => `${p} pulió sus tiempos de respuesta sobre el cockpit y elevó su Destreza.`,
+  ],
+  INT: [
+    p => `${p} se sumergió en doctrina táctica hasta el alba y agudizó su Inteligencia.`,
+    p => `${p} diseccionó manuales de combate y reportes de batalla, elevando su Inteligencia.`,
+    p => `${p} estudió patrones enemigos en cada salida y refinó su Inteligencia.`,
+  ],
+  CAR: [
+    p => `${p} se ganó la cohorte con mando firme y elevó su Carisma.`,
+    p => `${p} arengó a la lanza antes del salto y consolidó su Carisma.`,
+    p => `${p} ganó respeto en el comedor de oficiales y reforzó su Carisma.`,
+  ],
+};
+
+type SkillTheme = 'mando' | 'combate' | 'tecnica' | 'supervivencia';
+
+function normSkillName(v: string): string {
+  return v
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function skillTheme(skillName: string): SkillTheme {
+  const s = normSkillName(skillName);
+
+  const mando = new Set([
+    'admin. de feudo', 'administracion', 'diplomacia', 'interrogacion', 'liderazgo', 'tacticas',
+  ]);
+  const combate = new Set([
+    'arco', 'disparo aeroespacial', 'disparo artilleria', 'disparo mech',
+    'espada', 'pelea', 'pilotaje mech', 'pilotar aeroespacial',
+    'pistola', 'rifle',
+  ]);
+  const tecnica = new Set([
+    'astronavegacion', 'astropilotaje', 'informatica', 'ingenieria',
+    'mecanica', 'primeros auxilios', 'seguridad', 'tecnica mech',
+  ]);
+  const supervivencia = new Set([
+    'atletismo', 'callejeo', 'conducir', 'equitacion', 'robar', 'supervivencia',
+  ]);
+
+  if (mando.has(s)) return 'mando';
+  if (combate.has(s)) return 'combate';
+  if (tecnica.has(s)) return 'tecnica';
+  if (supervivencia.has(s)) return 'supervivencia';
+
+  return 'supervivencia';
+}
+
+function themedSkillLine(pilot: string, skill: string): string {
+  const theme = skillTheme(skill);
+  if (theme === 'mando') {
+    return `${pilot} consolidó su temple de mando y reforzó ${skill}.`;
+  }
+  if (theme === 'combate') {
+    return `${pilot} curtió su instinto de batalla y perfeccionó ${skill}.`;
+  }
+  if (theme === 'tecnica') {
+    return `${pilot} afinó su pericia técnica y elevó ${skill}.`;
+  }
+  return `${pilot} endureció su disciplina de campaña y mejoró ${skill}.`;
+}
+
+function prettyLogText(entry: LogEntry): string {
+  const pilot = entry.pilot || 'El piloto';
+  const desc = entry.desc || '';
+
+  if (entry.tipo === 'attr') {
+    const m = desc.match(/^([A-Z]{3})\s+\d+\s*→\s*\d+/i);
+    const attrKey = (m?.[1] || '').toUpperCase();
+    const pool = ATTR_FLAVOR[attrKey];
+    if (pool && pool.length > 0) {
+      const idx = Math.abs(entry.ts || 0) % pool.length;
+      return pool[idx](pilot);
+    }
+    const attr = ATTR_LABEL[attrKey] || attrKey || 'atributo';
+    return `${pilot} forjó su carácter bajo presión y elevó su ${attr}.`;
+  }
+
+  if (entry.tipo === 'skill') {
+    const m = desc.match(/^(.+?)\s+niv\s+\d+\s*→\s*\d+/i);
+    const skill = (m?.[1] || '').trim() || 'habilidad';
+    return themedSkillLine(pilot, skill);
+  }
+
+  if (entry.tipo === 'xp') {
+    const m = desc.match(/([+-]?\d+)/);
+    const xp = m?.[1] || '';
+    return xp
+      ? `${pilot} sumó experiencia de combate: ${xp} XP en su hoja de servicio.`
+      : `${pilot} regresó del frente con nuevas lecciones de combate.`;
+  }
+
+  if (entry.tipo === 'mech') {
+    const m = desc.match(/→\s*(.+)$/);
+    const mech = (m?.[1] || '').trim();
+    return mech
+      ? `${pilot} recibió asignación al ${mech} y entró en rotación de primera línea.`
+      : `${pilot} recibió una nueva asignación de BattleMech para la próxima salida.`;
+  }
+
+  if (entry.tipo === 'quirk') {
+    return `${pilot} incorporó una nueva táctica tras las últimas escaramuzas.`;
+  }
+
+  return `${pilot} dejó constancia de un nuevo avance en su expediente de campaña.`;
+}
+
+function logDayKey(ts: number): string {
+  const d = new Date(ts || Date.now());
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function dedupeKey(entry: LogEntry): string {
+  const pilot = (entry.pilot || '?').trim().toLowerCase();
+  const day = logDayKey(entry.ts);
+  const desc = entry.desc || '';
+
+  if (entry.tipo === 'attr') {
+    const m = desc.match(/^([A-Z]{3})\s+\d+\s*→\s*\d+/i);
+    const attr = (m?.[1] || 'attr').toUpperCase();
+    return `attr|${pilot}|${attr}|${day}`;
+  }
+
+  if (entry.tipo === 'skill') {
+    const m = desc.match(/^(.+?)\s+niv\s+\d+\s*→\s*\d+/i);
+    const skill = (m?.[1] || 'skill').trim().toLowerCase();
+    return `skill|${pilot}|${skill}|${day}`;
+  }
+
+  if (entry.tipo === 'mech') {
+    return `mech|${pilot}|${day}`;
+  }
+
+  if (entry.tipo === 'xp') {
+    return `xp|${pilot}|${day}`;
+  }
+
+  if (entry.tipo === 'quirk') {
+    const m = desc.match(/Quirk:\s*([^—-]+)/i);
+    const quirk = (m?.[1] || 'quirk').trim().toLowerCase();
+    return `quirk|${pilot}|${quirk}|${day}`;
+  }
+
+  return `${entry.tipo}|${pilot}|${desc.trim().toLowerCase()}|${day}`;
+}
+
+function compactAgenda(entries: LogEntry[], max = 5): LogEntry[] {
+  const seen = new Set<string>();
+  const sorted = [...entries].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  const out: LogEntry[] = [];
+  for (const e of sorted) {
+    const k = dedupeKey(e);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(e);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 function OrdenDelDia() {
   const [log, setLog] = useState<LogEntry[]>([]);
   useEffect(() => {
-    setLog(readLog().slice(0, 8));
+    setLog(compactAgenda(readLog(), 5));
     loadLogFromSheets().then(remote => {
-      if (remote && remote.length > 0) setLog(remote.slice(0, 8));
+      if (remote && remote.length > 0) setLog(compactAgenda(remote, 5));
     }).catch(() => {});
   }, []);
 
@@ -267,8 +522,8 @@ function OrdenDelDia() {
         <AgendaRow
           key={i}
           num={String(i + 1).padStart(2, '0')}
-          label={`${TIPO_LABEL[entry.tipo] ?? entry.tipo} · ${entry.pilot}`}
-          note={`${entry.desc}  ·  ${relTime(entry.ts)}`}
+          label={prettyLogText(entry)}
+          note={relTime(entry.ts)}
           tone={TIPO_TONE[entry.tipo] ?? 'neutral'}
         />
       ))}
@@ -276,23 +531,125 @@ function OrdenDelDia() {
   );
 }
 
+// ── Última Crónica ──────────────────────────────────────────
+
+const AUTOR_LABEL_CR: Record<string, string> = {
+  mando:        'Mando',
+  contratista:  'Contratista',
+  narrador:     'Cronista',
+};
+
+const MESES_ABREV = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function UltimaCronica() {
+  const [entry, setEntry] = useState<CronicaEntry | null>(null);
+
+  useEffect(() => {
+    const local = sortCronicas(readCronicas())[0] ?? null;
+    setEntry(local);
+    loadCronicasFromSheets().then(remote => {
+      if (remote && remote.length > 0) {
+        setEntry(sortCronicas(remote)[0] ?? null);
+      }
+    }).catch(() => {});
+  }, []);
+
+  if (!entry) {
+    return (
+      <div>
+        <SmallLabel>Última Entrada · Crónicas</SmallLabel>
+        <div style={{
+          fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+          color: T.outline, letterSpacing: 1, padding: '8px 0',
+        }}>
+          BITÁCORA SIN ENTRADAS
+        </div>
+      </div>
+    );
+  }
+
+  const autorBase = AUTOR_LABEL_CR[entry.autor] ?? 'Autor';
+  const autorNombre = entry.autorNombre?.trim() || autorBase;
+  const preview = stripMarkdownLite(entry.cuerpo);
+  const truncated = preview.length > 180 ? preview.slice(0, 177) + '…' : preview;
+  const fechaCorta = `${String(entry.campaignDay).padStart(2, '0')}/${MESES_ABREV[entry.campaignMonth - 1] ?? '—'}/${entry.campaignYear}`;
+
+  return (
+    <div>
+      <SmallLabel>Última Entrada · Crónicas</SmallLabel>
+      <blockquote style={{
+        margin: 0, padding: '12px 16px',
+        borderLeft: `2px solid ${T.bloodDark}`,
+        fontFamily: 'Inter, sans-serif', fontSize: 12, lineHeight: 1.55,
+        color: T.bone, fontStyle: 'italic',
+      }}>
+        <div style={{
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 13, fontWeight: 600,
+          color: T.creamHi, marginBottom: 6, fontStyle: 'normal',
+        }}>{entry.titulo}</div>
+        "{truncated}"
+        <div style={{ marginTop: 8, fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.gold, letterSpacing: 2, fontStyle: 'normal' }}>
+          — {autorNombre} · {fechaCorta}
+        </div>
+      </blockquote>
+    </div>
+  );
+}
+
+// ── Parte del Día ───────────────────────────────────────────
+
+const PARTE_TONE_COLOR: Record<ParteTone, string> = {
+  info:      T.ice,
+  victoria:  T.gold,
+  warning:   T.bloodLight,
+  status:    T.cream,
+};
+
+function ParteDiario() {
+  const [partes, setPartes] = useState<ParteEntry[]>([]);
+
+  useEffect(() => {
+    setPartes(readPartes().slice(0, 6));
+    loadPartesFromSheets().then(remote => {
+      if (remote && remote.length > 0) setPartes(remote.slice(0, 6));
+    }).catch(() => {});
+  }, []);
+
+  if (partes.length === 0) {
+    return (
+      <div style={{
+        fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+        color: T.outline, letterSpacing: 1.5, padding: '6px 0',
+      }}>SIN ACTIVIDAD REGISTRADA</div>
+    );
+  }
+
+  return (
+    <>
+      {partes.map((p, i) => (
+        <div key={p.id ?? i} style={{ display: 'flex', gap: 10 }}>
+          <span style={{ color: PARTE_TONE_COLOR[p.tone] ?? T.cream }}>{p.text}</span>
+        </div>
+      ))}
+    </>
+  );
+}
+
 // ── Page ────────────────────────────────────────────────────
 
 export function ComisionPage() {
-  const { campaign } = useAppStore();
+  const { campaign, roster } = useAppStore();
   const BASE = import.meta.env.BASE_URL;
 
   const mesNombre = MESES[(campaign.campaignMonth ?? 1) - 1] ?? 'Enero';
   const mesAbrev  = mesNombre.slice(0, 3).toUpperCase();
   const heroLabel = `${mesAbrev} · ${campaign.campaignYear ?? 3026} · DISTRITO KAPTEYN`;
 
-  // Format contratoValor: strip non-digits, format with dot thousands separator, append ₡
   function fmtValor(v: string | undefined): string {
-    const raw = String(v ?? '').replace(/[^\d]/g, '');
-    if (!raw) return '—';
-    return parseInt(raw, 10).toLocaleString('es-ES') + ' ₡';
+    const n = parseCurrencyValue(v);
+    return n === null ? '—' : formatCzar(n);
   }
-  const contratoFmt  = fmtValor(campaign.contratoValor);
+  const contratoFmt = fmtValor(campaign.contratoValor);
   const valorUnidadFmt = fmtValor(campaign.valorUnidad);
 
   // Load pilot slots from localStorage (same key as useBarracones)
@@ -311,26 +668,63 @@ export function ComisionPage() {
     } catch { /* silent */ }
   }, []);
 
-  // Build the 6 mech cards from fixed slots (0-5), in Barracones order
-  const mechCards = slots.slice(0, SLOT_COUNT).map((p, i) => {
-    const mechFromConfig = campaign.pilotMechs?.[i] ?? '';
-    const nameFromConfig = campaign.pilotNames?.[i] ?? '';
-    if (!p && !mechFromConfig && !nameFromConfig) return null;
+  const [mechFileStats, setMechFileStats] = useState<Record<string, MechFileStats>>({});
+  useEffect(() => {
+    let cancelled = false;
+    const names = Array.from(new Set(roster.map(r => r.mech).filter(Boolean)));
+    if (!names.length) return;
+
+    (async () => {
+      const loaded: Record<string, MechFileStats> = {};
+      for (const mechName of names) {
+        const enc = encodeURIComponent(mechName);
+        const candidates = [`${BASE}assets/mechs/${enc}.ssw`, `${BASE}assets/mechs/${enc}.mtf`];
+        for (const url of candidates) {
+          try {
+            const res = await fetch(url);
+            if (!res.ok) continue;
+            const text = await res.text();
+            loaded[mechName] = parseMechFileStats(text);
+            break;
+          } catch {
+            // ignore fetch errors and try next candidate
+          }
+        }
+      }
+      if (!cancelled && Object.keys(loaded).length) {
+        setMechFileStats(prev => ({ ...prev, ...loaded }));
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [roster, BASE]);
+
+  // Build mech cards from roster (fuente única). Slots aporta hpDmg si están cacheados.
+  const mechCards = roster.map((r, i) => {
+    const p = slots[i] ?? null;
+    if (!p && !r.mech && !r.nombre && !r.apodo) return null;
     try {
       const dmgPct   = p ? calcDamagePct(p) : 0;
       const status   = dmgPct > 30 ? 'REPARACIÓN' : 'READY';
-      const mech     = p?.mech ?? mechFromConfig;
-      const nombre   = p?.nombre ?? nameFromConfig;
+      const mech     = p?.mech || r.mech;
+      const nombre   = p?.nombre || r.nombre;
       const key      = mechKey(mech);
-      const meta     = MECH_META[key] ?? { weight: 0, bv: 0 };
-      const fallbackCall = nombre ? nombre.toUpperCase().slice(0, 2) : '?';
-      const apellido = nombre ? (nombre.split(' ').slice(-1)[0] || nombre) : (p?.callsign ?? '?');
+      const meta     = MECH_META[key] ?? { weight: 0, bv: 0, cost: 0 };
+      const stats    = mech ? mechFileStats[mech] : undefined;
+      const weight   = stats?.tons ?? meta.weight;
+      const weightClass = mechWeightCategory(weight);
+      const bv       = stats?.bv ?? meta.bv;
+      const price    = stats?.cost ?? meta.cost;
+      const apodo       = r.apodo?.trim() || p?.apodo?.trim() || p?.callsign || '?';
+      const fullName    = nombre || p?.callsign || '—';
       return {
-        pilot:      apellido,
-        call:       p?.callsign ?? fallbackCall,
+        pilot:      fullName,
+        call:       apodo,
         chassis:    mech || '—',
-        weight:     meta.weight,
-        bv:         meta.bv,
+        weight,
+        weightClass,
+        bv,
+        price,
         status,
         damage:     dmgPct,
         img:        mechImage(mech, BASE),
@@ -462,7 +856,7 @@ export function ComisionPage() {
             {mechCards.map((c, i) => c ? (
               <MechAsset key={i}
                 pilot={c.pilot} call={c.call}
-                chassis={c.chassis} weight={c.weight} bv={c.bv}
+                chassis={c.chassis} weight={c.weight} weightClass={c.weightClass} bv={c.bv} price={c.price}
                 status={c.status} damage={c.damage}
                 img={c.img} imgScale={c.imgScale} imgOffsetX={c.imgOffsetX}
               />
@@ -491,36 +885,13 @@ export function ComisionPage() {
         <OrdenDelDia />
 
         {/* Última entrada · Crónicas */}
-        <div>
-          <SmallLabel>Última Entrada · Crónicas</SmallLabel>
-          <blockquote style={{
-            margin: 0, padding: '12px 16px',
-            borderLeft: `2px solid ${T.bloodDark}`,
-            fontFamily: 'Inter, sans-serif', fontSize: 12, lineHeight: 1.55,
-            color: T.bone, fontStyle: 'italic',
-          }}>
-            "Hemos limpiado los pantanos, esos pobres capelenses no tuvieron ni una sola oportunidad."
-            <div style={{ marginTop: 8, fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.gold, letterSpacing: 2, fontStyle: 'normal' }}>
-              — Sargento Dayffid · 14/{mesAbrev}/{campaign.campaignYear ?? 3026}
-            </div>
-          </blockquote>
-        </div>
+        <UltimaCronica />
 
         {/* Parte diario + moral */}
         <div style={{ marginTop: 'auto' }}>
           <SmallLabel>Parte Diario</SmallLabel>
           <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: T.bone, lineHeight: 1.8, letterSpacing: 0.5 }}>
-            {([
-              ['04:22', T.ice,       'KING_KARL engages raider · 7-G'],
-              ['04:23', T.bloodLight,'VANGUARD gyro critical · falling back'],
-              ['04:24', T.cream,     'FALCON confirms raider-03 kill'],
-              ['04:28', T.gold,      'MISSION VICTORY · mech salvage x1'],
-            ] as [string, string, string][]).map(([time, color, msg], i) => (
-              <div key={i} style={{ display: 'flex', gap: 10 }}>
-                <span style={{ color: T.outlineV }}>{time}</span>
-                <span style={{ color }}>{msg}</span>
-              </div>
-            ))}
+            <ParteDiario />
           </div>
           <div style={{
             marginTop: 12, padding: '10px 12px', background: T.void,

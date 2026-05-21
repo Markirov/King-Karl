@@ -50,9 +50,13 @@ export function SimuladorPage() {
         .filter(p => p && (p.nombre || p.callsign))
         .map(p => {
           const habs: { nombre: string; nivel: number }[] = Array.isArray(p.habilidades) ? p.habilidades : [];
-          const norm = (s: string) => s.trim().toLowerCase();
+          const norm = (s: string) => s.trim().toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
           const disparoSkill = habs.find(h => norm(h.nombre) === 'disparo mech');
-          const pilotarSkill = habs.find(h => norm(h.nombre) === 'pilotar mech');
+          const pilotarSkill = habs.find(h => {
+            const n = norm(h.nombre);
+            return n === 'pilotaje mech' || n === 'pilotar mech';
+          });
           const attrAvg = calcAttrAvg(p.fue ?? 6, p.des ?? 6, p.int ?? 6, p.car ?? 6);
           const gunnery  = disparoSkill ? Math.max(0, calcTIR(attrAvg, disparoSkill.nivel)) : 4;
           const piloting = pilotarSkill ? Math.max(0, calcTIR(attrAvg, pilotarSkill.nivel)) : 5;

@@ -134,9 +134,11 @@ export interface CampaignConfig {
   campaignMonth: number;
   unitName: string;
   scriptUrl: string;
-  pilotNames: string[]; // PILOTO_1_NOMBRE … PILOTO_6_NOMBRE from config
-  pilotMechs: string[]; // PILOTO_1_MECH … PILOTO_6_MECH from config
+  pilotNames:  string[]; // PILOTO_1_NOMBRE … PILOTO_6_NOMBRE from config
+  pilotApodos: string[]; // PILOTO_1_APODO … PILOTO_6_APODO from config
+  pilotMechs:  string[]; // PILOTO_1_MECH … PILOTO_6_MECH from config
   contratoValor: string; // CONTRATO_VALOR from config (e.g. "5.000.000 ₡")
   valorUnidad:   string; // VALOR_UNIDAD from config (e.g. "7.480")
   totalMechs:    string; // TOTAL_MECHS from config
+  pcJugadores:   string[]; // PC_JUGADORES from config — handles separados por coma (PCs vs NPCs)
 }

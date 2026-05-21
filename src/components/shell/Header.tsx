@@ -28,9 +28,7 @@ export function Header() {
         </button>
 
         <span className="font-headline text-[11px] font-semibold text-on-surface-variant tracking-[2px] uppercase">
-          Comisión de Revisión y Fianza de{' '}
-          <span onClick={() => setSecretOpen(true)} className="cursor-default select-none">M</span>
-          ercenarios
+          Comisión de Revisión y Fianza de Mercenarios
         </span>
 
         <div className="flex items-center gap-5">
@@ -40,7 +38,11 @@ export function Header() {
               {MESES[(campaign.campaignMonth || 1) - 1]} de {campaign.campaignYear}
             </span>
           </div>
-          <button className="w-8 h-8 flex items-center justify-center text-outline hover:text-primary-container transition-colors">
+          <button
+            onClick={() => setSecretOpen(true)}
+            aria-label="Ajustes"
+            className="w-8 h-8 flex items-center justify-center text-outline hover:text-primary-container transition-colors"
+          >
             <Settings size={16} />
           </button>
         </div>

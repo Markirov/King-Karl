@@ -1,22 +1,36 @@
-import { useState, useEffect, useCallback } from 'react';
-import { User, Loader, CheckCircle, AlertCircle, RotateCcw } from 'lucide-react';
+// ══════════════════════════════════════════════════════════════
+//  HOJA DE SERVICIO · P3 TWO-TONE
+//  Reskin: columna oscura ceremonial + 2 hojas de papel claras
+//  Lógica intacta: registerMission + registerXPExpense
+// ══════════════════════════════════════════════════════════════
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getVeterancy } from '@/lib/barracones-data';
-import { loadPlayer, registerMission, registerXPExpense } from '@/lib/sheets-service';
+import { useAppStore } from '@/lib/store';
+import { registerMission, registerXPExpense } from '@/lib/sheets-service';
+import { isActivo } from '@/lib/roster';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────
 
-const PLAYERS = ['Marcos', 'Jaime', 'Joan', 'Juan'] as const;
-type PlayerName = (typeof PLAYERS)[number];
+const DW = 1280;
+const DH = 1100;
 
-const PLAYER_COLORS: Record<PlayerName, string> = {
-  Marcos: '#4ade80', Jaime: '#60a5fa', Joan: '#fbbf24', Juan: '#c084fc',
+const C = {
+  gold: '#e8c06a', goldHi: '#f5d985', goldDim: '#b08a3a', goldDeep: '#6b4a1a',
+  bronze: '#8a6a35', bronzeLo: '#3d2a10',
+  cream: '#d8ccb5', creamDim: '#b8a775',
+  paper: '#d8c896', paperHi: '#eadfb8', paperShade: '#a89060',
+  ink: '#1a1208', inkSoft: '#3d2a14',
+  red: '#a13a2b', redDeep: '#6b1f15',
+  green: '#3d6b3a', greenDeep: '#1f4a1c',
+  void: '#0a0d12', void2: '#10141a',
+  line2: '#3a2a14',
 };
 
-const PLAYER_DISPLAY: Record<PlayerName, string> = {
-  Marcos: 'MARCOS', Jaime: 'JAIME', Joan: 'JOAN', Juan: 'PALACIOS',
-};
+const ACCENT_COLORS = ['#a13a2b', '#3a5fa1', '#a18a3a', '#7a3aa1', '#3a7a4a', '#a13a7a', '#7a5a3a', '#3a9aa1'] as const;
 
-/** Reroll cost & max per veteran level */
+const ROMAN_NUMS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'] as const;
+
 const REROLL_CONFIG: Record<string, { max: number; cost: number }> = {
   Novato:   { max: 1, cost: 100  },
   Regular:  { max: 2, cost: 200  },
@@ -25,59 +39,449 @@ const REROLL_CONFIG: Record<string, { max: number; cost: number }> = {
   As:       { max: 5, cost: 6000 },
 };
 
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface PlayerRow {
-  name: PlayerName;
-  xpTotal: number;
-  xpDisponible: number;
-  nivel: string;
-  xpGanado: number;
-  chequeos: number;
-  rerolls: number;
-  loading: boolean;
-}
-
 const LS_KEY = 'kk_hoja_xp_from_hud';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────
 
-function calcSpent(p: PlayerRow) {
+interface PlayerRow {
+  name:         string;     // handle jugador (ej. "Marcos") — key para registerMission
+  nombre:       string;     // nombre del personaje (ej. "Dayffid Guffrudd")
+  callsign:     string;     // apodo (ej. "Castigador")
+  accent:       string;     // color acento de la fila
+  xpTotal:      number;
+  xpDisponible: number;
+  nivel:        string;
+  xpGanado:     number;
+  chequeos:     number;
+  rerolls:      number;
+  loading:      boolean;
+}
+
+// ── Helpers ────────────────────────────────────────────────
+
+const fmt = (n: number) => n.toLocaleString('de-DE');
+
+function calcSpent(p: PlayerRow): number {
   const rc = REROLL_CONFIG[p.nivel] ?? REROLL_CONFIG.Novato;
   return p.rerolls * rc.cost;
 }
 
-function fmtNum(n: number) {
-  return n.toLocaleString('de-DE'); // dots as thousand separators
+// ── Mission Medallion ──────────────────────────────────────
+
+function MissionMedallion({ ringText }: { ringText: string }) {
+  return (
+    <div style={{ position: 'relative', width: 280, height: 280, flexShrink: 0 }}>
+      {/* Disco oscuro central — la "ventana" donde vive la rosa */}
+      <div style={{
+        position: 'absolute', top: 50, left: 50, width: 180, height: 180,
+        borderRadius: '50%',
+        clipPath: 'circle(50%)',
+        background: `radial-gradient(circle at 35% 30%, #f0d48a44 0%, transparent 55%), linear-gradient(180deg, #1c1610, ${C.void})`,
+        boxShadow: `inset 0 0 30px ${C.void}`,
+        zIndex: 1,
+      }} />
+
+      {/* Rosa de los vientos */}
+      <div style={{
+        position: 'absolute', top: 80, left: 80, width: 120, height: 120,
+        display: 'grid', placeItems: 'center', zIndex: 2,
+      }}>
+        <svg viewBox="0 0 100 100" width="120" height="120">
+          <g stroke={C.gold} strokeWidth="1.2" fill="none">
+            <line x1="50" y1="8" x2="50" y2="92" />
+            <line x1="8" y1="50" x2="92" y2="50" />
+            <line x1="20" y1="20" x2="80" y2="80" opacity="0.6" />
+            <line x1="80" y1="20" x2="20" y2="80" opacity="0.6" />
+          </g>
+          <g fill={C.goldHi} opacity="0.9">
+            <polygon points="50,8 53,42 50,46 47,42" />
+            <polygon points="50,92 53,58 50,54 47,58" />
+            <polygon points="8,50 42,53 46,50 42,47" />
+            <polygon points="92,50 58,53 54,50 58,47" />
+          </g>
+          <circle cx="50" cy="50" r="32" fill="none" stroke={C.gold} strokeWidth="0.4" opacity="0.6" />
+          <circle cx="50" cy="50" r="22" fill="none" stroke={C.gold} strokeWidth="0.4" opacity="0.6" />
+          <text x="50" y="20" textAnchor="middle" style={{ font: 'bold 8px "Share Tech Mono", monospace' }} fill={C.goldHi}>N</text>
+          <circle cx="50" cy="50" r="3" fill={C.gold} />
+        </svg>
+      </div>
+
+      {/* Medallón completo: anillo bronce + texto + aro interior */}
+      <svg viewBox="0 0 280 280" style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none' }}>
+        <defs>
+          <radialGradient id="bronzeRG" cx="40%" cy="35%">
+            <stop offset="0%"  stopColor="#f0d48a" />
+            <stop offset="40%" stopColor="#b08a3a" />
+            <stop offset="100%" stopColor="#4a320e" />
+          </radialGradient>
+          <path id="ring2t" d="M 140 140 m -98 0 a 98 98 0 1 1 196 0 a 98 98 0 1 1 -196 0" />
+        </defs>
+
+        {/* Bordes exteriores */}
+        <circle cx="140" cy="140" r="138" fill="none" stroke={C.goldDeep} strokeWidth="1.5" />
+        <circle cx="140" cy="140" r="128" fill="none" stroke={C.gold} strokeWidth="0.5" opacity="0.6" />
+
+        {/* Anillo bronce con hueco (r ext 112, r int 90) */}
+        <path
+          d="M 28 140 a 112 112 0 1 0 224 0 a 112 112 0 1 0 -224 0 Z
+             M 50 140 a 90 90 0 1 0 180 0 a 90 90 0 1 0 -180 0 Z"
+          fill="url(#bronzeRG)"
+          fillRule="evenodd"
+        />
+
+        {/* Línea punteada en el borde exterior del anillo */}
+        <circle cx="140" cy="140" r="112" fill="none" stroke={C.gold} strokeWidth="1" strokeDasharray="2 4" opacity="0.7" />
+
+        {/* Aro dorado fino en el borde interior del anillo */}
+        <circle cx="140" cy="140" r="90" fill="none" stroke={C.gold} strokeWidth="2.5" opacity="0.95" />
+        <circle cx="140" cy="140" r="93" fill="none" stroke={C.goldDeep} strokeWidth="0.6" />
+
+        {/* Tick marks */}
+        {[0, 45, 90, 135, 180, 225, 270, 315].map(a => (
+          <line key={a} x1="140" y1="20" x2="140" y2="32"
+                transform={`rotate(${a} 140 140)`} stroke={C.gold} strokeWidth="1.4" />
+        ))}
+
+        {/* Texto curvo */}
+        <text style={{ font: '11px "Cormorant Garamond", serif', fill: C.gold, letterSpacing: 5, fontStyle: 'italic' }}>
+          <textPath href="#ring2t" startOffset="0">{ringText}</textPath>
+        </text>
+      </svg>
+    </div>
+  );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+function VisadoStamp({ size = 110, label = 'VISADO', sub = 'FAFS', tilt = -10, color = C.greenDeep }) {
+  return (
+    <div style={{ width: size, height: size, transform: `rotate(${tilt}deg)`, pointerEvents: 'none', opacity: 0.85 }}>
+      <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+        <defs>
+          <pattern id={`hatch-3t-${label}`} patternUnits="userSpaceOnUse" width="3" height="3" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="3" stroke={color} strokeWidth="0.4" opacity="0.4" />
+          </pattern>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="none" stroke={color} strokeWidth="2.5" />
+        <circle cx="50" cy="50" r="40" fill={`url(#hatch-3t-${label})`} />
+        <circle cx="50" cy="50" r="40" fill="none" stroke={color} strokeWidth="0.8" />
+        <text x="50" y="44" textAnchor="middle" style={{ font: 'bold 11px "Share Tech Mono", monospace', letterSpacing: 1 }} fill={color}>{label}</text>
+        <text x="50" y="55" textAnchor="middle" style={{ font: '7px "Share Tech Mono", monospace', letterSpacing: 0.5 }} fill={color}>· {sub} ·</text>
+        <text x="50" y="68" textAnchor="middle" style={{ font: 'italic 7px "Cormorant Garamond", serif' }} fill={color}>MMMXXVI</text>
+      </svg>
+    </div>
+  );
+}
+
+// ── Paper Sheet + Clip ─────────────────────────────────────
+
+function Clip({ x = '50%' }: { x?: string }) {
+  return (
+    <div style={{
+      position: 'absolute', top: -16, left: x, transform: 'translateX(-50%)',
+      width: 44, height: 32, zIndex: 3,
+    }}>
+      <svg viewBox="0 0 44 32" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 3px 3px rgba(0,0,0,0.5))' }}>
+        <defs>
+          <linearGradient id={`clipg-${x}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#d4d4d4" />
+            <stop offset="50%" stopColor="#888" />
+            <stop offset="100%" stopColor="#4a4a4a" />
+          </linearGradient>
+        </defs>
+        <path d="M 5 8 Q 5 2 10 2 L 34 2 Q 39 2 39 8 L 39 28 Q 39 30 37 30 L 7 30 Q 5 30 5 28 Z"
+              fill={`url(#clipg-${x})`} stroke="#2a2a2a" strokeWidth="0.5" />
+        <rect x="11" y="10" width="22" height="3" fill="#2a2a2a" opacity="0.55" />
+        <rect x="11" y="18" width="22" height="3" fill="#2a2a2a" opacity="0.55" />
+      </svg>
+    </div>
+  );
+}
+
+interface PaperSheetProps {
+  x: number; y: number; w: number; h?: number;
+  tilt?: number; clips?: string[];
+  children: React.ReactNode;
+}
+function PaperSheet({ x, y, w, h, tilt = 0, clips = [], children }: PaperSheetProps) {
+  return (
+    <div style={{
+      position: 'absolute', left: x, top: y, width: w,
+      ...(h ? { height: h } : {}),
+      transform: `rotate(${tilt}deg)`, transformOrigin: 'center top',
+      background: C.paper,
+      backgroundImage: `
+        radial-gradient(circle at 12% 18%, ${C.goldDeep}22 0%, transparent 14%),
+        radial-gradient(circle at 88% 82%, ${C.goldDeep}22 0%, transparent 14%),
+        radial-gradient(circle at 70% 25%, ${C.goldDeep}1a 0%, transparent 8%),
+        linear-gradient(${C.ink}11 1px, transparent 1px)
+      `,
+      backgroundSize: '100% 100%, 100% 100%, 100% 100%, 32px 32px',
+      color: C.ink,
+      padding: '24px 22px 18px',
+      boxShadow: `3px 5px 0 rgba(0,0,0,0.45), 0 14px 28px rgba(0,0,0,0.55), inset 0 0 50px ${C.goldDeep}22`,
+      display: 'flex', flexDirection: 'column',
+      overflow: 'hidden',
+    }}>
+      {clips.map((cx, i) => <Clip key={i} x={cx} />)}
+      {children}
+    </div>
+  );
+}
+
+function SheetHeader({ num, title, tail }: { num?: string; title: string; tail?: string }) {
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+      borderBottom: `1.5px solid ${C.ink}`, paddingBottom: 4, marginBottom: 8,
+    }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+        {num && <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: 3, color: C.goldDeep }}>§ {num}</span>}
+        <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 18, fontStyle: 'italic', color: C.redDeep, fontWeight: 700, letterSpacing: 1 }}>
+          {title}
+        </span>
+      </div>
+      {tail && <span style={{ fontFamily: '"Special Elite", monospace', fontSize: 10, color: C.goldDeep, fontStyle: 'italic' }}>{tail}</span>}
+    </div>
+  );
+}
+
+// ── Pilot Row (en hoja izq) ────────────────────────────────
+
+interface PaperPilotRowProps {
+  player: PlayerRow;
+  index:  number;
+  isLast: boolean;
+  onUpdate: (idx: number, patch: Partial<PlayerRow>) => void;
+}
+function PaperPilotRow({ player, index, isLast, onUpdate }: PaperPilotRowProps) {
+  const rc = REROLL_CONFIG[player.nivel] ?? REROLL_CONFIG.Novato;
+  const spent = calcSpent(player);
+  const sessionNet = player.xpGanado + player.chequeos - spent;
+  const xpFinal = sessionNet >= 0 ? player.xpTotal + sessionNet : player.xpTotal;
+  const accent = player.accent;
+
+  const inputBase: React.CSSProperties = {
+    background: C.paperHi + 'cc',
+    border: `1px solid ${C.goldDeep}66`,
+    color: C.ink,
+    fontFamily: '"Cormorant Garamond", serif',
+    fontSize: 18, fontStyle: 'italic', fontWeight: 700,
+    textAlign: 'right', padding: '0 8px', outline: 'none',
+    height: 32, minWidth: 0,
+  };
+
+  function handleReroll(target: number) {
+    if (target === player.rerolls) {
+      onUpdate(index, { rerolls: target - 1 });
+    } else {
+      const additional = (target - player.rerolls) * rc.cost;
+      if (player.xpDisponible - spent - additional >= 0) {
+        onUpdate(index, { rerolls: target });
+      }
+    }
+  }
+
+  return (
+    <div style={{
+      padding: '16px 0 18px',
+      borderBottom: !isLast ? `1px dashed ${C.ink}55` : 'none',
+      position: 'relative',
+    }}>
+      <div style={{
+        position: 'absolute', left: -22, top: 14, bottom: 14, width: 4,
+        background: accent, opacity: 0.85,
+      }} />
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 2, color: C.goldDeep }}>
+          § {ROMAN_NUMS[index]}
+        </span>
+        <span style={{
+          fontFamily: '"Cormorant Garamond", serif', fontSize: 22, fontStyle: 'italic',
+          fontWeight: 700, color: C.redDeep, lineHeight: 1,
+        }}>
+          {player.nombre || player.name}
+        </span>
+        <span style={{ fontSize: 10, color: C.inkSoft, fontStyle: 'italic', fontFamily: '"Special Elite", monospace' }}>
+          «{player.callsign || '—'}» · {player.nivel}
+        </span>
+        <span style={{ marginLeft: 'auto', fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: C.goldDeep }}>
+          EXP <span style={{ color: C.ink }}>{fmt(player.xpTotal)}</span>
+          <span style={{ margin: '0 5px', color: C.goldDim }}>·</span>
+          DISP <span style={{ color: C.greenDeep }}>{fmt(player.xpDisponible)}</span>
+        </span>
+      </div>
+
+      {/* Inputs grid */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1.6fr 78px 1.3fr 1.1fr',
+        gap: 8, alignItems: 'stretch',
+      }}>
+        {/* XP misión */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ fontSize: 8, letterSpacing: 2, color: C.goldDeep, fontFamily: '"Share Tech Mono", monospace', marginBottom: 2 }}>MISIÓN XP</div>
+          <input type="number" min={0} value={player.xpGanado}
+            onChange={e => onUpdate(index, { xpGanado: Math.max(0, parseInt(e.target.value) || 0) })}
+            style={{ ...inputBase, width: '100%', color: C.greenDeep, marginTop: 'auto' }} />
+        </div>
+
+        {/* Chequeos ±100 */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ fontSize: 8, letterSpacing: 2, color: C.goldDeep, fontFamily: '"Share Tech Mono", monospace', marginBottom: 2 }}>CHEQUEOS</div>
+          <div style={{ display: 'flex', gap: 2, marginTop: 'auto' }}>
+            <button onClick={() => onUpdate(index, { chequeos: player.chequeos - 100 })} style={{
+              width: 22, height: 32, padding: 0, border: `1px solid ${C.goldDeep}66`,
+              background: C.paperHi + '88', color: C.redDeep, fontFamily: '"Share Tech Mono", monospace',
+              fontSize: 14, lineHeight: 1, cursor: 'pointer',
+            }}>−</button>
+            <input type="number" value={player.chequeos}
+              onChange={e => onUpdate(index, { chequeos: parseInt(e.target.value) || 0 })}
+              style={{
+                ...inputBase, flex: 1, minWidth: 0,
+                color: player.chequeos > 0 ? C.greenDeep : player.chequeos < 0 ? C.redDeep : C.ink,
+              }} />
+            <button onClick={() => onUpdate(index, { chequeos: player.chequeos + 100 })} style={{
+              width: 22, height: 32, padding: 0, border: `1px solid ${C.goldDeep}66`,
+              background: C.paperHi + '88', color: C.greenDeep, fontFamily: '"Share Tech Mono", monospace',
+              fontSize: 14, lineHeight: 1, cursor: 'pointer',
+            }}>+</button>
+          </div>
+        </div>
+
+        {/* Repetir tirada */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{
+            fontSize: 8, letterSpacing: 2, color: C.goldDeep,
+            fontFamily: '"Share Tech Mono", monospace',
+            marginBottom: 2, display: 'flex', justifyContent: 'space-between',
+          }}>
+            <span>REPETIR T.</span>
+            <span style={{ color: C.goldDim }}>{rc.cost}/c</span>
+          </div>
+          <div style={{ display: 'flex', gap: 3, marginTop: 'auto' }}>
+            {Array.from({ length: rc.max }).map((_, ri) => {
+              const active = ri < player.rerolls;
+              return (
+                <button key={ri} onClick={() => handleReroll(ri + 1)} style={{
+                  flex: 1, height: 32, padding: 0,
+                  border: `1.5px solid ${active ? C.redDeep : C.goldDeep + '88'}`,
+                  background: active ? `${C.redDeep}33` : C.paperHi + '66',
+                  color: active ? C.redDeep : C.goldDeep + 'aa',
+                  fontFamily: '"Share Tech Mono", monospace',
+                  fontSize: 10, fontWeight: 700, letterSpacing: 1,
+                  cursor: 'pointer',
+                  transform: active ? `rotate(${(ri % 2 ? 1 : -1)}deg)` : 'none',
+                }}>R{ri + 1}</button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Resultado sesión + final */}
+        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'right' }}>
+          <div style={{ fontSize: 8, letterSpacing: 2, color: C.goldDeep, fontFamily: '"Share Tech Mono", monospace', marginBottom: 2 }}>
+            SESIÓN → FINAL
+          </div>
+          <div style={{ marginTop: 'auto' }}>
+            <div style={{
+              fontFamily: '"Cormorant Garamond", serif', fontSize: 20, fontStyle: 'italic', fontWeight: 700,
+              color: sessionNet > 0 ? C.greenDeep : sessionNet < 0 ? C.redDeep : C.ink,
+              lineHeight: 1,
+            }}>
+              {sessionNet > 0 ? '+' : ''}{fmt(sessionNet)}
+            </div>
+            <div style={{
+              fontFamily: '"Special Elite", monospace', fontSize: 11, color: C.inkSoft, marginTop: 2,
+            }}>
+              → <span style={{ color: C.ink, fontWeight: 700 }}>{fmt(xpFinal)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Tesorería row helper ───────────────────────────────────
+
+interface TesRowProps {
+  label: string; sign: string;
+  value: number; onChange: (v: number) => void;
+  color: string;
+}
+function TesRow({ label, sign, value, onChange, color }: TesRowProps) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', borderBottom: `1px dotted ${C.ink}55` }}>
+      <div style={{
+        flex: 1, fontFamily: '"Special Elite", monospace', fontSize: 11, color: C.ink,
+        textTransform: 'uppercase', letterSpacing: 0.6,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>{label}</div>
+      <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color, width: 12, textAlign: 'center' }}>{sign}</span>
+      <input type="number" min={0} value={value}
+        onChange={e => onChange(Math.max(0, parseInt(e.target.value) || 0))}
+        style={{
+          width: 100, height: 26,
+          background: C.paperHi, border: `1px solid ${C.goldDeep}66`, color,
+          fontFamily: '"Cormorant Garamond", serif', fontSize: 16, fontStyle: 'italic', fontWeight: 700,
+          textAlign: 'right', padding: '0 4px', outline: 'none',
+        }} />
+      <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 14, color, width: 12, textAlign: 'center' }}>₡</span>
+    </div>
+  );
+}
+
+// ── Page ───────────────────────────────────────────────────
 
 export function HojaServicioPage() {
-  const [players, setPlayers] = useState<PlayerRow[]>(() =>
-    PLAYERS.map(name => ({
-      name, xpTotal: 0, xpDisponible: 0, nivel: 'Novato',
-      xpGanado: 0, chequeos: 0, rerolls: 0, loading: true,
-    })),
-  );
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(1);
 
-  const [missionType, setMissionType] = useState('EXPERIENCIA / BALANCE');
-  const [duration, setDuration]       = useState('24:00:00');
-  const [missionNote, setMissionNote] = useState('MISION COMPLETADA');
+  const { roster, rosterLoading, campaign } = useAppStore();
 
-  // Finance
-  const [pago, setPago]             = useState(0);
-  const [salvamento, setSalvamento] = useState(0);
-  const [reparacion, setReparacion] = useState(0);
-  const [municion, setMunicion]     = useState(0);
+  // Pilotos PC activos (no PNJ). Configuracion.PC_JUGADORES filtra; si vacía → todos activos.
+  const pcSet = new Set((campaign.pcJugadores ?? []).map(s => s.toLowerCase()));
+  const activos = roster.filter(r => {
+    if (!isActivo(r)) return false;
+    if (pcSet.size === 0) return true;        // sin filtro = todos
+    return pcSet.has(r.jugador.toLowerCase());
+  });
 
-  // Status
+  const [players, setPlayers] = useState<PlayerRow[]>([]);
+
+  const [missionType, setMissionType] = useState('Sortie de combate');
+  const [duration]                    = useState('24:00:00');
+  const [pago, setPago]               = useState(0);
+  const [salvamento, setSalvamento]   = useState(0);
+  const [reparacion, setReparacion]   = useState(0);
+  const [municion, setMunicion]       = useState(0);
+
+  const [meta, setMeta] = useState({
+    missionId: 'FS-OPS-3026-04',
+    fecha:     '14 · IV · MMMXXVI',
+    codUnidad: 'KKK · 1ª Lanza',
+    oficial:   'Cdor. T. Holst',
+  });
+
   const [status, setStatus]       = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
   const [statusMsg, setStatusMsg] = useState('');
 
-  // ── Load XP + gastos from HUD + player data from Sheets ────────────────────
+  // Scale fit
   useEffect(() => {
+    const update = () => {
+      if (!wrapRef.current?.parentElement) return;
+      const w = wrapRef.current.parentElement.clientWidth;
+      const h = window.innerHeight - 80;
+      setScale(Math.min(1, w / DW, h / DH));
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  // Construir players desde roster (fuente única) + parche HUD
+  useEffect(() => {
+    if (rosterLoading) return;
     let hudXP: number[] | null = null;
     let hudGastos: { rerolls: number; chequeos?: number }[] | null = null;
     try {
@@ -87,34 +491,36 @@ export function HojaServicioPage() {
       if (rawG) { hudGastos = JSON.parse(rawG); localStorage.removeItem('kk_hoja_gastos_from_hud'); }
     } catch { /* ignore */ }
 
-    PLAYERS.forEach((name, i) => {
-      loadPlayer(name).then(res => {
-        const p0 = res.success && res.data?.personajes?.[0];
-        const xpTotal      = Number(p0?.xpTotal)      || 0;
-        const xpDisponible = Number(p0?.xpDisponible)  || 0;
-        const nivel = getVeterancy(xpTotal).nombre;
-        const hg = hudGastos?.[i];
-        setPlayers(prev => prev.map((p, j) => j === i ? {
-          ...p, xpTotal, xpDisponible, nivel, loading: false,
-          xpGanado: hudXP ? (hudXP[i] ?? 0) : p.xpGanado,
-          rerolls: hg ? hg.rerolls : p.rerolls,
-          chequeos: hg?.chequeos ?? p.chequeos,
-        } : p));
-      }).catch(() => {
-        setPlayers(prev => prev.map((p, j) => j === i ? { ...p, loading: false } : p));
-      });
-    });
-  }, []);
+    setPlayers(activos.map((r, i) => {
+      const hg = hudGastos?.[i];
+      return {
+        name:         r.jugador,
+        nombre:       r.nombre || r.jugador,
+        callsign:     r.apodo,
+        accent:       ACCENT_COLORS[i % ACCENT_COLORS.length],
+        xpTotal:      r.xpTotal,
+        xpDisponible: r.xpDisponible,
+        nivel:        getVeterancy(r.xpTotal).nombre,
+        xpGanado:     hudXP?.[i] ?? 0,
+        chequeos:     hg?.chequeos ?? 0,
+        rerolls:      hg?.rerolls ?? 0,
+        loading:      false,
+      };
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roster, rosterLoading]);
 
-  // ── Player updater ────────────────────────────────────────────────────────
   const upd = useCallback((idx: number, patch: Partial<PlayerRow>) => {
     setPlayers(prev => prev.map((p, i) => i === idx ? { ...p, ...patch } : p));
   }, []);
 
-  // ── Finance ───────────────────────────────────────────────────────────────
-  const balance = pago + salvamento - reparacion - municion;
+  // Computed
+  const totalSquadXp = players.reduce((s, p) => s + (p.xpGanado + p.chequeos - calcSpent(p)), 0);
+  const balance      = pago + salvamento - reparacion - municion;
+  const totalRerolls = players.reduce((s, p) => s + p.rerolls, 0);
+  const ringText     = '· COMISIÓN DE REVISIÓN · INFORME DE OPERACIONES · ANNO MMMXXVI ·';
 
-  // ── Register ──────────────────────────────────────────────────────────────
+  // Register (preserva lógica de la versión legacy)
   const handleRegister = async () => {
     const xpMap: Record<string, number> = {};
     players.forEach(p => { xpMap[p.name] = p.xpGanado; });
@@ -130,22 +536,18 @@ export function HojaServicioPage() {
       const res = await registerMission(xpMap, pago + salvamento, reparacion + municion);
       if (!res.success) throw new Error(res.error ?? 'Error de red');
 
-      // Register individual XP expenses
       for (const p of players) {
         const spent = calcSpent(p);
-        if (spent > 0) {
+        if (spent > 0 && p.rerolls > 0) {
           const rc = REROLL_CONFIG[p.nivel] ?? REROLL_CONFIG.Novato;
-          if (p.rerolls > 0) {
-            for (let r = 0; r < p.rerolls; r++) {
-              await registerXPExpense(p.name, rc.cost, `${p.name}: Repetir Tirada (${p.nivel})`);
-            }
+          for (let r = 0; r < p.rerolls; r++) {
+            await registerXPExpense(p.name, rc.cost, `${p.name}: Repetir Tirada (${p.nivel})`);
           }
         }
       }
 
       setStatus('ok');
-      setStatusMsg('Misión registrada correctamente');
-      // Reset form after successful registration
+      setStatusMsg('Misión visada y archivada');
       setPlayers(prev => prev.map(p => ({ ...p, xpGanado: 0, chequeos: 0, rerolls: 0 })));
       setPago(0); setSalvamento(0); setReparacion(0); setMunicion(0);
     } catch (e: any) {
@@ -160,345 +562,337 @@ export function HojaServicioPage() {
     setStatus('idle'); setStatusMsg('');
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────
+
   return (
-    <div className="p-6 pb-20 animate-[fadeInUp_0.3s_ease]">
+    <div style={{
+      width: '100%', minHeight: '100%',
+      display: 'grid', placeItems: 'center', padding: '20px 0',
+      background: `radial-gradient(ellipse at top, #1a1410 0%, ${C.void} 60%), linear-gradient(180deg, ${C.void2} 0%, ${C.void} 100%)`,
+    }}>
+      <div ref={wrapRef} style={{ width: DW * scale, height: DH * scale, position: 'relative' }}>
+        <div style={{
+          width: DW, height: DH, transformOrigin: 'top left', transform: `scale(${scale})`,
+          position: 'relative', overflow: 'hidden',
+          background: `radial-gradient(ellipse at top, #1a1410 0%, ${C.void} 60%), linear-gradient(180deg, ${C.void2} 0%, ${C.void} 100%)`,
+          fontFamily: '"Special Elite", "Share Tech Mono", monospace', color: C.cream,
+        }}>
 
-      {/* ═══ HERO TITLE ═══ */}
-      <div className="mb-6">
-        <div className="flex items-start justify-between gap-4 mb-1">
-          <div className="flex-1" />
-          <div className="text-right shrink-0">
-            <div className="font-mono text-[8px] text-outline/40 tracking-[2px] uppercase">
-              VER_0825.4.HUD // RESUMEN TACTICo
+          {/* Frame heráldico — DETRÁS de columna y medallón */}
+          <svg viewBox={`0 0 ${DW} ${DH}`} preserveAspectRatio="none" style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            pointerEvents: 'none', zIndex: 0,
+          }}>
+            <rect x="20" y="20" width={DW - 40} height={DH - 40} fill="none" stroke={C.goldDeep} strokeWidth="1" />
+            <rect x="28" y="28" width={DW - 56} height={DH - 56} fill="none" stroke={C.gold} strokeWidth="0.5" opacity="0.5" />
+            {[[40, 40, 0], [DW - 40, 40, 90], [DW - 40, DH - 40, 180], [40, DH - 40, 270]].map(([x, y, r], i) => (
+              <g key={i} transform={`translate(${x} ${y}) rotate(${r})`}>
+                <path d="M 0 0 L 30 0 M 0 0 L 0 30 M 0 0 L 22 22" stroke={C.gold} strokeWidth="0.8" fill="none" />
+                <circle cx="0" cy="0" r="3" fill={C.gold} />
+              </g>
+            ))}
+            <line x1="476" y1="92" x2="476" y2={DH - 60} stroke={C.goldDeep} strokeWidth="0.5" strokeDasharray="2 4" opacity="0.5" />
+            <line x1={DW - 476} y1="92" x2={DW - 476} y2={DH - 60} stroke={C.goldDeep} strokeWidth="0.5" strokeDasharray="2 4" opacity="0.5" />
+          </svg>
+
+          {/* Top motto */}
+          <div style={{
+            position: 'absolute', top: 40, left: 80, right: 80, height: 28,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            fontFamily: '"Share Tech Mono", monospace', fontSize: 9,
+            letterSpacing: 6, color: C.goldDim, zIndex: 4,
+          }}>
+            <span>◆ FAFS</span>
+            <span style={{
+              fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic',
+              fontSize: 14, letterSpacing: 4, color: C.gold,
+            }}>
+              — · Comisión de Revisión y Fianza de Mercenarios · —
+            </span>
+            <span>◆ Anno Domini MMMXXVI</span>
+          </div>
+
+          {/* COLUMNA CENTRAL */}
+          <div style={{
+            position: 'absolute', top: 92, left: 482, right: 482, bottom: 70,
+            zIndex: 3, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: 12, padding: '12px 8px',
+          }}>
+            <MissionMedallion ringText={ringText} />
+
+            {/* ID misión */}
+            <div style={{ textAlign: 'center', width: '100%' }}>
+              <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 5, color: C.goldDim }}>
+                EXPEDIENTE Nº · MISSION FILE
+              </div>
+              <input value={missionType}
+                onChange={e => setMissionType(e.target.value)}
+                placeholder="[ describir operación ]"
+                style={{
+                  width: '100%', background: 'transparent',
+                  border: 'none', outline: 'none', borderBottom: `1px dotted ${C.gold}66`,
+                  fontFamily: '"Cormorant Garamond", serif', fontSize: 30, fontStyle: 'italic',
+                  fontWeight: 700, color: C.gold, letterSpacing: 1, textAlign: 'center',
+                  textShadow: '0 2px 12px rgba(232,192,106,0.3)',
+                  marginTop: 4, paddingBottom: 4,
+                }} />
+              <div style={{ marginTop: 6, fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 4, color: C.gold }}>
+                DURACIÓN · {duration}
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="flex items-end justify-between gap-4 mb-3">
-          <h1 className="font-headline text-5xl font-black italic text-primary uppercase leading-none tracking-tight">
-            Informe de Mision
-          </h1>
-          <div className="text-right shrink-0">
-            <div className="font-mono text-[8px] text-outline/40 uppercase tracking-[2px] mb-0.5">Tipo de Registro</div>
-            <input
-              value={missionType}
-              onChange={e => setMissionType(e.target.value)}
-              className="bg-transparent font-headline text-[15px] font-bold text-primary-container uppercase tracking-widest text-right border-none focus:outline-none w-72"
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-2 font-mono text-sm">
-          <span className="text-secondary/60">◇</span>
-          <span className="text-secondary/60 uppercase tracking-widest">Duration:</span>
-          <input
-            value={duration}
-            onChange={e => setDuration(e.target.value)}
-            className="bg-transparent font-mono text-sm text-on-surface-variant/70 border-none focus:outline-none w-28"
-          />
-          <span className="text-outline/30">//</span>
-          <span className="font-mono text-sm text-on-surface-variant/70 uppercase tracking-wider">{missionNote}</span>
-        </div>
-      </div>
 
-      {/* ═══ MAIN 2-COL LAYOUT ═══ */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 max-w-[1200px]">
-
-        {/* ─── LEFT: ANALISIS DE COMBATE DE PILOTOS ─── */}
-        <div className="bg-surface-container-low/80 border border-outline-variant/8 overflow-hidden">
-
-          {/* Section header */}
-          <div className="flex items-center justify-between px-6 py-3.5 border-b border-outline-variant/8">
-            <h2 className="font-headline text-[11px] font-bold text-on-surface tracking-[2px] uppercase">
-              Analisis de combate de pilotos
-            </h2>
-            <span className="font-mono text-[9px] text-secondary/40 tracking-widest uppercase">Squad_ID: KKK</span>
-          </div>
-
-          {/* Column headers */}
-          <div className="grid grid-cols-[32px_1fr_100px_90px_100px_80px_90px_100px] items-center px-6 py-3 border-b border-outline-variant/6">
-            <span />
-            <span className="font-mono text-[9px] text-secondary/30 uppercase tracking-[3px]">Nombre</span>
-            <span className="font-mono text-[9px] text-secondary/30 uppercase tracking-[3px]">Exp actual</span>
-            <span className="font-mono text-[9px] text-secondary/30 uppercase tracking-[3px]">Exp ganada</span>
-            <span className="font-mono text-[9px] text-secondary/30 uppercase tracking-[3px]">Chequeos</span>
-            <span className="font-mono text-[9px] text-secondary/30 uppercase tracking-[3px]">Gastada</span>
-            <span className="font-mono text-[9px] text-secondary/30 uppercase tracking-[3px]">Total sesión</span>
-            <span className="font-mono text-[9px] text-secondary/30 uppercase tracking-[3px]">Exp final</span>
-          </div>
-
-          {/* ── Player rows ── */}
-          {players.map((p, i) => {
-            const spent = calcSpent(p);
-            const sessionNet = p.xpGanado + p.chequeos - spent;
-            // Positive: adds to total (and disponible). Negative: only subtracts from disponible.
-            const xpTotalFinal = sessionNet >= 0 ? p.xpTotal + sessionNet : p.xpTotal;
-            const xpDispFinal  = p.xpDisponible + sessionNet;
-            return (
-              <div key={p.name}
-                className="grid grid-cols-[32px_1fr_100px_90px_100px_80px_90px_100px] items-center px-6 py-4 border-b border-outline-variant/6 transition-colors hover:bg-surface-container/30">
-
-                {/* Icon */}
-                <User size={14} className="opacity-40" style={{ color: PLAYER_COLORS[p.name] }} />
-
-                {/* Name */}
-                <span className="font-headline text-[13px] font-bold uppercase tracking-wider text-primary-container">
-                  {PLAYER_DISPLAY[p.name]}
-                </span>
-
-                {/* Current XP */}
-                <span className="font-mono text-[12px] text-on-surface-variant/70">
-                  {p.loading
-                    ? <Loader size={11} className="animate-spin text-outline/40" />
-                    : <>{fmtNum(p.xpTotal)} <span className="text-[9px] text-outline/40">PX</span></>
-                  }
-                </span>
-
-                {/* XP Ganada */}
-                <div className="flex items-center gap-1">
-                  <span className="font-mono text-[10px] text-green-400">+</span>
-                  <input type="number" min={0} value={p.xpGanado}
-                    onChange={e => upd(i, { xpGanado: Math.max(0, parseInt(e.target.value) || 0) })}
-                    className="w-14 h-7 bg-transparent border border-outline-variant/8 px-1 font-mono text-[12px] text-green-400 font-bold text-center focus:outline-none focus:border-green-400/30"
-                  />
-                  <span className="font-mono text-[9px] text-outline/40">XP</span>
+            {/* KPIs */}
+            <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {([
+                ['XP ESCUADRÓN', `${totalSquadXp >= 0 ? '+' : ''}${fmt(totalSquadXp)}`, totalSquadXp >= 0],
+                ['BALANCE ₡',    `${balance >= 0 ? '+' : '−'}${fmt(Math.abs(balance))}`, balance >= 0],
+                ['PILOTOS',      `${players.length} efectivos`, true],
+                ['REPETICIONES', `${totalRerolls} solicitadas`, true],
+              ] as [string, string, boolean][]).map(([label, val, ok]) => (
+                <div key={label} style={{
+                  border: `1px solid ${ok ? C.gold : C.redDeep}66`,
+                  background: `linear-gradient(180deg, ${ok ? C.gold : C.redDeep}10, transparent)`,
+                  padding: '8px 10px',
+                }}>
+                  <div style={{ fontSize: 8, letterSpacing: 3, color: C.goldDim, fontFamily: '"Share Tech Mono", monospace' }}>{label}</div>
+                  <div style={{
+                    fontFamily: '"Cormorant Garamond", serif', fontSize: 22,
+                    color: ok ? C.gold : C.red, fontWeight: 700, fontStyle: 'italic',
+                    textShadow: `0 0 10px ${ok ? C.gold : C.red}33`, marginTop: 2,
+                  }}>{val}</div>
                 </div>
+              ))}
+            </div>
 
-                {/* Chequeos ±100 */}
-                <div className="flex items-center gap-1">
-                  <button onClick={() => upd(i, { chequeos: p.chequeos - 100 })}
-                    className="w-5 h-5 flex items-center justify-center border border-outline-variant/10 font-mono text-[9px] text-error/70 hover:bg-error/10 hover:text-error transition-all select-none">
-                    −
-                  </button>
-                  <span className={`font-mono text-[11px] font-bold w-10 text-center ${p.chequeos > 0 ? 'text-amber-400' : p.chequeos < 0 ? 'text-error' : 'text-outline/30'}`}>
-                    {p.chequeos !== 0 ? (p.chequeos > 0 ? `+${p.chequeos}` : p.chequeos) : '0'}
-                  </span>
-                  <button onClick={() => upd(i, { chequeos: p.chequeos + 100 })}
-                    className="w-5 h-5 flex items-center justify-center border border-outline-variant/10 font-mono text-[9px] text-green-400/70 hover:bg-green-400/10 hover:text-green-400 transition-all select-none">
-                    +
-                  </button>
-                </div>
-
-                {/* XP Gastada (rerolls + iniciativa) */}
-                <span className={`font-mono text-[12px] font-bold ${spent > 0 ? 'text-error' : 'text-outline/30'}`}>
-                  {spent > 0 ? `−${spent}` : '0'} <span className="text-[9px] font-normal">XP</span>
-                </span>
-
-                {/* Total sesión (ganado + chequeos − gastado) */}
-                <span className={`font-mono text-[12px] font-bold ${sessionNet > 0 ? 'text-green-400' : sessionNet < 0 ? 'text-error' : 'text-outline/30'}`}>
-                  {sessionNet > 0 ? '+' : ''}{sessionNet !== 0 ? fmtNum(sessionNet) : '0'} <span className="text-[9px] font-normal">XP</span>
-                </span>
-
-                {/* Exp final */}
-                <div className="flex flex-col">
-                  {p.loading ? <span className="font-mono text-[12px] text-outline/40">—</span> : (
-                    <>
-                      <span className="font-mono text-[12px] font-bold text-primary-container">
-                        {fmtNum(xpTotalFinal)} <span className="text-[9px] font-normal text-outline/40">PX</span>
-                      </span>
-                      {sessionNet < 0 && (
-                        <span className={`font-mono text-[9px] ${xpDispFinal < 0 ? 'text-error' : 'text-outline/50'}`}>
-                          disp: {fmtNum(xpDispFinal)}
-                        </span>
-                      )}
-                    </>
-                  )}
+            {/* Oficial Pagador */}
+            <div style={{
+              width: '100%', borderTop: `1px solid ${C.line2}`, borderBottom: `1px solid ${C.line2}`,
+              padding: '10px 0', marginTop: 4,
+            }}>
+              <div style={{
+                fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 5,
+                color: C.goldDim, marginBottom: 6, textAlign: 'center',
+              }}>
+                · OFICIAL PAGADOR ·
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 10px', alignItems: 'baseline' }}>
+                {(['missionId','fecha','codUnidad'] as const).map(key => (
+                  <FragmentRow key={key}
+                    label={({ missionId: 'EXPED.', fecha: 'FECHA', codUnidad: 'UNIDAD' } as const)[key]}
+                    value={meta[key]}
+                    onChange={v => setMeta(prev => ({ ...prev, [key]: v }))} />
+                ))}
+              </div>
+              <div style={{ marginTop: 8, textAlign: 'right' }}>
+                <div style={{ fontSize: 8, letterSpacing: 2, color: C.goldDim, fontFamily: '"Share Tech Mono", monospace' }}>FIRMA</div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 24, color: C.gold, marginTop: 2, fontStyle: 'italic' }}>
+                  {meta.oficial}
                 </div>
               </div>
-            );
-          })}
-
-          {/* ── GASTOS DE SESION (below table) ── */}
-          <div className="px-6 py-5 border-t border-outline-variant/8">
-            <div className="font-mono text-[8px] text-outline/40 uppercase tracking-[3px] mb-4">
-              Gastos de sesion
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              {players.map((p, i) => {
-                const rc = REROLL_CONFIG[p.nivel] ?? REROLL_CONFIG.Novato;
-                const spent = calcSpent(p);
-                const canAfford = (cost: number) => p.xpDisponible - spent - cost >= 0;
-
-                return (
-                  <div key={p.name} className="bg-surface-container-low/50 border border-outline-variant/8 border-t-2 border-t-primary-container/20 p-3 space-y-2">
-                    {/* Player name + nivel */}
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: PLAYER_COLORS[p.name] }}>
-                        {PLAYER_DISPLAY[p.name]}
-                      </span>
-                      <span className="font-mono text-[8px] text-outline/40">{p.nivel}</span>
-                    </div>
-
-                    {/* XP Disponible */}
-                    <div className="flex items-center justify-between bg-green-400/3 border border-green-400/10 px-2 py-1">
-                      <span className="font-mono text-[8px] text-outline/40">XP Disponible</span>
-                      <span className="font-mono text-[11px] text-green-400 font-bold">
-                        {p.loading ? '…' : fmtNum(p.xpDisponible)}
-                      </span>
-                    </div>
-
-                    {/* Reroll buttons */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-[7px] text-outline/40 uppercase tracking-widest">Repetir Tirada</span>
-                        <span className={`font-mono text-[8px] ${p.rerolls > 0 ? 'text-amber-400' : 'text-outline/30'}`}>
-                          {p.rerolls}/{rc.max}
-                        </span>
-                      </div>
-                      <div className="flex gap-1">
-                        {Array.from({ length: rc.max }).map((_, ri) => (
-                          <button key={ri}
-                            onClick={() => {
-                              if (p.rerolls <= ri) {
-                                if (canAfford(rc.cost)) upd(i, { rerolls: ri + 1 });
-                              } else {
-                                upd(i, { rerolls: ri });
-                              }
-                            }}
-                            disabled={p.loading}
-                            className={`flex-1 h-5 font-mono text-[7px] border transition-all ${
-                              ri < p.rerolls
-                                ? 'bg-amber-400/10 border-amber-400/50 text-amber-400'
-                                : 'border-outline-variant/10 text-outline/30 hover:border-outline-variant/20'
-                            } disabled:opacity-30`}>
-                            R{ri + 1}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="font-mono text-[7px] text-outline/30 text-right">
-                        {rc.cost} XP c/u
-                      </div>
-                    </div>
-
-                    {/* Total spent */}
-                    <div className="flex items-center justify-between border-t border-outline-variant/8 pt-1.5">
-                      <span className="font-mono text-[8px] text-outline/40">Total gastado:</span>
-                      <span className={`font-mono text-[10px] font-bold ${spent > 0 ? 'text-error' : 'text-outline/30'}`}>
-                        {spent > 0 ? `−${spent} XP` : '0 XP'}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* ─── RIGHT: REPORTE FINANCIERO + ACTIONS ─── */}
-        <div className="space-y-4">
-
-          {/* Financial report */}
-          <div className="bg-surface-container/60 border border-outline-variant/8 p-6">
-            <h2 className="font-headline text-base font-bold text-on-surface tracking-[2px] uppercase mb-4">
-              Reporte financiero
-            </h2>
-
-            <div className="divide-y divide-outline-variant/6">
-              {/* PAGO POR CONTRATO */}
-              <FinRow label="Pago por contrato" sign="" color="text-primary" labelColor="text-secondary/40"
-                value={pago} onChange={setPago} />
-
-              {/* SALVAMENTO */}
-              <FinRow label="Salvamento" sign="+" color="text-primary" labelColor="text-secondary/40" signColor="text-green-400"
-                value={salvamento} onChange={setSalvamento} />
-
-              {/* COSTES DE REPARACIÓN */}
-              <FinRow label="Costes de reparación" sign="−" color="text-error" labelColor="text-error/50" signColor="text-error"
-                value={reparacion} onChange={setReparacion} />
-
-              {/* AMMO RESUPPLY */}
-              <FinRow label="Ammo resupply" sign="−" color="text-error" labelColor="text-error/50" signColor="text-error"
-                value={municion} onChange={setMunicion} />
             </div>
 
-            {/* BALANCE */}
-            <div className="border-t border-outline-variant/8 pt-5 mt-4">
-              <div className="font-mono text-[8px] text-outline/30 uppercase tracking-[3px] mb-2">Balance</div>
-              <div className={`font-headline text-4xl font-black leading-none ${balance >= 0 ? 'text-primary' : 'text-error'}`}>
-                {balance < 0 ? '−' : ''}{fmtNum(Math.abs(balance))}
+            {/* Acciones */}
+            <div style={{ width: '100%', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button onClick={handleRegister} disabled={status === 'loading'} style={{
+                width: '100%', height: 70,
+                background: status === 'loading' ? `${C.goldDeep}33` : `${C.greenDeep}33`,
+                border: `2.5px solid ${status === 'loading' ? C.goldDeep : C.green}`,
+                color: status === 'loading' ? C.gold : '#9bd28a',
+                fontFamily: '"Share Tech Mono", monospace',
+                fontSize: 14, letterSpacing: 4, fontWeight: 700,
+                cursor: status === 'loading' ? 'wait' : 'pointer', outline: 'none', padding: 0,
+                boxShadow: '2px 3px 0 rgba(0,0,0,0.4)',
+              }}>
+                <div style={{ fontSize: 9, letterSpacing: 3, opacity: 0.7, marginBottom: 2 }}>
+                  {status === 'loading' ? '· EN TRÁMITE ·' : '· ACCIÓN OFICIAL ·'}
+                </div>
+                <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 22, fontStyle: 'italic' }}>
+                  ▣ {status === 'loading' ? 'Registrando…' : 'Visar y Archivar'}
+                </div>
+              </button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                <button onClick={handleReset} style={{
+                  background: 'transparent', border: 'none', color: C.goldDim,
+                  fontFamily: '"Special Elite", monospace', fontSize: 11, fontStyle: 'italic',
+                  cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', outline: 'none',
+                }}>↺ desechar borrador</button>
               </div>
-              <div className="font-mono text-xs text-outline/40 uppercase tracking-widest mt-1">C-BILLS ₡</div>
+              {statusMsg && (
+                <div style={{
+                  padding: '6px 10px',
+                  border: `1px solid ${status === 'ok' ? C.green : status === 'error' ? C.red : C.gold}`,
+                  background: `${status === 'ok' ? C.green : status === 'error' ? C.red : C.gold}15`,
+                  color: status === 'ok' ? '#9bd28a' : status === 'error' ? '#e88a7a' : C.gold,
+                  fontFamily: '"Special Elite", monospace', fontSize: 11, fontStyle: 'italic',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                  <span>{status === 'ok' ? '✓' : status === 'error' ? '✗' : '◆'}</span>
+                  {statusMsg}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* System heat decorative box */}
-          <div className="bg-surface-container-low/50 border border-outline-variant/8 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[9px] text-outline/50 uppercase tracking-[3px]">System heat: nominal</span>
-              <span className="font-mono text-[12px] text-green-400 font-bold">42°C</span>
+          {/* HOJA IZQUIERDA · BITÁCORA */}
+          <PaperSheet x={70} y={92} w={392} tilt={-0.2} clips={['28%', '72%']}>
+            <SheetHeader num={players.length > 1 ? `I—${ROMAN_NUMS[players.length - 1]}` : 'I'} title="Libro de Bitácora" tail="por piloto" />
+            <div style={{ paddingLeft: 26 }}>
+              {players.map((p, i) => (
+                <PaperPilotRow key={p.name}
+                  player={p} index={i}
+                  isLast={i === players.length - 1}
+                  onUpdate={upd} />
+              ))}
             </div>
-            {/* Heat bar */}
-            <div className="flex gap-1 h-3">
-              <div className="flex-[3] bg-secondary/40" />
-              <div className="flex-[2] bg-secondary/25" />
-              <div className="flex-[1] bg-secondary/15" />
-              <div className="flex-[2] bg-outline-variant/10" />
-              <div className="flex-[2] bg-outline-variant/5" />
+            <div style={{
+              marginTop: 14, paddingTop: 10, borderTop: `2px solid ${C.ink}`,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 13, fontStyle: 'italic', color: C.inkSoft }}>
+                Σ Escuadrón ·
+              </span>
+              <span style={{
+                fontFamily: '"Cormorant Garamond", serif', fontSize: 26, fontStyle: 'italic', fontWeight: 700,
+                color: totalSquadXp > 0 ? C.greenDeep : totalSquadXp < 0 ? C.redDeep : C.ink,
+              }}>
+                {totalSquadXp > 0 ? '+' : ''}{fmt(totalSquadXp)}{' '}
+                <span style={{ fontSize: 13, color: C.goldDeep, fontFamily: '"Share Tech Mono", monospace', fontStyle: 'normal' }}>XP</span>
+              </span>
             </div>
-            <div className="font-mono text-[8px] text-outline/30 leading-relaxed">
-              // SENSOR LOGS CAPTURED // ENEMY SALVAGE DETECTED<br />
-              // PREPARING LOGISTICS FOR DEPARTURE //
+            <div style={{
+              marginTop: 8, padding: '6px 8px', borderLeft: `3px solid ${C.redDeep}`,
+              background: `${C.paperHi}88`, fontFamily: 'Caveat, cursive', fontSize: 16,
+              color: C.redDeep, fontStyle: 'italic',
+            }}>
+              "Castigador y Halcón siguen al frente — felicitar"
             </div>
-          </div>
+          </PaperSheet>
 
-          {/* ── ACTIONS ── */}
-          <button
-            onClick={handleRegister}
-            disabled={status === 'loading'}
-            className="w-full h-12 font-headline text-[11px] font-bold uppercase tracking-[3px] border border-green-400/60 text-green-400 hover:bg-green-400/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-            {status === 'loading'
-              ? <><Loader size={12} className="animate-spin" /> Registrando…</>
-              : '📡 Registrar mision'}
-          </button>
+          {/* HOJA DERECHA · TESORERÍA */}
+          <PaperSheet x={DW - 462} y={92} w={392} tilt={0.24} clips={['50%']}>
+            <SheetHeader num="V" title="Tesorería · Liquidación" tail="C-Bills" />
 
-          <button
-            onClick={handleReset}
-            className="w-full h-8 font-mono text-[9px] uppercase tracking-widest border border-outline-variant/10 text-outline/40 hover:border-secondary/30 hover:text-secondary transition-all flex items-center justify-center gap-1.5">
-            <RotateCcw size={9} /> Limpiar formulario
-          </button>
+            <div>
+              <div style={{
+                fontSize: 9, letterSpacing: 3, color: C.greenDeep,
+                fontFamily: '"Share Tech Mono", monospace',
+                marginBottom: 4, paddingBottom: 2, borderBottom: `1px solid ${C.greenDeep}55`,
+              }}>HABER · ENTRADAS</div>
+              <TesRow label="Pago por contrato" sign=""  value={pago}       onChange={setPago}       color={C.ink} />
+              <TesRow label="Salvamento"        sign="+" value={salvamento} onChange={setSalvamento} color={C.greenDeep} />
 
-          {/* Status message */}
-          {statusMsg && (
-            <div className={`flex items-center gap-2 font-mono text-[10px] py-2 px-3 border ${
-              status === 'ok'    ? 'text-green-400 border-green-400/20 bg-green-400/5' :
-              status === 'error' ? 'text-error border-error/20 bg-error/5' :
-                                   'text-amber-400 border-amber-400/20 bg-amber-400/5'
-            }`}>
-              {status === 'ok' ? <CheckCircle size={11} /> : status === 'error' ? <AlertCircle size={11} /> : <Loader size={11} className="animate-spin" />}
-              {statusMsg}
+              <div style={{
+                fontSize: 9, letterSpacing: 3, color: C.redDeep,
+                fontFamily: '"Share Tech Mono", monospace',
+                marginTop: 12, marginBottom: 4, paddingBottom: 2, borderBottom: `1px solid ${C.redDeep}55`,
+              }}>DEBE · GASTOS</div>
+              <TesRow label="Costes de reparación" sign="−" value={reparacion} onChange={setReparacion} color={C.redDeep} />
+              <TesRow label="Munición · resupply"  sign="−" value={municion}   onChange={setMunicion}   color={C.redDeep} />
+            </div>
+
+            <div style={{
+              marginTop: 14, padding: '10px 14px',
+              border: `2.5px solid ${balance >= 0 ? C.greenDeep : C.redDeep}`,
+              background: `${balance >= 0 ? C.greenDeep : C.redDeep}11`,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <div>
+                <div style={{ fontSize: 8, letterSpacing: 3, color: C.goldDeep, fontFamily: '"Share Tech Mono", monospace' }}>BALANCE FINAL</div>
+                <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 11, fontStyle: 'italic', color: C.ink + 'aa', marginTop: 2 }}>
+                  · Saldo de la operación ·
+                </div>
+              </div>
+              <div style={{
+                fontFamily: '"Cormorant Garamond", serif', fontSize: 30, fontStyle: 'italic', fontWeight: 700,
+                color: balance >= 0 ? C.greenDeep : C.redDeep, lineHeight: 1,
+              }}>
+                {balance < 0 ? '−' : '+'}{fmt(Math.abs(balance))} <span style={{ fontSize: 16 }}>₡</span>
+              </div>
+            </div>
+
+            {/* Detalle por piloto */}
+            <div style={{ marginTop: 14 }}>
+              <SheetHeader num="VI" title="Gasto por piloto" tail="repeticiones" />
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: '"Special Elite", monospace', fontSize: 11 }}>
+                <tbody>
+                  {players.map(p => {
+                    const spent = calcSpent(p);
+                    const rc = REROLL_CONFIG[p.nivel] ?? REROLL_CONFIG.Novato;
+                    return (
+                      <tr key={p.name} style={{ borderBottom: `1px dotted ${C.ink}55` }}>
+                        <td style={{ padding: '4px 2px', color: C.ink }}>
+                          <span style={{
+                            display: 'inline-block', width: 6, height: 6,
+                            background: p.accent,
+                            marginRight: 6, verticalAlign: 'middle',
+                          }} />
+                          {p.nombre || p.name}
+                        </td>
+                        <td style={{ padding: '4px 2px', color: C.inkSoft, textAlign: 'right', fontStyle: 'italic' }}>
+                          {p.rerolls} × {rc.cost}
+                        </td>
+                        <td style={{
+                          padding: '4px 2px', textAlign: 'right',
+                          fontFamily: '"Cormorant Garamond", serif', fontSize: 14, fontStyle: 'italic', fontWeight: 700,
+                          color: spent > 0 ? C.redDeep : C.ink + '88',
+                        }}>
+                          {spent > 0 ? `−${fmt(spent)}` : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{
+              marginTop: 12, padding: '6px 8px', borderLeft: `3px solid ${C.greenDeep}`,
+              background: `${C.paperHi}88`, fontFamily: 'Caveat, cursive', fontSize: 16,
+              color: C.greenDeep, fontStyle: 'italic',
+            }}>
+              "Salvamento por encima de lo estimado — buena cosecha"
+            </div>
+          </PaperSheet>
+
+          {/* Sello VISADO */}
+          {status === 'ok' && (
+            <div style={{ position: 'absolute', left: 560, top: 880, zIndex: 6 }}>
+              <VisadoStamp size={120} label="VISADO" sub="FAFS" tilt={-12} color={C.green} />
             </div>
           )}
+
+          {/* Bottom motto */}
+          <div style={{
+            position: 'absolute', bottom: 22, left: 80, right: 80, height: 22,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 4,
+            fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic',
+            fontSize: 13, letterSpacing: 2, color: C.goldDim,
+          }}>
+            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontStyle: 'normal', fontSize: 9, letterSpacing: 4 }}>
+              FILE · {meta.missionId}
+            </span>
+            <span>— King Karl. For Eridani. —</span>
+            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontStyle: 'normal', fontSize: 9, letterSpacing: 4 }}>
+              ◆ INFORME DE MISIÓN
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Finance row sub-component ───────────────────────────────────────────────
+// ── Sub: fila label/input para meta del Oficial Pagador ──
 
-function FinRow({ label, sign, color, labelColor, signColor, value, onChange }: {
-  label: string; sign: string; color: string;
-  labelColor?: string; signColor?: string;
-  value: number; onChange: (v: number) => void;
-}) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\./g, '');
-    onChange(Math.max(0, parseInt(raw) || 0));
-  };
-
+function FragmentRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
-    <div className="py-3">
-      <div className={`font-mono text-[8px] uppercase tracking-[2px] mb-1 ${labelColor || 'text-outline'}`}>
-        {label}
-      </div>
-      <div className="flex items-baseline justify-end gap-1.5">
-        {sign && <span className={`font-mono text-base ${signColor || color} shrink-0`}>{sign}</span>}
-        <input value={fmtNum(value)}
-          onChange={handleChange}
-          className={`w-full h-10 bg-transparent border-none font-headline text-2xl font-black text-right focus:outline-none ${color}`}
-        />
-        <span className={`font-mono text-sm shrink-0 ${color}`}>₡</span>
-      </div>
-    </div>
+    <>
+      <span style={{ fontSize: 9, letterSpacing: 2, color: C.goldDim, fontFamily: '"Share Tech Mono", monospace' }}>{label}</span>
+      <input value={value} onChange={e => onChange(e.target.value)} style={{
+        background: 'transparent', border: 'none', borderBottom: `1px dotted ${C.gold}55`,
+        fontFamily: '"Special Elite", monospace', fontSize: 11, color: C.cream,
+        outline: 'none', padding: '2px 0', width: '100%',
+      }} />
+    </>
   );
 }

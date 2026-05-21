@@ -47,7 +47,18 @@ const MOV_OPTIONS = [
   { label: 'Corriendo', val: 2 },
   { label: 'Esquivando',val: 3 },
 ];
-const COMBAT_SKILLS = ['armas pequeñas', 'rifle', 'armas de apoyo', 'arco', 'pelea', 'armas arrojadizas', 'artillería', 'pistola', 'espada'];
+const COMBAT_SKILLS = [
+  'arco',
+  'disparo aeroespacial',
+  'disparo artilleria',
+  'disparo mech',
+  'espada',
+  'pelea',
+  'pilotaje mech',
+  'pilotar aeroespacial',
+  'pistola',
+  'rifle',
+];
 
 const DOT = 10;  // px — tamaño de cada dot (igual que en ArmorDiagram)
 const GAP = 1;  // px — separación entre dots

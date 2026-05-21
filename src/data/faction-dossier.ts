@@ -12,6 +12,8 @@ export interface FactionDossier {
   crestAsset:      string | null; // null = sin crest, usa monograma
   crestScale?:     number;        // multiplicador sobre el tamaño base (56px)
   crestOffsetY?:   number;        // desplazamiento vertical en px (positivo = abajo)
+  clearanceLabel:  string;        // ej: 'RANGO', 'KAIKYŪ', 'RATING'
+  clearanceNames:  [string, string, string, string, string]; // por veterancy: Novato/Regular/Veterano/Elite/As
 }
 
 const DOSSIERS: FactionDossier[] = [
@@ -24,6 +26,8 @@ const DOSSIERS: FactionDossier[] = [
     crestAsset:      'house_steiner_logo.png',
     crestScale:      1.3,
     crestOffsetY:    7,
+    clearanceLabel:  'RANG',
+    clearanceNames:  ['REKRUT','SOLDAT','VETERAN','ELITE','RITTER'],
   },
   {
     code: 'FS',
@@ -32,6 +36,8 @@ const DOSSIERS: FactionDossier[] = [
     dossierTitle:    'Hoja de Servicio',
     filePrefix:      'FS',
     crestAsset:      'house_davion_logo.png',
+    clearanceLabel:  'RANGO',
+    clearanceNames:  ['RECLUTA','SOLDADO','VETERANO','ÉLITE','CABALLERO'],
   },
   {
     code: 'DC',
@@ -40,6 +46,8 @@ const DOSSIERS: FactionDossier[] = [
     dossierTitle:    '武士記録 · Bushi Kiroku',
     filePrefix:      'CD',
     crestAsset:      'house_kurita_logo.png',
+    clearanceLabel:  'KAIKYŪ · 階級',
+    clearanceNames:  ['SHINPEI','HEISO','KOSHO','SHIKAN','SAMURAI'],
   },
   {
     code: 'FWL',
@@ -48,6 +56,8 @@ const DOSSIERS: FactionDossier[] = [
     dossierTitle:    'Expediente Militar',
     filePrefix:      'LML',
     crestAsset:      'house_marik_logo.png',
+    clearanceLabel:  'RANGO',
+    clearanceNames:  ['NOVATO','OFICIAL','VETERANO','SELECTO','PALADÍN'],
   },
   {
     code: 'CC',
@@ -56,6 +66,8 @@ const DOSSIERS: FactionDossier[] = [
     dossierTitle:    '軍事檔案 · Jūnshì Dǎng\'àn',
     filePrefix:      'CC',
     crestAsset:      'house_liao_logo.png',
+    clearanceLabel:  'DĚNGJÍ · 等級',
+    clearanceNames:  ['SHIBING','SHIWUZHANG','LAOBING','JINGRUI','LONGXIANG'],
   },
   {
     code: 'OA',
@@ -64,6 +76,8 @@ const DOSSIERS: FactionDossier[] = [
     dossierTitle:    'Ficha de la Milicia',
     filePrefix:      'AME',
     crestAsset:      'house_outworlds_alliance_logo.png',
+    clearanceLabel:  'GRADO',
+    clearanceNames:  ['RECLUTA','GUARDA','VETERANO','TIRADOR','LEYENDA'],
   },
   {
     code: 'MERC',
@@ -72,6 +86,8 @@ const DOSSIERS: FactionDossier[] = [
     dossierTitle:    'Contractor Dossier',
     filePrefix:      'MR',
     crestAsset:      null,
+    clearanceLabel:  'RATING',
+    clearanceNames:  ['D','C','B','A','A+'],
   },
 ];
 

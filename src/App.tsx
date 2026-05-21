@@ -6,12 +6,15 @@ import { SectionTabs } from '@/components/shell/SectionTabs';
 import { useAppStore } from '@/lib/store';
 import { getPaletteForPath, getNavItemByPath } from '@/lib/navigation';
 import { loadConfig } from '@/lib/sheets-service';
+import { loadRoster } from '@/lib/roster';
 
 // Pages
 import { ComisionPage } from '@/pages/ComisionPage';
 import { ReclutamientoPage } from '@/pages/ReclutamientoPage';
 import { BarraconesPage } from '@/pages/BarraconesPage';
+import { BarraconesPageLegacy } from '@/pages/BarraconesPageLegacy';
 import { HojaServicioPage } from '@/pages/HojaServicioPage';
+import { HojaServicioPageLegacy } from '@/pages/HojaServicioPageLegacy';
 import { SimuladorPage } from '@/pages/SimuladorPage';
 import { HudTacticoPage } from '@/pages/HudTacticoPage';
 import { AyudasPage } from '@/pages/AyudasPage';
@@ -22,7 +25,7 @@ import { PortadaPage } from '@/pages/PortadaPage';
 
 export function App() {
   const location = useLocation();
-  const { setActivePalette, setCampaign } = useAppStore();
+  const { setActivePalette, setCampaign, useLegacyDesigns, setRoster, setRosterLoading } = useAppStore();
 
   // Load campaign config from Google Sheets on startup
   useEffect(() => {
@@ -40,12 +43,33 @@ export function App() {
       if (pilotMechs.some(m => m)) patch.pilotMechs = pilotMechs;
       const pilotNames = [1, 2, 3, 4, 5, 6].map(i => d[`PILOTO_${i}_NOMBRE`] || '');
       if (pilotNames.some(n => n)) patch.pilotNames = pilotNames;
+      const pilotApodos = [1, 2, 3, 4, 5, 6].map(i => d[`PILOTO_${i}_APODO`] || '');
+      if (pilotApodos.some(a => a)) patch.pilotApodos = pilotApodos;
       if (d['CONTRATO_VALOR']) patch.contratoValor = d['CONTRATO_VALOR'];
       if (d['VALOR_UNIDAD'])   patch.valorUnidad   = d['VALOR_UNIDAD'];
       if (d['TOTAL_MECHS'])    patch.totalMechs    = d['TOTAL_MECHS'];
+      if (d['PC_JUGADORES']) {
+        patch.pcJugadores = String(d['PC_JUGADORES'])
+          .split(',').map(s => s.trim()).filter(Boolean);
+      }
       if (Object.keys(patch).length) setCampaign(patch);
+
+      // Hidratar toggle legacy global desde Sheets (sin reescribir a sheets)
+      if (d['USE_LEGACY_DESIGNS'] !== undefined) {
+        const useLegacy = String(d['USE_LEGACY_DESIGNS']) === '1';
+        useAppStore.setState({ useLegacyDesigns: useLegacy });
+        localStorage.setItem('useLegacyDesigns', useLegacy ? '1' : '0');
+      }
     }).catch(() => {});
   }, [setCampaign]);
+
+  // Cargar Roster (fuente única de pilotos) al arrancar
+  useEffect(() => {
+    setRosterLoading(true);
+    loadRoster()
+      .then(setRoster)
+      .catch(() => setRosterLoading(false));
+  }, [setRoster, setRosterLoading]);
 
   // Sync palette to current route
   useEffect(() => {
@@ -80,8 +104,10 @@ export function App() {
           <Route path="/portada"        element={<PortadaPage />} />
           <Route path="/comision"       element={<ComisionPage />} />
           <Route path="/reclutamiento"  element={<ReclutamientoPage />} />
-          <Route path="/barracones"     element={<BarraconesPage />} />
-          <Route path="/hoja-servicio"  element={<HojaServicioPage />} />
+          <Route path="/barracones"     element={useLegacyDesigns ? <BarraconesPageLegacy /> : <BarraconesPage />} />
+          <Route path="/barracones-legacy" element={<BarraconesPageLegacy />} />
+          <Route path="/hoja-servicio"  element={useLegacyDesigns ? <HojaServicioPageLegacy /> : <HojaServicioPage />} />
+          <Route path="/hoja-servicio-legacy" element={<HojaServicioPageLegacy />} />
           <Route path="/simulador"      element={<SimuladorPage />} />
           <Route path="/hud"            element={<HudTacticoPage />} />
           <Route path="/ayudas"         element={<AyudasPage />} />

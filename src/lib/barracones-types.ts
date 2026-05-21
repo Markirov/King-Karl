@@ -24,6 +24,7 @@ export interface Pilot {
   // Identidad
   nombre: string;
   callsign: string;
+  apodo: string;       // viene de columna Apodo en Sheet (nickname narrativo)
   mech: string;
   sexo: string;
   edad: number;      // calculada: campaignYear - birthYear
@@ -72,7 +73,7 @@ export interface Pilot {
 export function emptyPilot(): Pilot {
   return {
     id: crypto.randomUUID(),
-    nombre: '', callsign: '', mech: '', sexo: '', edad: 25,
+    nombre: '', callsign: '', apodo: '', mech: '', sexo: '', edad: 25,
     decade: 0, yearBorn: 0, ageRoll: 0,
     altura: '', peso: '', pelo: '', ojos: '', origen: '', notas: '',
     fue: 6, des: 6, int: 6, car: 6,

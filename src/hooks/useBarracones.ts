@@ -8,7 +8,7 @@ import { useAppStore } from '@/lib/store';
 import { appendLog } from '@/lib/barracones-log';
 
 const STORAGE_KEY = 'barracones_slots_v1';
-const SLOT_COUNT = 6;
+const SLOT_COUNT = 12;  // 12 slots para crecer roster sin tocar código
 
 // ── Sheets ↔ Pilot conversion ──────────────────────────────
 
@@ -39,6 +39,7 @@ function sheetsDataToPilot(d: any): Pilot {
   const p = emptyPilot();
   p.nombre    = d.nombre   || '';
   p.callsign  = d.jugador  || '';
+  p.apodo     = d.apodo || d.Apodo || d.alias || '';
   p.mech      = d.mech || d.mechModel || d.battlemech || '';
   p.fue       = parseInt(d.str) || 6;
   p.des       = parseInt(d.dex) || 6;
@@ -117,6 +118,16 @@ function sheetsDataToPilot(d: any): Pilot {
     };
   }
 
+  // Armor secundaria
+  let armorData2 = d.armaduraSecundaria;
+  if (typeof armorData2 === 'string') { try { armorData2 = JSON.parse(armorData2); } catch { armorData2 = null; } }
+  if (armorData2) {
+    p.armadura2 = {
+      tipo:   armorData2.tipo   || '',
+      piezas: parseInt(armorData2.piezas) || 0,
+    };
+  }
+
   // Méritos y defectos
   p.meritos  = toStringArray(d.merits   ?? d.meritos  ?? d.ventajas);
   p.defectos = toStringArray(d.demerits ?? d.defectos ?? d.desventajas);
@@ -160,7 +171,7 @@ function pilotToSheets(pilot: Pilot): Record<string, any> {
     }
   }
 
-  return {
+  const payload: Record<string, any> = {
     action:    'guardarJugador',
     jugador:   pilot.callsign,
     nombre:    pilot.nombre,
@@ -184,7 +195,8 @@ function pilotToSheets(pilot: Pilot): Record<string, any> {
     skillUpgrades: Object.fromEntries(pilot.habilidades.map(h => [h.nombre, h.upgrades ?? 0])),
     attrUpgrades:  pilot.attrUpgrades ?? {},
     armas:       pilot.armas.map(a => ({ select: a.nombre, munActual: a.munActual })),
-    armaduraInfanteria: { tipo: pilot.armadura.tipo, piezas: pilot.armadura.piezas },
+    armaduraInfanteria:   { tipo: pilot.armadura.tipo,  piezas: pilot.armadura.piezas },
+    armaduraSecundaria:   { tipo: pilot.armadura2.tipo, piezas: pilot.armadura2.piezas },
     estadoFisico,
     merits:   pilot.meritos  ?? [],
     demerits: pilot.defectos ?? [],
@@ -192,6 +204,12 @@ function pilotToSheets(pilot: Pilot): Record<string, any> {
     quirks:          pilot.quirks ?? [],
     quirksComprados: pilot.quirks ?? [],
   };
+
+  // Solo enviar apodo si no está vacío — evita borrar Personajes.Apodo en sheet
+  if (pilot.apodo && pilot.apodo.trim() !== '') {
+    payload.apodo = pilot.apodo;
+  }
+  return payload;
 }
 
 export type SheetsStatus = 'idle' | 'loading' | 'ok' | 'error';
@@ -200,7 +218,15 @@ export interface SheetsSearchResult { raw: any; nombre: string; jugador: string 
 function loadSlots(): (Pilot | null)[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        // Pad o trim a SLOT_COUNT actual
+        const arr: (Pilot | null)[] = parsed.slice(0, SLOT_COUNT);
+        while (arr.length < SLOT_COUNT) arr.push(null);
+        return arr;
+      }
+    }
   } catch {}
   return Array(SLOT_COUNT).fill(null);
 }
@@ -487,6 +513,10 @@ export function useBarracones() {
     // Mech assignment lives in campaign config (PILOTO_X_MECH), always takes precedence
     if (campaign.pilotMechs[idx]) {
       pilot.mech = campaign.pilotMechs[idx];
+    }
+    // Apodo: si Personajes no devolvió valor, usa Configuracion (PILOTO_X_APODO)
+    if (!pilot.apodo && campaign.pilotApodos?.[idx]) {
+      pilot.apodo = campaign.pilotApodos[idx];
     }
     setSlots(prev => {
       const next = [...prev];

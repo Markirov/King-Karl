@@ -3,72 +3,55 @@ import { useAppStore } from '@/lib/store';
 import { Download, Upload, Plus, Trash2, Cloud, Save, Loader } from 'lucide-react';
 import { useBarracones } from '@/hooks/useBarracones';
 import { BarraconesPortada } from '@/components/barracones/BarraconesPortada';
-import { FichaHeraldica }    from '@/components/barracones/FichaHeraldica';
+import { FichaHeraldicaLegacy as FichaHeraldica } from '@/components/barracones/FichaHeraldicaLegacy';
 import { SheetsPanel }       from '@/components/barracones/SheetsPanel';
 import { CombatePanel }      from '@/components/barracones/CombatePanel';
-import { pilotSlug } from '@/lib/roster';
 
 const BASE = import.meta.env.BASE_URL;
 
 type Tab = 'ficha' | 'combate';
 
-export function BarraconesPage() {
+function imageSlug(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Slots 0-5: jugadores fijos (siempre cargan desde Sheets, solo permiten exportar JSON)
+const DEFAULT_FIXED_PLAYERS = ['Marcos', 'Jaime', 'Joan', 'Alex', 'Zhao', 'Erik'] as const;
+const FIXED_COUNT = DEFAULT_FIXED_PLAYERS.length; // 6
+
+export function BarraconesPageLegacy() {
   const sim = useBarracones();
   const { current: pilot, slots, activeIdx } = sim;
   const fileRef = useRef<HTMLInputElement>(null);
   const [showSheets, setShowSheets] = useState(false);
   const [tab, setTab] = useState<Tab>('ficha');
 
-  const { barraconesPortada, setBarraconesPortada, roster, rosterLoading } = useAppStore();
-
-  const FIXED_COUNT = roster.length;
+  const { barraconesPortada, setBarraconesPortada, campaign } = useAppStore();
+  const fixedPlayers = DEFAULT_FIXED_PLAYERS.map((fallback, i) => {
+    const fromConfig = campaign.pilotNames?.[i]?.trim();
+    return fromConfig || fallback;
+  });
   const isFixed = activeIdx < FIXED_COUNT;
-  const activeRosterEntry = isFixed ? roster[activeIdx] : null;
 
   const handleSlotClick = async (i: number) => {
     sim.setActiveIdx(i);
     if (i < FIXED_COUNT) {
-      await sim.sheetsQuickLoad(roster[i].jugador, i);
+      await sim.sheetsQuickLoad(DEFAULT_FIXED_PLAYERS[i], i);
     }
   };
 
   const handlePortadaSelect = async (name: string) => {
-    const i = roster.findIndex(r => r.jugador === name);
+    const i = fixedPlayers.indexOf(name);
     if (i === -1) return;
     setBarraconesPortada(false);
     sim.setActiveIdx(i);
-    await sim.sheetsQuickLoad(roster[i].jugador, i);
+    await sim.sheetsQuickLoad(DEFAULT_FIXED_PLAYERS[i], i);
   };
-
-  // Loading state mientras roster carga
-  if (rosterLoading) {
-    return (
-      <div className="p-6 animate-[fadeInUp_0.3s_ease]">
-        <h1 className="font-headline text-xl font-black text-primary-container tracking-tighter uppercase mb-6">
-          Barracones
-        </h1>
-        <div className="flex items-center justify-center min-h-[40vh] gap-2 font-mono text-[11px] text-outline tracking-[2px] uppercase">
-          <Loader size={14} className="animate-spin" /> Cargando roster…
-        </div>
-      </div>
-    );
-  }
-
-  if (roster.length === 0) {
-    return (
-      <div className="p-6 animate-[fadeInUp_0.3s_ease]">
-        <h1 className="font-headline text-xl font-black text-primary-container tracking-tighter uppercase mb-6">
-          Barracones
-        </h1>
-        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3 opacity-60">
-          <span className="text-5xl">🪖</span>
-          <span className="font-mono text-[11px] text-outline tracking-[2px] uppercase">
-            Roster vacío — añade pilotos a Personajes
-          </span>
-        </div>
-      </div>
-    );
-  }
 
   if (barraconesPortada) {
     return (
@@ -95,17 +78,15 @@ export function BarraconesPage() {
         {/* Slot selector */}
         <div className="flex items-center gap-2 flex-wrap">
           {slots.map((s, i) => {
-            const entry = i < FIXED_COUNT ? roster[i] : undefined;
-            const fixedName = entry?.jugador;
+            const fixedName = i < FIXED_COUNT ? fixedPlayers[i] : undefined;
             const label = s
               ? (s.callsign ? s.callsign.slice(0, 2).toUpperCase() : '?')
-              : entry
-                ? (entry.apodo || entry.jugador).slice(0, 2).toUpperCase()
+              : fixedName
+                ? fixedName.slice(0, 2).toUpperCase()
                 : String(i + 1);
-            const titleText = entry ? `${entry.jugador}${entry.apodo ? ` «${entry.apodo}»` : ''}` : undefined;
             return (
               <button key={i} onClick={() => handleSlotClick(i)}
-                title={titleText}
+                title={fixedName ?? undefined}
                 className={`w-9 h-9 font-headline text-[11px] font-bold border transition-all relative ${
                   i === activeIdx
                     ? 'bg-primary-container/20 border-primary-container text-primary-container'
@@ -136,6 +117,7 @@ export function BarraconesPage() {
                     }`}>
                     {sim.sheetsStatus === 'loading' ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
                   </button>
+                  {/* Status label — only visible briefly after save attempt */}
                   {(sim.sheetsStatus === 'ok' || sim.sheetsStatus === 'error') && sim.sheetsMsg && (
                     <span className={`font-mono text-[9px] self-center max-w-32 truncate ${
                       sim.sheetsStatus === 'ok' ? 'text-green-400/80' : 'text-red-400/80'
@@ -240,8 +222,8 @@ export function BarraconesPage() {
           {tab === 'ficha' && (
             <FichaHeraldica
               pilot={pilot}
-              pilotImg={activeRosterEntry ? `${BASE}pilot-${pilotSlug(activeRosterEntry.jugador)}.png` : undefined}
-              apodoOverride={activeRosterEntry?.apodo}
+              pilotImg={activeIdx < FIXED_COUNT ? `${BASE}pilot-${imageSlug(DEFAULT_FIXED_PLAYERS[activeIdx])}.png` : undefined}
+              apodoOverride={campaign.pilotApodos?.[activeIdx]}
               onAddQuirk={sim.addQuirk}
               onSetWeapon={sim.setWeapon}
               onSetArmadura={sim.setArmadura}

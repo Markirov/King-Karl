@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import type { CampaignConfig, Palette } from './types';
+import { saveConfigBatch } from './sheets-service';
+import type { RosterEntry } from './roster';
 
 const DEFAULT_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbyAAh-lYB1L72hTH72lpYDD0mcaAyeERLjJp1e0Ar0hhuZK8TszJdu-qmlN_cwi4sEncQ/exec';
@@ -23,6 +25,14 @@ interface AppState {
 
   barraconesPortada: boolean;
   setBarraconesPortada: (v: boolean) => void;
+
+  useLegacyDesigns: boolean;
+  setUseLegacyDesigns: (v: boolean) => void;
+
+  roster: RosterEntry[];
+  rosterLoading: boolean;
+  setRoster: (r: RosterEntry[]) => void;
+  setRosterLoading: (v: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -32,11 +42,13 @@ export const useAppStore = create<AppState>((set) => ({
     campaignMonth: 1,
     unitName: "King Karl's Kürassiers",
     scriptUrl: localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM') || DEFAULT_SCRIPT_URL,
-    pilotNames: [],
-    pilotMechs: [],
+    pilotNames:  [],
+    pilotApodos: [],
+    pilotMechs:  [],
     contratoValor: '',
     valorUnidad:   '',
     totalMechs:    '',
+    pcJugadores:   [],
   },
   setCampaign: (patch) => set((s) => ({ campaign: { ...s.campaign, ...patch } })),
 
@@ -55,4 +67,18 @@ export const useAppStore = create<AppState>((set) => ({
 
   barraconesPortada: true,
   setBarraconesPortada: (v) => set({ barraconesPortada: v }),
+
+  // Cache local rápido para evitar flash al recargar; valor real llega de Sheets en App.tsx
+  useLegacyDesigns: localStorage.getItem('useLegacyDesigns') === '1',
+  setUseLegacyDesigns: (v) => {
+    localStorage.setItem('useLegacyDesigns', v ? '1' : '0');
+    set({ useLegacyDesigns: v });
+    // Persistencia global compartida via celda USE_LEGACY_DESIGNS en Configuracion
+    saveConfigBatch({ USE_LEGACY_DESIGNS: v ? '1' : '0' }).catch(() => {});
+  },
+
+  roster: [],
+  rosterLoading: true,
+  setRoster: (r) => set({ roster: r, rosterLoading: false }),
+  setRosterLoading: (v) => set({ rosterLoading: v }),
 }));
