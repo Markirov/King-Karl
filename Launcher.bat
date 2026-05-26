@@ -11,11 +11,13 @@ echo  KING KARL - TASK LAUNCHER
 echo ==========================================
 echo.
 echo Elige una secuencia (varias opciones y orden libre)
-echo Ejemplo: 2 1 3
+echo Ejemplo: 2 4 5
 echo.
 echo   1^) Local dev server
-Echo   2^) Rebuild indexes
-Echo   3^) Deploy
+echo   2^) Rebuild indexes
+echo   3^) Deploy ^(con commit/push^)
+echo   4^) Build
+echo   5^) Deploy sin commit ^(siempre build^)
 echo   0^) Salir
 echo.
 set /p RUNSEQ="Secuencia: "
@@ -55,8 +57,18 @@ if "%OPT%"=="2" (
   exit /b %ERRORLEVEL%
 )
 if "%OPT%"=="3" (
-  echo --- [3] Deploy ---
+  echo --- [3] Deploy con commit ---
   call "%ROOT%scripts\deploy.bat"
+  exit /b %ERRORLEVEL%
+)
+if "%OPT%"=="4" (
+  echo --- [4] Build ---
+  call "%ROOT%scripts\build.bat"
+  exit /b %ERRORLEVEL%
+)
+if "%OPT%"=="5" (
+  echo --- [5] Deploy sin commit ---
+  call "%ROOT%scripts\deploy-no-commit.bat"
   exit /b %ERRORLEVEL%
 )
 

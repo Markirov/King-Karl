@@ -8,3 +8,9 @@ Herramientas/
 .vscode/
 .idea/
 Thumbs.db
+
+# Local junk / no commitear
+.claude/worktrees/
+*.zip
+MRCB.html
+design_handoff_reskin/
