@@ -39,6 +39,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'INTEL',
     items: [
       { id: 'mapa',     label: 'Mapa Estelar', icon: '🌌', path: '/mapa',     palette: 'blue'  },
+      { id: 'logros',   label: 'Logros',        icon: '🎖️', path: '/logros',   palette: 'amber' },
       { id: 'cronicas', label: 'Crónicas',      icon: '📜', path: '/cronicas', palette: 'amber' },
     ],
   },

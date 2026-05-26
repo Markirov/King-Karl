@@ -21,6 +21,7 @@ import { AyudasPage } from '@/pages/AyudasPage';
 import { TROPage } from '@/pages/TROPage';
 import { MapaEstelarPage } from '@/pages/MapaEstelarPage';
 import { CronicasPage } from '@/pages/CronicasPage';
+import { LogrosPage } from '@/pages/LogrosPage';
 import { PortadaPage } from '@/pages/PortadaPage';
 
 export function App() {
@@ -114,6 +115,7 @@ export function App() {
           <Route path="/tro"            element={<TROPage />} />
           <Route path="/mapa"            element={<MapaEstelarPage />} />
           <Route path="/cronicas"       element={<CronicasPage />} />
+          <Route path="/logros"         element={<LogrosPage />} />
         </Routes>
       </main>
 

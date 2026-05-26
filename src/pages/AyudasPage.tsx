@@ -8,6 +8,7 @@ import { DamageGrouperView }    from '@/components/ayudas/DamageGrouperView';
 import { ModifiersView }        from '@/components/ayudas/ModifiersView';
 import { InfantryView }         from '@/components/ayudas/InfantryView';
 import { InfantryWeaponsView }  from '@/components/ayudas/InfantryWeaponsView';
+import { C3CalculatorView }     from '@/components/ayudas/C3CalculatorView';
 import { JumpCalculator }       from '@/features/jumpCalculator/JumpCalculator';
 
 type View =
@@ -20,6 +21,7 @@ type View =
   | 'modifiers'
   | 'infantry'
   | 'infantry-weapons'
+  | 'c3-calculator'
   | 'jump-calculator';
 
 interface Section {
@@ -44,9 +46,10 @@ const SECTIONS: Section[] = [
   {
     label: 'Utilidades',
     buttons: [
-      { view: 'cluster',   icon: '💥', text: 'Cluster Misiles', desc: 'Tabla 2D6 × tamaño lanzador' },
-      { view: 'grouper',   icon: '📊', text: 'Agrupador Daño',  desc: 'Grupos de 5 puntos + localizaciones' },
-      { view: 'modifiers', icon: '📐', text: 'Modificadores',   desc: 'Ataque · Movimiento · Terreno · Calor' },
+      { view: 'cluster',        icon: '💥', text: 'Cluster Misiles', desc: 'Tabla 2D6 × tamaño lanzador' },
+      { view: 'grouper',        icon: '📊', text: 'Agrupador Daño',  desc: 'Grupos de 5 puntos + localizaciones' },
+      { view: 'modifiers',      icon: '📐', text: 'Modificadores',   desc: 'Ataque · Movimiento · Terreno · Calor' },
+      { view: 'c3-calculator',  icon: '📡', text: 'Calculadora C3',  desc: 'BV + componentes red C3 Standard' },
     ],
   },
   {
@@ -68,6 +71,7 @@ const VIEW_TITLES: Record<View, string> = {
   'modifiers':        'Tabla de Modificadores',
   'infantry':         'TRR Infantería',
   'infantry-weapons': 'Tabla de Armamento — Infantería',
+  'c3-calculator':    'Calculadora de Red C3 Standard',
   'jump-calculator':  'Calculadora de Saltos Hiperespaciales',
 };
 
@@ -140,6 +144,7 @@ export function AyudasPage() {
           {view === 'modifiers'       && <ModifiersView />}
           {view === 'infantry'         && <InfantryView />}
           {view === 'infantry-weapons' && <InfantryWeaponsView />}
+          {view === 'c3-calculator'    && <C3CalculatorView />}
           {view === 'jump-calculator'  && <JumpCalculator />}
         </div>
       )}

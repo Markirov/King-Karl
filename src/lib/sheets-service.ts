@@ -51,13 +51,13 @@ export const registerImprovement = (jugador: string, xpGastado: number, mejora: 
 export const registerMission = (xp: Record<string, number>, dinero: number, gastos: number) =>
   sheetsGet({
     action: 'registrarMision',
-    xpMarcos: String(xp['Marcos'] ?? 0),
-    xpJaime:  String(xp['Jaime']  ?? 0),
-    xpJoan:   String(xp['Joan']   ?? 0),
-    xpJuan:   String(xp['Juan']   ?? 0),
+    xpMap: JSON.stringify(xp),    // dinámico — Apps Script mapea por header
     dineroGanado: String(dinero),
     gastos:       String(gastos),
   });
+
+export const loadLogros = () => sheetsGet({ action: 'getLogros' });
+export const loadHistorial = () => sheetsGet({ action: 'getHistorial' });
 
 export const registerXPExpense = (jugador: string, cantidad: number, descripcion: string) =>
   sheetsGet({
