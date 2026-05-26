@@ -13,14 +13,32 @@ const BASE = import.meta.env.BASE_URL;
 
 // ── Datos C3 ──────────────────────────────────────────────
 
-const C3_MULTIPLIER = 1.05;
 const NETWORK_MAX = 12;
-const UNITS_PER_MASTER = 4;       // 1 Master cubre sí mismo + 3 Slaves
 
 const COMPONENTS = {
   master: { name: 'C3 Master Computer', cost: 1_500_000, tons: 5, crits: 5 },
   slave:  { name: 'C3 Slave Unit',       cost: 250_000,   tons: 1, crits: 1 },
 };
+
+/**
+ * BV multiplier por número de unidades en red C3 Standard.
+ * N=1 → 1.00 (sin red). N≥2 → 1 + 0.05·N (lineal hasta N=12 → 1.60).
+ */
+function c3Multiplier(n: number): number {
+  if (n <= 1) return 1.00;
+  return 1.00 + 0.05 * n;
+}
+
+/**
+ * Masters mínimos para red C3 Standard según tabla canon:
+ * 1-4 → 1, 5-8 → 3, 9-12 → 4.
+ */
+function mastersNeeded(n: number): number {
+  if (n <= 0) return 0;
+  if (n <= 4) return 1;
+  if (n <= 8) return 3;
+  return 4;
+}
 
 // ── Tipos ─────────────────────────────────────────────────
 
@@ -47,8 +65,8 @@ function genId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-function bvWithC3(bv: number): number {
-  return Math.round(bv * C3_MULTIPLIER);
+function bvWithC3(bv: number, n: number): number {
+  return Math.round(bv * c3Multiplier(n));
 }
 
 // ── Component ─────────────────────────────────────────────
@@ -77,11 +95,12 @@ export function C3CalculatorView() {
     return catalog.filter(m => m.name.toLowerCase().includes(q)).slice(0, 30);
   }, [catalog, search]);
 
-  /** Default isMaster: 1ª unidad del grupo = master automático hasta llegar al mínimo */
+  /** Default isMaster: cubre tabla 1-4→1, 5-8→3, 9-12→4 */
   function defaultIsMaster(currentUnits: NetworkUnit[]): boolean {
-    const mastersNeeded = Math.ceil((currentUnits.length + 1) / UNITS_PER_MASTER);
+    const newCount = currentUnits.length + 1;
+    const needed = mastersNeeded(newCount);
     const currentMasters = currentUnits.filter(u => u.isMaster).length;
-    return currentMasters < mastersNeeded;
+    return currentMasters < needed;
   }
 
   function addFromCatalog(m: MechCatalogEntry) {
@@ -124,14 +143,16 @@ export function C3CalculatorView() {
   }
 
   // Cálculos
+  const n = units.length;
+  const multiplier = c3Multiplier(n);
   const baseBV = units.reduce((s, u) => s + u.bv, 0);
-  const c3BV   = units.reduce((s, u) => s + bvWithC3(u.bv), 0);
+  const c3BV   = units.reduce((s, u) => s + bvWithC3(u.bv, n), 0);
   const deltaBV = c3BV - baseBV;
 
   const mastersCount = units.filter(u => u.isMaster).length;
-  const slavesCount  = units.length - mastersCount;
-  const mastersNeeded = Math.ceil(units.length / UNITS_PER_MASTER);
-  const mastersShortage = Math.max(0, mastersNeeded - mastersCount);
+  const slavesCount  = n - mastersCount;
+  const mastersRequired = mastersNeeded(n);
+  const mastersShortage = Math.max(0, mastersRequired - mastersCount);
 
   const cost = mastersCount * COMPONENTS.master.cost + slavesCount * COMPONENTS.slave.cost;
   const tons = mastersCount * COMPONENTS.master.tons + slavesCount * COMPONENTS.slave.tons;
@@ -232,7 +253,7 @@ export function C3CalculatorView() {
 
         {mastersShortage > 0 && (
           <div className="mb-3 px-3 py-2 bg-amber-400/10 border border-amber-400/30 font-mono text-[10px] text-amber-400">
-            ⚠ Faltan {mastersShortage} Master(s). Red requiere mínimo {mastersNeeded} para {units.length} unidades.
+            ⚠ Faltan {mastersShortage} Master(s). Red requiere mínimo {mastersRequired} para {n} unidades.
           </div>
         )}
 
@@ -247,12 +268,12 @@ export function C3CalculatorView() {
               <span>Rol</span>
               <span>Unidad</span>
               <span className="text-right">BV base</span>
-              <span className="text-right">BV ×1.05</span>
+              <span className="text-right">BV ×{multiplier.toFixed(2)}</span>
               <span />
             </div>
             <div className="space-y-1.5">
               {units.map(u => {
-                const c3 = bvWithC3(u.bv);
+                const c3 = bvWithC3(u.bv, n);
                 return (
                   <div key={u.id}
                     className={`grid grid-cols-[80px_1fr_90px_90px_30px] gap-3 items-center px-3 py-2 border transition-all ${
@@ -316,8 +337,8 @@ export function C3CalculatorView() {
                 <div className="font-headline text-2xl font-black text-on-surface">{fmt(baseBV)}</div>
               </div>
               <div className="text-center">
-                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">× C3</div>
-                <div className="font-mono text-sm text-primary-container">×{C3_MULTIPLIER} por unidad</div>
+                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">× C3 (N={n})</div>
+                <div className="font-mono text-sm text-primary-container">×{multiplier.toFixed(2)} por unidad</div>
               </div>
               <div className="text-right">
                 <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">C3 total</div>
@@ -335,7 +356,7 @@ export function C3CalculatorView() {
               </span>
             </div>
             <p className="font-mono text-[9px] text-outline/70 mt-2 leading-relaxed">
-              TW p. 285: cada unidad en C3 multiplica su BV × 1.05. Total = suma de BVs modificados.
+              Multiplicador C3 Standard según N unidades: 2→1.10, 3→1.15, ..., 12→1.60 (lineal 1+0.05·N). Cada mech BV × multiplier.
             </p>
           </div>
 
@@ -378,8 +399,8 @@ export function C3CalculatorView() {
           Reglas C3 Standard
         </div>
         <ul className="font-mono text-[10px] text-on-surface-variant/70 leading-relaxed space-y-1 list-disc list-inside">
-          <li>Cada Master controla sí mismo + 3 Slaves (lanza 4 unidades)</li>
-          <li>Múltiples Masters se interconectan → compañía hasta 12 unidades</li>
+          <li>Cada Master controla sí mismo + 3 Slaves. Masters mínimos: 1-4→1, 5-8→3, 9-12→4</li>
+          <li>Multiplicador BV lineal: 1+0.05·N (N=2→1.10, N=12→1.60)</li>
           <li>Slaves comparten datos de targeting via Master (to-hit usa distancia más corta de la red)</li>
           <li>Master destruido → red colapsa (Slaves desconectados)</li>
           <li>LOS Master ↔ Slave máx 60 hex</li>
