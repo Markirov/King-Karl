@@ -55,7 +55,12 @@ interface NetworkUnit {
   bv:       number;
   source:   'catalog' | 'manual';
   isMaster: boolean;     // user-controlled
+  gunnery:  number;      // 0-8, default 4 (Disparo)
+  piloting: number;      // 0-8, default 5 (Pilotaje)
 }
+
+const DEFAULT_GUNNERY = 4;
+const DEFAULT_PILOTING = 5;
 
 // ── Helpers ───────────────────────────────────────────────
 
@@ -67,6 +72,22 @@ function genId(): string {
 
 function bvWithC3(bv: number, n: number): number {
   return Math.round(bv * c3Multiplier(n));
+}
+
+/**
+ * Skill Multiplier para BV2 (TacOps p.275 — fórmula simplificada).
+ * Base: Gunnery 4 / Piloting 5 = ×1.00.
+ *   gunnery: +20% por cada nivel BAJO 4, −20% por cada nivel SOBRE 4
+ *   piloting: +5% por cada nivel BAJO 5, −5% por cada nivel SOBRE 5
+ */
+function skillMultiplier(gunnery: number, piloting: number): number {
+  const gMod = 1 + 0.2 * (4 - gunnery);
+  const pMod = 1 + 0.05 * (5 - piloting);
+  return Math.max(0, gMod * pMod);
+}
+
+function bvAdjusted(bv: number, gunnery: number, piloting: number): number {
+  return Math.round(bv * skillMultiplier(gunnery, piloting));
 }
 
 // ── Component ─────────────────────────────────────────────
@@ -111,6 +132,8 @@ export function C3CalculatorView() {
       bv: m.bv2,
       source: 'catalog',
       isMaster: defaultIsMaster(u),
+      gunnery: DEFAULT_GUNNERY,
+      piloting: DEFAULT_PILOTING,
     }]);
     setSearch('');
   }
@@ -125,6 +148,8 @@ export function C3CalculatorView() {
       bv,
       source: 'manual',
       isMaster: defaultIsMaster(u),
+      gunnery: DEFAULT_GUNNERY,
+      piloting: DEFAULT_PILOTING,
     }]);
     setManualName('');
     setManualBV('');
@@ -132,6 +157,11 @@ export function C3CalculatorView() {
 
   function toggleMaster(id: string) {
     setUnits(u => u.map(x => x.id === id ? { ...x, isMaster: !x.isMaster } : x));
+  }
+
+  function setSkill(id: string, field: 'gunnery' | 'piloting', val: number) {
+    const clamped = Math.max(0, Math.min(8, val));
+    setUnits(u => u.map(x => x.id === id ? { ...x, [field]: clamped } : x));
   }
 
   function removeUnit(id: string) {
@@ -145,9 +175,10 @@ export function C3CalculatorView() {
   // Cálculos
   const n = units.length;
   const multiplier = c3Multiplier(n);
-  const baseBV = units.reduce((s, u) => s + u.bv, 0);
-  const c3BV   = units.reduce((s, u) => s + bvWithC3(u.bv, n), 0);
-  const deltaBV = c3BV - baseBV;
+  const baseBV    = units.reduce((s, u) => s + u.bv, 0);
+  const skillBV   = units.reduce((s, u) => s + bvAdjusted(u.bv, u.gunnery, u.piloting), 0);
+  const c3BV      = units.reduce((s, u) => s + bvWithC3(bvAdjusted(u.bv, u.gunnery, u.piloting), n), 0);
+  const deltaBV   = c3BV - baseBV;
 
   const mastersCount = units.filter(u => u.isMaster).length;
   const slavesCount  = n - mastersCount;
@@ -264,19 +295,24 @@ export function C3CalculatorView() {
         ) : (
           <>
             {/* Header tabla */}
-            <div className="grid grid-cols-[80px_1fr_90px_90px_30px] gap-3 px-3 py-1.5 font-mono text-[8px] text-outline tracking-[2px] uppercase">
+            <div className="grid grid-cols-[78px_1fr_50px_50px_70px_80px_80px_24px] gap-2 px-3 py-1.5 font-mono text-[8px] text-outline tracking-[2px] uppercase">
               <span>Rol</span>
               <span>Unidad</span>
+              <span className="text-center">G</span>
+              <span className="text-center">P</span>
               <span className="text-right">BV base</span>
+              <span className="text-right">BV skill</span>
               <span className="text-right">BV ×{multiplier.toFixed(2)}</span>
               <span />
             </div>
             <div className="space-y-1.5">
               {units.map(u => {
-                const c3 = bvWithC3(u.bv, n);
+                const sm = skillMultiplier(u.gunnery, u.piloting);
+                const adj = bvAdjusted(u.bv, u.gunnery, u.piloting);
+                const c3 = bvWithC3(adj, n);
                 return (
                   <div key={u.id}
-                    className={`grid grid-cols-[80px_1fr_90px_90px_30px] gap-3 items-center px-3 py-2 border transition-all ${
+                    className={`grid grid-cols-[78px_1fr_50px_50px_70px_80px_80px_24px] gap-2 items-center px-3 py-2 border transition-all ${
                       u.isMaster
                         ? 'bg-amber-400/5 border-amber-400/30'
                         : 'bg-surface-container/40 border-outline-variant/10'
@@ -299,12 +335,29 @@ export function C3CalculatorView() {
                       )}
                     </span>
 
+                    {/* Gunnery */}
+                    <input type="number" min={0} max={8} value={u.gunnery}
+                      onChange={e => setSkill(u.id, 'gunnery', parseInt(e.target.value) || 0)}
+                      title="Disparo (Gunnery) 0-8 · default 4"
+                      className="w-full h-7 bg-surface-container-lowest border border-outline-variant/30 px-1 font-mono text-[11px] text-on-surface text-center focus:outline-none focus:border-primary-container [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none" />
+
+                    {/* Piloting */}
+                    <input type="number" min={0} max={8} value={u.piloting}
+                      onChange={e => setSkill(u.id, 'piloting', parseInt(e.target.value) || 0)}
+                      title="Pilotaje (Piloting) 0-8 · default 5"
+                      className="w-full h-7 bg-surface-container-lowest border border-outline-variant/30 px-1 font-mono text-[11px] text-on-surface text-center focus:outline-none focus:border-primary-container [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none" />
+
                     {/* BV base */}
                     <span className="font-mono text-[11px] text-on-surface-variant text-right">
                       {fmt(u.bv)}
                     </span>
 
-                    {/* BV C3 */}
+                    {/* BV adjusted by skill */}
+                    <span className="font-mono text-[11px] text-amber-400 text-right" title={`Skill ×${sm.toFixed(2)}`}>
+                      {fmt(adj)}
+                    </span>
+
+                    {/* BV C3 final */}
                     <span className="font-headline text-[12px] font-bold text-primary-container text-right">
                       {fmt(c3)}
                     </span>
@@ -329,34 +382,38 @@ export function C3CalculatorView() {
           {/* BV totales */}
           <div className="bg-primary-container/10 border-2 border-primary-container/40 p-4 col-span-1 md:col-span-2">
             <div className="font-mono text-[10px] text-primary-container tracking-[3px] uppercase mb-2">
-              Battle Value (red C3)
+              Battle Value Final
             </div>
-            <div className="grid grid-cols-3 gap-3 items-end">
+            <div className="grid grid-cols-4 gap-3 items-end">
               <div>
-                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">Base total</div>
-                <div className="font-headline text-2xl font-black text-on-surface">{fmt(baseBV)}</div>
+                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">Base</div>
+                <div className="font-headline text-xl font-black text-on-surface">{fmt(baseBV)}</div>
               </div>
-              <div className="text-center">
+              <div>
+                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">Con Skill</div>
+                <div className="font-headline text-xl font-black text-amber-400">{fmt(skillBV)}</div>
+              </div>
+              <div>
                 <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">× C3 (N={n})</div>
-                <div className="font-mono text-sm text-primary-container">×{multiplier.toFixed(2)} por unidad</div>
+                <div className="font-mono text-sm text-primary-container">×{multiplier.toFixed(2)}</div>
               </div>
               <div className="text-right">
-                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">C3 total</div>
-                <div className="font-headline text-3xl font-black text-primary-container leading-none">
+                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">C3 Final</div>
+                <div className="font-headline text-2xl font-black text-primary-container leading-none">
                   {fmt(c3BV)}
                 </div>
               </div>
             </div>
             <div className="mt-3 pt-3 border-t border-outline-variant/15 flex items-center justify-between">
               <span className="font-mono text-[10px] text-outline tracking-widest uppercase">
-                Bonus BV
+                Bonus BV vs base
               </span>
               <span className="font-headline text-lg font-bold text-amber-400">
-                +{fmt(deltaBV)}
+                {deltaBV >= 0 ? '+' : ''}{fmt(deltaBV)}
               </span>
             </div>
             <p className="font-mono text-[9px] text-outline/70 mt-2 leading-relaxed">
-              Multiplicador C3 Standard según N unidades: 2→1.10, 3→1.15, ..., 12→1.60 (lineal 1+0.05·N). Cada mech BV × multiplier.
+              Cadena: BV publicado → ajuste por skills (G/P) → ajuste por red C3 (×{multiplier.toFixed(2)} si N={n}). Cada mech aporta su BV final al total.
             </p>
           </div>
 
@@ -400,7 +457,8 @@ export function C3CalculatorView() {
         </div>
         <ul className="font-mono text-[10px] text-on-surface-variant/70 leading-relaxed space-y-1 list-disc list-inside">
           <li>Cada Master controla sí mismo + 3 Slaves. Masters mínimos: 1-4→1, 5-8→3, 9-12→4</li>
-          <li>Multiplicador BV lineal: 1+0.05·N (N=2→1.10, N=12→1.60)</li>
+          <li>Multiplicador BV C3 lineal: 1+0.05·N (N=2→1.10, N=12→1.60)</li>
+          <li>Skill BV (TacOps): G4/P5 = base (×1.00). Por cada nivel: ±20% Gunnery, ±5% Piloting</li>
           <li>Slaves comparten datos de targeting via Master (to-hit usa distancia más corta de la red)</li>
           <li>Master destruido → red colapsa (Slaves desconectados)</li>
           <li>LOS Master ↔ Slave máx 60 hex</li>
