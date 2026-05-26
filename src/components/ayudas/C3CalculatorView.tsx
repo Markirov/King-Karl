@@ -4,7 +4,6 @@
 //  Componentes: Master 1.5M C-Bills / 5t / 5 crits;
 //               Slave  250k / 1t / 1 crit.
 //  Max 12 unidades. 1 Master por cada 4 unidades.
-//  C3 Standard disponible 3050+.
 // ══════════════════════════════════════════════════════════════
 
 import { useEffect, useMemo, useState } from 'react';
@@ -33,10 +32,11 @@ interface MechCatalogEntry {
 }
 
 interface NetworkUnit {
-  id:     string;
-  name:   string;
-  bv:     number;
-  source: 'catalog' | 'manual';
+  id:       string;
+  name:     string;
+  bv:       number;
+  source:   'catalog' | 'manual';
+  isMaster: boolean;     // user-controlled
 }
 
 // ── Helpers ───────────────────────────────────────────────
@@ -47,14 +47,8 @@ function genId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-function calcComponents(n: number) {
-  if (n <= 0) return { masters: 0, slaves: 0, cost: 0, tons: 0, crits: 0 };
-  const masters = Math.ceil(n / UNITS_PER_MASTER);
-  const slaves  = n - masters;
-  const cost  = masters * COMPONENTS.master.cost  + slaves * COMPONENTS.slave.cost;
-  const tons  = masters * COMPONENTS.master.tons  + slaves * COMPONENTS.slave.tons;
-  const crits = masters * COMPONENTS.master.crits + slaves * COMPONENTS.slave.crits;
-  return { masters, slaves, cost, tons, crits };
+function bvWithC3(bv: number): number {
+  return Math.round(bv * C3_MULTIPLIER);
 }
 
 // ── Component ─────────────────────────────────────────────
@@ -76,12 +70,19 @@ export function C3CalculatorView() {
       .catch(() => setCatalog([]));
   }, []);
 
-  // Filter catalog by search
+  // Filter catalog
   const filtered = useMemo(() => {
     if (!search.trim()) return [];
     const q = search.toLowerCase();
     return catalog.filter(m => m.name.toLowerCase().includes(q)).slice(0, 30);
   }, [catalog, search]);
+
+  /** Default isMaster: 1ª unidad del grupo = master automático hasta llegar al mínimo */
+  function defaultIsMaster(currentUnits: NetworkUnit[]): boolean {
+    const mastersNeeded = Math.ceil((currentUnits.length + 1) / UNITS_PER_MASTER);
+    const currentMasters = currentUnits.filter(u => u.isMaster).length;
+    return currentMasters < mastersNeeded;
+  }
 
   function addFromCatalog(m: MechCatalogEntry) {
     if (units.length >= NETWORK_MAX) return;
@@ -90,6 +91,7 @@ export function C3CalculatorView() {
       name: m.name,
       bv: m.bv2,
       source: 'catalog',
+      isMaster: defaultIsMaster(u),
     }]);
     setSearch('');
   }
@@ -103,9 +105,14 @@ export function C3CalculatorView() {
       name: manualName.trim(),
       bv,
       source: 'manual',
+      isMaster: defaultIsMaster(u),
     }]);
     setManualName('');
     setManualBV('');
+  }
+
+  function toggleMaster(id: string) {
+    setUnits(u => u.map(x => x.id === id ? { ...x, isMaster: !x.isMaster } : x));
   }
 
   function removeUnit(id: string) {
@@ -118,9 +125,18 @@ export function C3CalculatorView() {
 
   // Cálculos
   const baseBV = units.reduce((s, u) => s + u.bv, 0);
-  const c3BV   = Math.round(baseBV * C3_MULTIPLIER);
+  const c3BV   = units.reduce((s, u) => s + bvWithC3(u.bv), 0);
   const deltaBV = c3BV - baseBV;
-  const comps = calcComponents(units.length);
+
+  const mastersCount = units.filter(u => u.isMaster).length;
+  const slavesCount  = units.length - mastersCount;
+  const mastersNeeded = Math.ceil(units.length / UNITS_PER_MASTER);
+  const mastersShortage = Math.max(0, mastersNeeded - mastersCount);
+
+  const cost = mastersCount * COMPONENTS.master.cost + slavesCount * COMPONENTS.slave.cost;
+  const tons = mastersCount * COMPONENTS.master.tons + slavesCount * COMPONENTS.slave.tons;
+  const crits = mastersCount * COMPONENTS.master.crits + slavesCount * COMPONENTS.slave.crits;
+
   const networkFull = units.length >= NETWORK_MAX;
 
   return (
@@ -141,7 +157,6 @@ export function C3CalculatorView() {
               className="w-full h-9 pl-7 pr-3 bg-surface-container-lowest border border-outline-variant/30 font-mono text-[11px] text-on-surface focus:outline-none focus:border-primary-container"
             />
           </div>
-          {/* Results */}
           {search.trim() && (
             <div className="mt-2 max-h-60 overflow-y-auto custom-scrollbar border border-outline-variant/10">
               {filtered.length === 0 ? (
@@ -203,6 +218,9 @@ export function C3CalculatorView() {
         <div className="flex items-center justify-between mb-3">
           <div className="font-mono text-[10px] text-secondary tracking-[3px] uppercase">
             Red C3 — {units.length} / {NETWORK_MAX} unidades
+            <span className="ml-3 text-outline">
+              ◆ {mastersCount} Master · ○ {slavesCount} Slave
+            </span>
           </div>
           {units.length > 0 && (
             <button onClick={clearAll}
@@ -211,40 +229,75 @@ export function C3CalculatorView() {
             </button>
           )}
         </div>
+
+        {mastersShortage > 0 && (
+          <div className="mb-3 px-3 py-2 bg-amber-400/10 border border-amber-400/30 font-mono text-[10px] text-amber-400">
+            ⚠ Faltan {mastersShortage} Master(s). Red requiere mínimo {mastersNeeded} para {units.length} unidades.
+          </div>
+        )}
+
         {units.length === 0 ? (
           <div className="py-6 font-mono text-[10px] text-outline text-center tracking-widest uppercase">
             Añade unidades arriba (catálogo o manual)
           </div>
         ) : (
-          <div className="space-y-1.5">
-            {units.map((u, i) => {
-              // Primeros N masters están al frente: cada 4 unidades, la 1ª es master
-              const isMaster = i % UNITS_PER_MASTER === 0;
-              return (
-                <div key={u.id}
-                  className="flex items-center gap-3 px-3 py-2 bg-surface-container/40 border border-outline-variant/10 hover:border-primary-container/30 transition-all">
-                  <span className={`font-mono text-[9px] tracking-[2px] uppercase shrink-0 w-16 ${
-                    isMaster ? 'text-amber-400' : 'text-outline'
-                  }`}>
-                    {isMaster ? '◆ Master' : '○ Slave'}
-                  </span>
-                  <span className="flex-1 font-mono text-[11px] text-on-surface truncate">
-                    {u.name}
-                    {u.source === 'manual' && (
-                      <span className="ml-2 font-mono text-[8px] text-outline tracking-widest uppercase">manual</span>
-                    )}
-                  </span>
-                  <span className="font-headline text-[12px] font-bold text-primary-container shrink-0">
-                    BV {fmt(u.bv)}
-                  </span>
-                  <button onClick={() => removeUnit(u.id)}
-                    className="w-6 h-6 flex items-center justify-center text-outline hover:text-error transition-colors">
-                    <X size={12} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+          <>
+            {/* Header tabla */}
+            <div className="grid grid-cols-[80px_1fr_90px_90px_30px] gap-3 px-3 py-1.5 font-mono text-[8px] text-outline tracking-[2px] uppercase">
+              <span>Rol</span>
+              <span>Unidad</span>
+              <span className="text-right">BV base</span>
+              <span className="text-right">BV ×1.05</span>
+              <span />
+            </div>
+            <div className="space-y-1.5">
+              {units.map(u => {
+                const c3 = bvWithC3(u.bv);
+                return (
+                  <div key={u.id}
+                    className={`grid grid-cols-[80px_1fr_90px_90px_30px] gap-3 items-center px-3 py-2 border transition-all ${
+                      u.isMaster
+                        ? 'bg-amber-400/5 border-amber-400/30'
+                        : 'bg-surface-container/40 border-outline-variant/10'
+                    } hover:border-primary-container/30`}>
+
+                    {/* Toggle Master/Slave */}
+                    <button onClick={() => toggleMaster(u.id)}
+                      title={u.isMaster ? 'Clic para hacer Slave' : 'Clic para hacer Master'}
+                      className={`font-mono text-[9px] tracking-[2px] uppercase text-left cursor-pointer transition-colors ${
+                        u.isMaster ? 'text-amber-400 hover:text-amber-300' : 'text-outline hover:text-on-surface'
+                      }`}>
+                      {u.isMaster ? '◆ Master' : '○ Slave'}
+                    </button>
+
+                    {/* Nombre */}
+                    <span className="font-mono text-[11px] text-on-surface truncate">
+                      {u.name}
+                      {u.source === 'manual' && (
+                        <span className="ml-2 font-mono text-[8px] text-outline tracking-widest uppercase">manual</span>
+                      )}
+                    </span>
+
+                    {/* BV base */}
+                    <span className="font-mono text-[11px] text-on-surface-variant text-right">
+                      {fmt(u.bv)}
+                    </span>
+
+                    {/* BV C3 */}
+                    <span className="font-headline text-[12px] font-bold text-primary-container text-right">
+                      {fmt(c3)}
+                    </span>
+
+                    {/* Remove */}
+                    <button onClick={() => removeUnit(u.id)}
+                      className="w-6 h-6 flex items-center justify-center text-outline hover:text-error transition-colors justify-self-end">
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -252,22 +305,22 @@ export function C3CalculatorView() {
       {units.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-          {/* BV (lo más importante) */}
+          {/* BV totales */}
           <div className="bg-primary-container/10 border-2 border-primary-container/40 p-4 col-span-1 md:col-span-2">
             <div className="font-mono text-[10px] text-primary-container tracking-[3px] uppercase mb-2">
               Battle Value (red C3)
             </div>
             <div className="grid grid-cols-3 gap-3 items-end">
               <div>
-                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">Base</div>
+                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">Base total</div>
                 <div className="font-headline text-2xl font-black text-on-surface">{fmt(baseBV)}</div>
               </div>
               <div className="text-center">
                 <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">× C3</div>
-                <div className="font-mono text-sm text-primary-container">× {C3_MULTIPLIER}</div>
+                <div className="font-mono text-sm text-primary-container">×{C3_MULTIPLIER} por unidad</div>
               </div>
               <div className="text-right">
-                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">Total</div>
+                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">C3 total</div>
                 <div className="font-headline text-3xl font-black text-primary-container leading-none">
                   {fmt(c3BV)}
                 </div>
@@ -282,7 +335,7 @@ export function C3CalculatorView() {
               </span>
             </div>
             <p className="font-mono text-[9px] text-outline/70 mt-2 leading-relaxed">
-              TW p. 285: cada unidad en C3 multiplica su BV × 1.05.
+              TW p. 285: cada unidad en C3 multiplica su BV × 1.05. Total = suma de BVs modificados.
             </p>
           </div>
 
@@ -294,24 +347,24 @@ export function C3CalculatorView() {
             <div className="space-y-1.5 text-[11px] font-mono">
               <div className="flex justify-between">
                 <span className="text-outline">Masters:</span>
-                <span className="text-amber-400 font-bold">{comps.masters} × 1,5M</span>
+                <span className="text-amber-400 font-bold">{mastersCount} × 1,5M</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-outline">Slaves:</span>
-                <span className="text-on-surface">{comps.slaves} × 250k</span>
+                <span className="text-on-surface">{slavesCount} × 250k</span>
               </div>
               <div className="border-t border-outline-variant/15 pt-1.5 mt-2">
                 <div className="flex justify-between">
                   <span className="text-outline">Coste:</span>
-                  <span className="text-primary-container font-bold">{fmt(comps.cost)} ₡</span>
+                  <span className="text-primary-container font-bold">{fmt(cost)} ₡</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-outline">Tons:</span>
-                  <span className="text-on-surface">{comps.tons} t</span>
+                  <span className="text-on-surface">{tons} t</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-outline">Crits:</span>
-                  <span className="text-on-surface">{comps.crits}</span>
+                  <span className="text-on-surface">{crits}</span>
                 </div>
               </div>
             </div>
@@ -331,6 +384,7 @@ export function C3CalculatorView() {
           <li>Master destruido → red colapsa (Slaves desconectados)</li>
           <li>LOS Master ↔ Slave máx 60 hex</li>
           <li>ECM enemigo interfiere la red</li>
+          <li>Clic en rol (◆/○) de cada unidad para cambiar Master ↔ Slave manualmente</li>
         </ul>
       </div>
     </div>
