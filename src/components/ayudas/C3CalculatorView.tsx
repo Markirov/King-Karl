@@ -75,15 +75,29 @@ function bvWithC3(bv: number, n: number): number {
 }
 
 /**
- * Skill Multiplier para BV2 (TacOps p.275 — fórmula simplificada).
- * Base: Gunnery 4 / Piloting 5 = ×1.00.
- *   gunnery: +20% por cada nivel BAJO 4, −20% por cada nivel SOBRE 4
- *   piloting: +5% por cada nivel BAJO 5, −5% por cada nivel SOBRE 5
+ * Skill Multiplier para BV2 — Tabla canónica TechManual p.315.
+ * Filas = Gunnery (0-8), Columnas = Piloting (0-8).
+ * En la tabla, G4/P5 = 1.05 (BV publicado asume G4/P5 con 1.05 bakeado).
+ * Normalizamos dividiendo por 1.05 → G4/P5 = ×1.00 efectivo.
  */
+const SKILL_MULT_TABLE: number[][] = [
+  // P=0    P=1    P=2    P=3    P=4    P=5    P=6    P=7    P=8
+  [ 2.70,  2.55,  2.40,  2.25,  2.10,  1.95,  1.80,  1.65,  1.50 ], // G=0
+  [ 2.52,  2.38,  2.24,  2.10,  1.96,  1.82,  1.68,  1.54,  1.40 ], // G=1
+  [ 2.31,  2.18,  2.05,  1.93,  1.80,  1.67,  1.54,  1.41,  1.28 ], // G=2
+  [ 1.89,  1.78,  1.68,  1.57,  1.47,  1.36,  1.26,  1.15,  1.05 ], // G=3
+  [ 1.50,  1.41,  1.32,  1.23,  1.14,  1.05,  0.96,  0.87,  0.78 ], // G=4
+  [ 1.29,  1.21,  1.13,  1.06,  0.98,  0.91,  0.83,  0.76,  0.68 ], // G=5
+  [ 1.08,  1.01,  0.95,  0.88,  0.81,  0.74,  0.67,  0.61,  0.54 ], // G=6
+  [ 0.87,  0.81,  0.76,  0.70,  0.65,  0.59,  0.54,  0.48,  0.43 ], // G=7
+  [ 0.66,  0.62,  0.58,  0.54,  0.50,  0.46,  0.42,  0.38,  0.34 ], // G=8
+];
+const BASELINE_GP = SKILL_MULT_TABLE[4][5]; // 1.05 — baseline G4/P5
+
 function skillMultiplier(gunnery: number, piloting: number): number {
-  const gMod = 1 + 0.2 * (4 - gunnery);
-  const pMod = 1 + 0.05 * (5 - piloting);
-  return Math.max(0, gMod * pMod);
+  const g = Math.max(0, Math.min(8, gunnery));
+  const p = Math.max(0, Math.min(8, piloting));
+  return SKILL_MULT_TABLE[g][p] / BASELINE_GP;
 }
 
 function bvAdjusted(bv: number, gunnery: number, piloting: number): number {
@@ -462,7 +476,7 @@ export function C3CalculatorView() {
         <ul className="font-mono text-[10px] text-on-surface-variant/70 leading-relaxed space-y-1 list-disc list-inside">
           <li>Cada Master controla sí mismo + 3 Slaves. Masters mínimos: 1-4→1, 5-8→3, 9-12→4</li>
           <li>Multiplicador BV C3 lineal: 1+0.05·N (N=2→1.10, N=12→1.60)</li>
-          <li>Skill BV (TacOps): G4/P5 = base (×1.00). Por cada nivel: ±20% Gunnery, ±5% Piloting</li>
+          <li>Skill BV (TechManual p.315): tabla canon 9×9 (G×P). G4/P5 = base ×1.00. Mejores skills suben BV, peores bajan</li>
           <li>Slaves comparten datos de targeting via Master (to-hit usa distancia más corta de la red)</li>
           <li>Master destruido → red colapsa (Slaves desconectados)</li>
           <li>LOS Master ↔ Slave máx 60 hex</li>
