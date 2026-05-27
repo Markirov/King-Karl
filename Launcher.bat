@@ -18,6 +18,7 @@ echo   2^) Rebuild indexes
 echo   3^) Deploy ^(con commit/push^)
 echo   4^) Build
 echo   5^) Deploy sin commit ^(siempre build^)
+echo   6^) Importar .ssw/.saw desde carpeta
 echo   0^) Salir
 echo.
 set /p RUNSEQ="Secuencia: "
@@ -69,6 +70,11 @@ if "%OPT%"=="4" (
 if "%OPT%"=="5" (
   echo --- [5] Deploy sin commit ---
   call "%ROOT%scripts\deploy-no-commit.bat"
+  exit /b %ERRORLEVEL%
+)
+if "%OPT%"=="6" (
+  echo --- [6] Importar SSW/SAW ---
+  call "%ROOT%scripts\import-units.bat"
   exit /b %ERRORLEVEL%
 )
 
