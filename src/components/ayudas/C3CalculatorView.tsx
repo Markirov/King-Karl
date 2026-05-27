@@ -83,28 +83,26 @@ function bvWithC3(adjBV: number, bonus: number): number {
 
 /**
  * Skill Multiplier para BV2 — Tabla canónica TechManual p.315.
- * Filas = Gunnery (0-8), Columnas = Piloting (0-8).
- * En la tabla, G4/P5 = 1.05 (BV publicado asume G4/P5 con 1.05 bakeado).
- * Normalizamos dividiendo por 1.05 → G4/P5 = ×1.00 efectivo.
+ * Filas = Gunnery (0-8), Columnas = Piloting/Driving/Anti-'Mech (0-8).
+ * G4/P5 = 1.00 (baseline directo, sin normalizar).
  */
 const SKILL_MULT_TABLE: number[][] = [
   // P=0    P=1    P=2    P=3    P=4    P=5    P=6    P=7    P=8
-  [ 2.70,  2.55,  2.40,  2.25,  2.10,  1.95,  1.80,  1.65,  1.50 ], // G=0
-  [ 2.52,  2.38,  2.24,  2.10,  1.96,  1.82,  1.68,  1.54,  1.40 ], // G=1
-  [ 2.31,  2.18,  2.05,  1.93,  1.80,  1.67,  1.54,  1.41,  1.28 ], // G=2
-  [ 1.89,  1.78,  1.68,  1.57,  1.47,  1.36,  1.26,  1.15,  1.05 ], // G=3
-  [ 1.50,  1.41,  1.32,  1.23,  1.14,  1.05,  0.96,  0.87,  0.78 ], // G=4
-  [ 1.29,  1.21,  1.13,  1.06,  0.98,  0.91,  0.83,  0.76,  0.68 ], // G=5
-  [ 1.08,  1.01,  0.95,  0.88,  0.81,  0.74,  0.67,  0.61,  0.54 ], // G=6
-  [ 0.87,  0.81,  0.76,  0.70,  0.65,  0.59,  0.54,  0.48,  0.43 ], // G=7
-  [ 0.66,  0.62,  0.58,  0.54,  0.50,  0.46,  0.42,  0.38,  0.34 ], // G=8
+  [ 2.80,  2.63,  2.45,  2.28,  2.01,  1.82,  1.75,  1.67,  1.59 ], // G=0
+  [ 2.56,  2.40,  2.24,  2.08,  1.84,  1.60,  1.58,  1.51,  1.44 ], // G=1
+  [ 2.24,  2.10,  1.96,  1.82,  1.61,  1.40,  1.33,  1.31,  1.25 ], // G=2
+  [ 1.92,  1.80,  1.68,  1.56,  1.38,  1.20,  1.14,  1.08,  1.06 ], // G=3
+  [ 1.60,  1.50,  1.40,  1.30,  1.15,  1.00,  0.95,  0.90,  0.85 ], // G=4
+  [ 1.50,  1.35,  1.26,  1.17,  1.04,  0.90,  0.86,  0.81,  0.77 ], // G=5
+  [ 1.43,  1.33,  1.19,  1.11,  0.98,  0.85,  0.81,  0.77,  0.72 ], // G=6
+  [ 1.36,  1.26,  1.16,  1.04,  0.92,  0.80,  0.76,  0.72,  0.68 ], // G=7
+  [ 1.28,  1.19,  1.10,  1.01,  0.86,  0.75,  0.71,  0.68,  0.64 ], // G=8
 ];
-const BASELINE_GP = SKILL_MULT_TABLE[4][5]; // 1.05 — baseline G4/P5
 
 function skillMultiplier(gunnery: number, piloting: number): number {
   const g = Math.max(0, Math.min(8, gunnery));
   const p = Math.max(0, Math.min(8, piloting));
-  return SKILL_MULT_TABLE[g][p] / BASELINE_GP;
+  return SKILL_MULT_TABLE[g][p];
 }
 
 function bvAdjusted(bv: number, gunnery: number, piloting: number): number {
