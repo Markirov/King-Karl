@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="ArcRoyal Behemot" model="X" tons="100" motive="Tracked" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>2432</battle_value>
+    <motive type="Tracked" cruise="3" turret="Single Turret" />
+    <cost>1.0752E8</cost>
+    <rules_level>3</rules_level>
+    <era>2</era>
+    <productionera>2</productionera>
+    <techbase manufacturer="Mitchell Vehicles" location="Graham IV (destroyed 2767)">Mixed</techbase>
+    <year restricted="FALSE">0</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="true" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="300" manufacturer="Janzen" techbase="1">XXL Engine</engine>
+    <armor manufacturer="Durolex" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>94</front>
+        <left>76</left>
+        <right>76</right>
+        <rear>61</rear>
+        <primaryturret>77</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>Blackmore</source>
+        <info>ArcRoyal Behemot X 100t, 3/5, XXLFE, 20.0T/98% FF Armor; 39 SHS; 1 TC, 3 ERLPL, 1 AECM, TC</info>
+        <battleforce pv="24" wt="4" mv="3t" s="4" m="4" l="4" e="0" ov="0" armor="13" internal="5" abilities="AECM, ENE, TUR(4/4/4)" />
+        <heatsinks number="39" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(CL) ER Large Pulse Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ER Large Pulse Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ER Large Pulse Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) Targeting Computer</name>
+            <type>TargetingComputer</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">Angel ECM</name>
+            <type>equipment</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Stony AIX</commsystem>
+        <tandtsystem>AL2200 Track-Nav AI System</tandtsystem>
+    </fluff>
+</combatvehicle>

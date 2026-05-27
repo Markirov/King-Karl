@@ -36,6 +36,12 @@
     "year": 3045
   },
   {
+    "name": "'Slagmaiden' SLG-X",
+    "bv2": 1602,
+    "file": "Slagmaiden SLG-X.ssw",
+    "year": 3076
+  },
+  {
     "name": "'Space Hound' ProspectorMech AM-PRM-SH1",
     "bv2": 465,
     "file": "Space Hound ProspectorMech AM-PRM-SH1.ssw",
@@ -126,6 +132,12 @@
     "year": 3063
   },
   {
+    "name": "Albatross ALB-5W (Dantalion)",
+    "bv2": 2296,
+    "file": "Albatross ALB-5W (Dantalion).ssw",
+    "year": 3073
+  },
+  {
     "name": "Alfar AL-A1",
     "bv2": 1447,
     "file": "Alfar AL-A1.ssw",
@@ -162,6 +174,12 @@
     "year": 3009
   },
   {
+    "name": "Annihilator ANH-1E",
+    "bv2": 1625,
+    "file": "Annihilator ANH-1E.ssw",
+    "year": 3028
+  },
+  {
     "name": "Annihilator ANH-1G",
     "bv2": 2274,
     "file": "Annihilator ANH-1G.ssw",
@@ -178,6 +196,12 @@
     "bv2": 1595,
     "file": "Annihilator ANH-2A.ssw",
     "year": 3048
+  },
+  {
+    "name": "Annihilator ANH-2AX",
+    "bv2": 2553,
+    "file": "Annihilator ANH-2AX.ssw",
+    "year": 3074
   },
   {
     "name": "Annihilator ANH-3A",
@@ -226,6 +250,12 @@
     "bv2": 951,
     "file": "Anubis ABS-3L.ssw",
     "year": 3063
+  },
+  {
+    "name": "Anubis ABS-3MC",
+    "bv2": 1074,
+    "file": "Anubis ABS-3MC.ssw",
+    "year": 3081
   },
   {
     "name": "Anubis ABS-3R",
@@ -336,6 +366,18 @@
     "year": 3083
   },
   {
+    "name": "Aquagladius AQS-3",
+    "bv2": 834,
+    "file": "Aquagladius AQS-3.ssw",
+    "year": 3065
+  },
+  {
+    "name": "Aquagladius AQS-4",
+    "bv2": 1486,
+    "file": "Aquagladius AQS-4.ssw",
+    "year": 3066
+  },
+  {
     "name": "Arana ARA-S-1",
     "bv2": 1092,
     "file": "Arana ARA-S-1.ssw",
@@ -360,10 +402,22 @@
     "year": 3081
   },
   {
+    "name": "Arbiter ARB-001",
+    "bv2": 507,
+    "file": "Arbiter ARB-001.ssw",
+    "year": 3063
+  },
+  {
     "name": "Arbiter ARB-001 SecurityMech",
     "bv2": 507,
     "file": "Arbiter ARB-001 SecurityMech.ssw",
     "year": 3074
+  },
+  {
+    "name": "ARC-1A Archer",
+    "bv2": 1269,
+    "file": "ARC-1A Archer.ssw",
+    "year": 2458
   },
   {
     "name": "Arcas",
@@ -393,7 +447,7 @@
     "name": "Archer (Wolf)",
     "bv2": 2365,
     "file": "Archer (Wolf).ssw",
-    "year": 3055
+    "year": 3051
   },
   {
     "name": "Archer ARC-2K",
@@ -405,6 +459,12 @@
     "name": "Archer ARC-2R",
     "bv2": 1477,
     "file": "Archer ARC-2R.ssw",
+    "year": 2474
+  },
+  {
+    "name": "Archer ARC-2R (Morgan)",
+    "bv2": 1477,
+    "file": "Archer ARC-2R (Morgan).ssw",
     "year": 2474
   },
   {
@@ -429,7 +489,7 @@
     "name": "Archer ARC-2Rb",
     "bv2": 1705,
     "file": "Archer ARC-2Rb.ssw",
-    "year": 2750
+    "year": 2752
   },
   {
     "name": "Archer ARC-2S",
@@ -465,19 +525,19 @@
     "name": "Archer ARC-5R",
     "bv2": 1672,
     "file": "Archer ARC-5R.ssw",
-    "year": 3050
+    "year": 3052
   },
   {
     "name": "Archer ARC-5S",
     "bv2": 1353,
     "file": "Archer ARC-5S.ssw",
-    "year": 3050
+    "year": 3052
   },
   {
     "name": "Archer ARC-5W",
     "bv2": 1337,
     "file": "Archer ARC-5W.ssw",
-    "year": 3050
+    "year": 3052
   },
   {
     "name": "Archer ARC-6S",
@@ -547,7 +607,7 @@
   },
   {
     "name": "Archer C",
-    "bv2": 1883,
+    "bv2": 1721,
     "file": "Archer C.ssw",
     "year": 3050
   },
@@ -565,9 +625,9 @@
   },
   {
     "name": "Arctic Wolf",
-    "bv2": 1641,
+    "bv2": 1330,
     "file": "Arctic Wolf.ssw",
-    "year": 3075
+    "year": 3059
   },
   {
     "name": "Arctic Wolf 2",
@@ -678,6 +738,12 @@
     "year": 3068
   },
   {
+    "name": "Atlas AS7-00 (Jurn)",
+    "bv2": 2052,
+    "file": "Atlas AS7-00 (Jurn).ssw",
+    "year": 3081
+  },
+  {
     "name": "Atlas AS7-A",
     "bv2": 1787,
     "file": "Atlas AS7-A.ssw",
@@ -700,6 +766,12 @@
     "bv2": 1897,
     "file": "Atlas AS7-D.ssw",
     "year": 2755
+  },
+  {
+    "name": "Atlas AS7-D (Danielle)",
+    "bv2": 1976,
+    "file": "Atlas AS7-D (Danielle).ssw",
+    "year": 3028
   },
   {
     "name": "Atlas AS7-D-DC",
@@ -730,6 +802,18 @@
     "bv2": 2160,
     "file": "Atlas AS7-K2.ssw",
     "year": 3082
+  },
+  {
+    "name": "Atlas AS7-K2 (Jedra)",
+    "bv2": 1971,
+    "file": "Atlas AS7-K2 (Jedra).ssw",
+    "year": 3133
+  },
+  {
+    "name": "Atlas AS7-K2 Jedra",
+    "bv2": 1971,
+    "file": "Atlas AS7-K2 Jedra.ssw",
+    "year": 3133
   },
   {
     "name": "Atlas AS7-K3",
@@ -786,6 +870,12 @@
     "year": 3062
   },
   {
+    "name": "Atlas AS7-WGS (Samsonov)",
+    "bv2": 1884,
+    "file": "Atlas AS7-WGS (Samsonov).ssw",
+    "year": 3025
+  },
+  {
     "name": "Atlas AS8-D",
     "bv2": 2432,
     "file": "Atlas AS8-D.ssw",
@@ -793,7 +883,7 @@
   },
   {
     "name": "Atlas C",
-    "bv2": 2340,
+    "bv2": 2174,
     "file": "Atlas C.ssw",
     "year": 3050
   },
@@ -808,6 +898,12 @@
     "bv2": 2491,
     "file": "Atlas II AS7-D-H (Devlin).ssw",
     "year": 3078
+  },
+  {
+    "name": "Atlas II AS7-D-H (Kerensky)",
+    "bv2": 2777,
+    "file": "Atlas II AS7-D-H (Kerensky).ssw",
+    "year": 2834
   },
   {
     "name": "Atlas II AS7-D-H2",
@@ -870,10 +966,28 @@
     "year": 3142
   },
   {
+    "name": "Awesome AWS-11M",
+    "bv2": 1801,
+    "file": "Awesome AWS-11M.ssw",
+    "year": 3079
+  },
+  {
+    "name": "Awesome AWS-11R",
+    "bv2": 1878,
+    "file": "Awesome AWS-11R.ssw",
+    "year": 3133
+  },
+  {
     "name": "Awesome AWS-8Q",
     "bv2": 1605,
     "file": "Awesome AWS-8Q.ssw",
     "year": 2665
+  },
+  {
+    "name": "Awesome AWS-8Q (Buck)",
+    "bv2": 1787,
+    "file": "Awesome AWS-8Q (Buck).ssw",
+    "year": 3076
   },
   {
     "name": "Awesome AWS-8R",
@@ -984,6 +1098,12 @@
     "year": 3083
   },
   {
+    "name": "Axman AXM-6X",
+    "bv2": 2132,
+    "file": "Axman AXM-6X.ssw",
+    "year": 3074
+  },
+  {
     "name": "Baboon (Howler)",
     "bv2": 645,
     "file": "Baboon (Howler).ssw",
@@ -1078,6 +1198,18 @@
     "bv2": 2709,
     "file": "Bane (Kraken) 4.ssw",
     "year": 3066
+  },
+  {
+    "name": "Banshee BNC-11X",
+    "bv2": 2030,
+    "file": "Banshee BNC-11X.ssw",
+    "year": 3076
+  },
+  {
+    "name": "Banshee BNC-1E",
+    "bv2": 1458,
+    "file": "Banshee BNC-1E.ssw",
+    "year": 2445
   },
   {
     "name": "Banshee BNC-3E",
@@ -1182,6 +1314,12 @@
     "year": 3109
   },
   {
+    "name": "Banzai BNZ-X",
+    "bv2": 2647,
+    "file": "Banzai BNZ-X.ssw",
+    "year": 3076
+  },
+  {
     "name": "Barghest BGS-1T",
     "bv2": 1787,
     "file": "Barghest BGS-1T.ssw",
@@ -1204,6 +1342,12 @@
     "bv2": 1734,
     "file": "Barghest BGS-4T.ssw",
     "year": 3083
+  },
+  {
+    "name": "Barghest BGS-4X",
+    "bv2": 1667,
+    "file": "Barghest BGS-4X.ssw",
+    "year": 3078
   },
   {
     "name": "Barghest BGS-7S",
@@ -1234,6 +1378,12 @@
     "bv2": 926,
     "file": "Battle Hawk BH-K306.ssw",
     "year": 3067
+  },
+  {
+    "name": "BattleAxe BKX-1X",
+    "bv2": 1079,
+    "file": "BattleAxe BKX-1X.ssw",
+    "year": 2468
   },
   {
     "name": "Battleaxe BKX-7K",
@@ -1278,6 +1428,12 @@
     "year": 2633
   },
   {
+    "name": "Battlemaster BLR-1G (Red Corsair)",
+    "bv2": 2745,
+    "file": "Battlemaster BLR-1G (Red Corsair).ssw",
+    "year": 3055
+  },
+  {
     "name": "Battlemaster BLR-1G-Bl",
     "bv2": 1551,
     "file": "Battlemaster BLR-1G-Bl.ssw",
@@ -1317,13 +1473,19 @@
     "name": "BattleMaster BLR-2C",
     "bv2": 1563,
     "file": "BattleMaster BLR-2C.ssw",
-    "year": 2925
+    "year": 3000
   },
   {
-    "name": "BattleMaster BLR-3M",
+    "name": "Battlemaster BLR-3M",
     "bv2": 1679,
     "file": "BattleMaster BLR-3M.ssw",
-    "year": 3049
+    "year": 3052
+  },
+  {
+    "name": "Battlemaster BLR-3M (Rogers)",
+    "bv2": 1819,
+    "file": "Battlemaster BLR-3M (Rogers).ssw",
+    "year": 3058
   },
   {
     "name": "BattleMaster BLR-3M-DC",
@@ -1332,10 +1494,10 @@
     "year": 3053
   },
   {
-    "name": "BattleMaster BLR-3S",
+    "name": "Battlemaster BLR-3S",
     "bv2": 1441,
     "file": "BattleMaster BLR-3S.ssw",
-    "year": 3050
+    "year": 3052
   },
   {
     "name": "Battlemaster BLR-4L",
@@ -1488,6 +1650,12 @@
     "year": 3128
   },
   {
+    "name": "Bellerophon BEL-1X",
+    "bv2": 957,
+    "file": "Bellerophon BEL-1X.ssw",
+    "year": 2442
+  },
+  {
     "name": "Beowulf BEO-12",
     "bv2": 1319,
     "file": "Beowulf BEO-12.ssw",
@@ -1500,10 +1668,22 @@
     "year": 3075
   },
   {
+    "name": "Beowulf BEO-X-7A",
+    "bv2": 1473,
+    "file": "Beowulf BEO-X-7A.ssw",
+    "year": 3068
+  },
+  {
     "name": "Beowulf IIC",
     "bv2": 2048,
     "file": "Beowulf IIC.ssw",
     "year": 3084
+  },
+  {
+    "name": "Beowulf IIC PR",
+    "bv2": 1992,
+    "file": "Beowulf IIC PR.ssw",
+    "year": 3086
   },
   {
     "name": "Berserker BRZ-A3",
@@ -1698,6 +1878,12 @@
     "year": 3138
   },
   {
+    "name": "Black Knight BLK-X-KNT 'Red Reaper'",
+    "bv2": 1858,
+    "file": "Black Knight BLK-X-KNT Red Reaper.ssw",
+    "year": 3069
+  },
+  {
     "name": "Black Lanner",
     "bv2": 2268,
     "file": "Black Lanner.ssw",
@@ -1827,13 +2013,19 @@
     "name": "Blade BLD-7R",
     "bv2": 1227,
     "file": "Blade BLD-7R.ssw",
-    "year": 3132
+    "year": 3094
   },
   {
     "name": "Blade BLD-XL",
     "bv2": 1314,
     "file": "Blade BLD-XL.ssw",
     "year": 3087
+  },
+  {
+    "name": "Blade BLD-XR",
+    "bv2": 1101,
+    "file": "Blade BLD-XR.ssw",
+    "year": 3125
   },
   {
     "name": "Blade BLD-XS",
@@ -1926,6 +2118,24 @@
     "year": 3073
   },
   {
+    "name": "Bombard BMB-010",
+    "bv2": 850,
+    "file": "Bombard BMB-010.ssw",
+    "year": 3054
+  },
+  {
+    "name": "Bombard BMB-013",
+    "bv2": 1019,
+    "file": "Bombard BMB-013.ssw",
+    "year": 3063
+  },
+  {
+    "name": "Bombard BMB-1X",
+    "bv2": 1648,
+    "file": "Bombard BMB-1X.ssw",
+    "year": 3068
+  },
+  {
     "name": "Bombardier BMB-05A",
     "bv2": 1440,
     "file": "Bombardier BMB-05A.ssw",
@@ -2016,6 +2226,12 @@
     "year": 3065
   },
   {
+    "name": "Brigand LDT-5",
+    "bv2": 762,
+    "file": "Brigand LDT-5.ssw",
+    "year": 3076
+  },
+  {
     "name": "Brigand LDT-X1",
     "bv2": 937,
     "file": "Brigand LDT-X1.ssw",
@@ -2038,6 +2254,36 @@
     "bv2": 1038,
     "file": "Brigand LDT-X4.ssw",
     "year": 3078
+  },
+  {
+    "name": "Brigand LDT-XPR1",
+    "bv2": 723,
+    "file": "Brigand LDT-XPR1.ssw",
+    "year": 3076
+  },
+  {
+    "name": "Brigand LDT-XPR2",
+    "bv2": 956,
+    "file": "Brigand LDT-XPR2.ssw",
+    "year": 3076
+  },
+  {
+    "name": "Brigand LDT-XPR3",
+    "bv2": 752,
+    "file": "Brigand LDT-XPR3.ssw",
+    "year": 3076
+  },
+  {
+    "name": "Brigand LDT-XPR4",
+    "bv2": 739,
+    "file": "Brigand LDT-XPR4.ssw",
+    "year": 3076
+  },
+  {
+    "name": "Brigand LDT-XPR5",
+    "bv2": 743,
+    "file": "Brigand LDT-XPR5.ssw",
+    "year": 3076
   },
   {
     "name": "Bruin",
@@ -2322,6 +2568,12 @@
     "year": 3102
   },
   {
+    "name": "Cataphract CTF-0X",
+    "bv2": 1258,
+    "file": "Cataphract CTF-0X.ssw",
+    "year": 3025
+  },
+  {
     "name": "Cataphract CTF-1X",
     "bv2": 1316,
     "file": "Cataphract CTF-1X.ssw",
@@ -2386,6 +2638,12 @@
     "bv2": 2090,
     "file": "Cataphract CTF-5L.ssw",
     "year": 3150
+  },
+  {
+    "name": "Cataphract CTF-5MOC (Naomi)",
+    "bv2": 2028,
+    "file": "Cataphract CTF-5MOC (Naomi).ssw",
+    "year": 3067
   },
   {
     "name": "Catapult CPLT-A1",
@@ -2550,6 +2808,12 @@
     "year": 3072
   },
   {
+    "name": "CattleMaster RA-4 'HerderMech'",
+    "bv2": 228,
+    "file": "CattleMaster RA-4 HerderMech.ssw",
+    "year": 3024
+  },
+  {
     "name": "Cattlemaster RA-4 'Hunter'",
     "bv2": 260,
     "file": "Cattlemaster RA-4 Hunter.ssw",
@@ -2566,6 +2830,18 @@
     "bv2": 3044,
     "file": "Cave Lion.ssw",
     "year": 3122
+  },
+  {
+    "name": "Cazador",
+    "bv2": 921,
+    "file": "Cazador.ssw",
+    "year": 3140
+  },
+  {
+    "name": "Celerity CLR-02-X-D",
+    "bv2": 157,
+    "file": "Celerity CLR-02-X-D.ssw",
+    "year": 3067
   },
   {
     "name": "Celerity CLR-03-O",
@@ -2670,6 +2946,12 @@
     "year": 3076
   },
   {
+    "name": "Centurion CN9-H",
+    "bv2": 848,
+    "file": "Centurion CN9-H.ssw",
+    "year": 3077
+  },
+  {
     "name": "Centurion CN9-YLW 'Yen Lo Wang'",
     "bv2": 957,
     "file": "Centurion CN9-YLW Yen Lo Wang.ssw",
@@ -2680,6 +2962,12 @@
     "bv2": 1435,
     "file": "Centurion CN9-YLW2 Yen Lo Wang.ssw",
     "year": 3051
+  },
+  {
+    "name": "Centurion CN9-YLW3 'Yen Lo Wang'",
+    "bv2": 1815,
+    "file": "Centurion CN9-YLW3 Yen Lo Wang.ssw",
+    "year": 3101
   },
   {
     "name": "Cephalus",
@@ -2758,6 +3046,12 @@
     "bv2": 1042,
     "file": "Chameleon CLN-7V.ssw",
     "year": 3056
+  },
+  {
+    "name": "Chameleon CLN-7VQ 'Q-Mech'",
+    "bv2": 2105,
+    "file": "Chameleon CLN-7VQ Q-Mech.ssw",
+    "year": 3071
   },
   {
     "name": "Chameleon CLN-7W",
@@ -2854,6 +3148,12 @@
     "bv2": 980,
     "file": "Charger CGR-1L.ssw",
     "year": 3022
+  },
+  {
+    "name": "Charger CGR-1X1",
+    "bv2": 2009,
+    "file": "Charger CGR-1X1.ssw",
+    "year": 3076
   },
   {
     "name": "Charger CGR-2A2",
@@ -3054,6 +3354,30 @@
     "year": 3075
   },
   {
+    "name": "Colossus CL-P3",
+    "bv2": 1986,
+    "file": "Colossus CL-P3.ssw",
+    "year": 3053
+  },
+  {
+    "name": "Colossus CLS-4S",
+    "bv2": 2392,
+    "file": "Colossus CLS-4S.ssw",
+    "year": 3066
+  },
+  {
+    "name": "Colossus CLS-5S",
+    "bv2": 2647,
+    "file": "Colossus CLS-5S.ssw",
+    "year": 3067
+  },
+  {
+    "name": "Commando COM-1A",
+    "bv2": 475,
+    "file": "Commando COM-1A.ssw",
+    "year": 2463
+  },
+  {
     "name": "Commando COM-1B",
     "bv2": 616,
     "file": "Commando COM-1B.ssw",
@@ -3126,6 +3450,12 @@
     "year": 3059
   },
   {
+    "name": "Commando COM-7S2 (Freyr)",
+    "bv2": 1105,
+    "file": "Commando COM-7S2 (Freyr).ssw",
+    "year": 3070
+  },
+  {
     "name": "Commando COM-8S",
     "bv2": 775,
     "file": "Commando COM-8S.ssw",
@@ -3147,7 +3477,7 @@
     "name": "Conjurer (Hellhound)",
     "bv2": 1813,
     "file": "Conjurer (Hellhound).ssw",
-    "year": 2826
+    "year": 2829
   },
   {
     "name": "Conjurer (Hellhound) 2",
@@ -3216,6 +3546,24 @@
     "year": 3065
   },
   {
+    "name": "Copperhead CPR-HD-002",
+    "bv2": 763,
+    "file": "Copperhead CPR-HD-002.ssw",
+    "year": 3054
+  },
+  {
+    "name": "Copperhead CPR-HD-003",
+    "bv2": 1117,
+    "file": "Copperhead CPR-HD-003.ssw",
+    "year": 3065
+  },
+  {
+    "name": "Copperhead CPR-HD-004",
+    "bv2": 1151,
+    "file": "Copperhead CPR-HD-004.ssw",
+    "year": 3066
+  },
+  {
     "name": "Corvis",
     "bv2": 1336,
     "file": "Corvis.ssw",
@@ -3249,7 +3597,7 @@
     "name": "Cougar X",
     "bv2": 1516,
     "file": "Cougar X.ssw",
-    "year": 3132
+    "year": 3086
   },
   {
     "name": "Cougar X 2",
@@ -3274,6 +3622,12 @@
     "bv2": 1410,
     "file": "Cougar X3.ssw",
     "year": 3132
+  },
+  {
+    "name": "Cougar-XR",
+    "bv2": 1783,
+    "file": "Cougar-XR.ssw",
+    "year": 3070
   },
   {
     "name": "Coyotl",
@@ -3450,6 +3804,12 @@
     "year": 3071
   },
   {
+    "name": "Crossbow CRS-X",
+    "bv2": 969,
+    "file": "Crossbow CRS-X.ssw",
+    "year": 2750
+  },
+  {
     "name": "Crosscut ED-X1 LoggerMech",
     "bv2": 251,
     "file": "Crosscut ED-X1 LoggerMech.ssw",
@@ -3520,6 +3880,12 @@
     "bv2": 460,
     "file": "Crosscut ED-X5M-B DemolitionMech MOD.ssw",
     "year": 3079
+  },
+  {
+    "name": "Crosscut ED-XX 'Ichabod'",
+    "bv2": 442,
+    "file": "Crosscut ED-XX Ichabod.ssw",
+    "year": 3075
   },
   {
     "name": "Crosscut LoggerMech ED-X4",
@@ -3708,6 +4074,24 @@
     "year": 3064
   },
   {
+    "name": "Cudgel CDG-1B",
+    "bv2": 1347,
+    "file": "Cudgel CDG-1B.ssw",
+    "year": 3053
+  },
+  {
+    "name": "Cudgel CDG-2A",
+    "bv2": 1750,
+    "file": "Cudgel CDG-2A.ssw",
+    "year": 3066
+  },
+  {
+    "name": "Cudgel CDG-2B",
+    "bv2": 1762,
+    "file": "Cudgel CDG-2B.ssw",
+    "year": 3068
+  },
+  {
     "name": "Cuirass CDR-1X",
     "bv2": 1301,
     "file": "Cuirass CDR-1X.ssw",
@@ -3828,6 +4212,30 @@
     "year": 3038
   },
   {
+    "name": "Daedalus DAD-3C",
+    "bv2": 1070,
+    "file": "Daedalus DAD-3C.ssw",
+    "year": 3053
+  },
+  {
+    "name": "Daedalus DAD-3D",
+    "bv2": 1729,
+    "file": "Daedalus DAD-3D.ssw",
+    "year": 3062
+  },
+  {
+    "name": "Daedalus DAD-4A",
+    "bv2": 1466,
+    "file": "Daedalus DAD-4A.ssw",
+    "year": 3064
+  },
+  {
+    "name": "Daedalus DAD-4B",
+    "bv2": 1431,
+    "file": "Daedalus DAD-4B.ssw",
+    "year": 3067
+  },
+  {
     "name": "Daedalus GTX2 'Militarized'",
     "bv2": 836,
     "file": "Daedalus GTX2 Militarized.ssw",
@@ -3880,6 +4288,12 @@
     "bv2": 1148,
     "file": "Daimyo DMO-1K.ssw",
     "year": 3053
+  },
+  {
+    "name": "Daimyo DMO-1K2 (al-Shahab)",
+    "bv2": 1332,
+    "file": "Daimyo DMO-1K2 (al-Shahab).ssw",
+    "year": 3066
   },
   {
     "name": "Daimyo DMO-2K",
@@ -4050,6 +4464,12 @@
     "year": 2514
   },
   {
+    "name": "Dervish DV-1S",
+    "bv2": 864,
+    "file": "Dervish DV-1S.ssw",
+    "year": 2520
+  },
+  {
     "name": "Dervish DV-6D",
     "bv2": 1321,
     "file": "Dervish DV-6D.ssw",
@@ -4128,6 +4548,12 @@
     "year": 3062
   },
   {
+    "name": "Dervish DV-8D2 'Lightbringer'",
+    "bv2": 1717,
+    "file": "Dervish DV-8D2 Lightbringer.ssw",
+    "year": 3071
+  },
+  {
     "name": "Dervish DV-9D",
     "bv2": 1518,
     "file": "Dervish DV-9D.ssw",
@@ -4170,6 +4596,12 @@
     "year": 3058
   },
   {
+    "name": "Devastator DVS-X10 MUSE EARTH",
+    "bv2": 3250,
+    "file": "Devastator DVS-X10 MUSE EARTH.ssw",
+    "year": 3075
+  },
+  {
     "name": "Devil",
     "bv2": 1691,
     "file": "Devil.ssw",
@@ -4194,6 +4626,18 @@
     "year": 3057
   },
   {
+    "name": "Dig Lord RCL-4M MiningMech MOD",
+    "bv2": 706,
+    "file": "Dig Lord RCL-4M MiningMech MOD.ssw",
+    "year": 3133
+  },
+  {
+    "name": "Dig Lord RCL-Z1 Armed MiningMech",
+    "bv2": 681,
+    "file": "Dig Lord RCL-Z1 Armed MiningMech.ssw",
+    "year": 3081
+  },
+  {
     "name": "Diomede D-M3D-3 ConstructionMech",
     "bv2": 1228,
     "file": "Diomede D-M3D-3 ConstructionMech.ssw",
@@ -4216,6 +4660,12 @@
     "bv2": 2712,
     "file": "Dire Wolf (Daishi).ssw",
     "year": 3010
+  },
+  {
+    "name": "Dola DOL-1A",
+    "bv2": 911,
+    "file": "Dola DOL-1A.ssw",
+    "year": 3079
   },
   {
     "name": "Dola DOL-1A1",
@@ -4254,6 +4704,12 @@
     "year": 2754
   },
   {
+    "name": "Dragon DRG-2Y (Yoriyoshi)",
+    "bv2": 1257,
+    "file": "Dragon DRG-2Y (Yoriyoshi).ssw",
+    "year": 3025
+  },
+  {
     "name": "Dragon DRG-5N",
     "bv2": 1223,
     "file": "Dragon DRG-5N.ssw",
@@ -4290,6 +4746,12 @@
     "year": 3065
   },
   {
+    "name": "Dragon Fire DGR-6FC2 (Gregory)",
+    "bv2": 2230,
+    "file": "Dragon Fire DGR-6FC2 (Gregory).ssw",
+    "year": 3067
+  },
+  {
     "name": "Dragon II DRG-11K",
     "bv2": 1598,
     "file": "Dragon II DRG-11K.ssw",
@@ -4312,6 +4774,12 @@
     "bv2": 1669,
     "file": "Dragoon AEM-01.ssw",
     "year": 2769
+  },
+  {
+    "name": "Dragoon AEM-05C",
+    "bv2": 1893,
+    "file": "Dragoon AEM-05C.ssw",
+    "year": 3141
   },
   {
     "name": "Drift Shag",
@@ -4404,6 +4872,12 @@
     "year": 3077
   },
   {
+    "name": "Eisenfaust EFT-2",
+    "bv2": 715,
+    "file": "Eisenfaust EFT-2.ssw",
+    "year": 2471
+  },
+  {
     "name": "Eisenfaust EFT-4J",
     "bv2": 977,
     "file": "Eisenfaust EFT-4J.ssw",
@@ -4426,6 +4900,12 @@
     "bv2": 2948,
     "file": "Emperor Crab EC-BL.ssw",
     "year": 3070
+  },
+  {
+    "name": "Emperor EMP-1A",
+    "bv2": 1453,
+    "file": "Emperor EMP-1A.ssw",
+    "year": 2442
   },
   {
     "name": "Emperor EMP-5A",
@@ -4468,6 +4948,12 @@
     "bv2": 2090,
     "file": "Emperor EMP-6M.ssw",
     "year": 3069
+  },
+  {
+    "name": "Emperor EMP-6ME 'Mercury Elite'",
+    "bv2": 2004,
+    "file": "Emperor EMP-6ME Mercury Elite.ssw",
+    "year": 3075
   },
   {
     "name": "Emperor EMP-6S",
@@ -4602,6 +5088,18 @@
     "year": 3075
   },
   {
+    "name": "Enforcer III ENF-7D",
+    "bv2": 1495,
+    "file": "Enforcer III ENF-7D.ssw",
+    "year": 3104
+  },
+  {
+    "name": "Enforcer III ENF-7X MUSE COMPACT",
+    "bv2": 1670,
+    "file": "Enforcer III ENF-7X MUSE COMPACT.ssw",
+    "year": 3074
+  },
+  {
     "name": "Epimetheus",
     "bv2": 2517,
     "file": "Epimetheus.ssw",
@@ -4698,6 +5196,12 @@
     "year": 3131
   },
   {
+    "name": "Exterminator Caine EXT-4DX",
+    "bv2": 1794,
+    "file": "Exterminator Caine EXT-4DX.ssw",
+    "year": 2754
+  },
+  {
     "name": "Exterminator EXT-4A",
     "bv2": 1372,
     "file": "Exterminator EXT-4A.ssw",
@@ -4740,6 +5244,12 @@
     "year": 3074
   },
   {
+    "name": "Exterminator EXT-6CS",
+    "bv2": 1592,
+    "file": "Exterminator EXT-6CS.ssw",
+    "year": 3079
+  },
+  {
     "name": "Eyleuka EYL-35A",
     "bv2": 1484,
     "file": "Eyleuka EYL-35A.ssw",
@@ -4768,6 +5278,12 @@
     "bv2": 1401,
     "file": "Eyrie.ssw",
     "year": 3087
+  },
+  {
+    "name": "Fafnir FNR-4A (Peter)",
+    "bv2": 2458,
+    "file": "Fafnir FNR-4A (Peter).ssw",
+    "year": 3068
   },
   {
     "name": "Fafnir FNR-5",
@@ -4968,6 +5484,18 @@
     "year": 3054
   },
   {
+    "name": "Fireball ALM-XF",
+    "bv2": 612,
+    "file": "Fireball ALM-XF.ssw",
+    "year": 3077
+  },
+  {
+    "name": "Firebee FRB-1E (WAM-B)",
+    "bv2": 514,
+    "file": "Firebee FRB-1E (WAM-B).ssw",
+    "year": 2483
+  },
+  {
     "name": "Firebee FRB-2E",
     "bv2": 808,
     "file": "Firebee FRB-2E.ssw",
@@ -5046,6 +5574,12 @@
     "year": 3067
   },
   {
+    "name": "Firestarter FS9-81X",
+    "bv2": 1065,
+    "file": "Firestarter FS9-81X.ssw",
+    "year": 3074
+  },
+  {
     "name": "Firestarter FS9-A",
     "bv2": 773,
     "file": "Firestarter FS9-A.ssw",
@@ -5091,13 +5625,13 @@
     "name": "Firestarter FS9-M2",
     "bv2": 751,
     "file": "Firestarter FS9-M2.ssw",
-    "year": 3131
+    "year": 3101
   },
   {
     "name": "Firestarter FS9-M3",
-    "bv2": 827,
+    "bv2": 866,
     "file": "Firestarter FS9-M3.ssw",
-    "year": 3132
+    "year": 3104
   },
   {
     "name": "Firestarter FS9-M4",
@@ -5166,6 +5700,24 @@
     "year": 3087
   },
   {
+    "name": "Flashfire FLS-P2",
+    "bv2": 718,
+    "file": "Flashfire FLS-P2.ssw",
+    "year": 3054
+  },
+  {
+    "name": "Flashfire FLS-P4",
+    "bv2": 712,
+    "file": "Flashfire FLS-P4.ssw",
+    "year": 3055
+  },
+  {
+    "name": "Flashfire FLS-P5",
+    "bv2": 654,
+    "file": "Flashfire FLS-P5.ssw",
+    "year": 3067
+  },
+  {
     "name": "Flashman FLS-7K",
     "bv2": 1480,
     "file": "Flashman FLS-7K.ssw",
@@ -5224,6 +5776,12 @@
     "bv2": 332,
     "file": "Flea Fire Ant.ssw",
     "year": 3063
+  },
+  {
+    "name": "Flea FLE-14",
+    "bv2": 270,
+    "file": "Flea FLE-14.ssw",
+    "year": 2519
   },
   {
     "name": "Flea FLE-15",
@@ -5293,7 +5851,7 @@
   },
   {
     "name": "Fox CS-1",
-    "bv2": 1574,
+    "bv2": 1416,
     "file": "Fox CS-1.ssw",
     "year": 2824
   },
@@ -5343,6 +5901,12 @@
     "name": "Galahad GLH-3D",
     "bv2": 1268,
     "file": "Galahad GLH-3D.ssw",
+    "year": 3070
+  },
+  {
+    "name": "Galahad GLH-3D (Laodices)",
+    "bv2": 1549,
+    "file": "Galahad GLH-3D (Laodices).ssw",
     "year": 3070
   },
   {
@@ -5518,6 +6082,12 @@
     "bv2": 1517,
     "file": "Gladiator (Keller).ssw",
     "year": 3071
+  },
+  {
+    "name": "Gladiator GLD-1R",
+    "bv2": 1027,
+    "file": "Gladiator GLD-1R.ssw",
+    "year": 2468
   },
   {
     "name": "Gladiator GLD-1R (Keller)",
@@ -5826,6 +6396,18 @@
     "year": 3091
   },
   {
+    "name": "Grand Titan T-IT-N14R 'Vengeance'",
+    "bv2": 2237,
+    "file": "Grand Titan T-IT-N14R Vengeance.ssw",
+    "year": 3075
+  },
+  {
+    "name": "Grasshopper (Reynolds)",
+    "bv2": 2344,
+    "file": "Grasshopper (Reynolds).ssw",
+    "year": 3059
+  },
+  {
     "name": "Grasshopper GHR-5H",
     "bv2": 1427,
     "file": "Grasshopper GHR-5H.ssw",
@@ -5833,7 +6415,7 @@
   },
   {
     "name": "Grasshopper GHR-5H ELH",
-    "bv2": 1417,
+    "bv2": 1390,
     "file": "Grasshopper GHR-5H ELH.ssw",
     "year": 2780
   },
@@ -5892,6 +6474,12 @@
     "year": 3081
   },
   {
+    "name": "Grasshopper GHR-7X",
+    "bv2": 1587,
+    "file": "Grasshopper GHR-7X.ssw",
+    "year": 3075
+  },
+  {
     "name": "Grasshopper GHR-8K",
     "bv2": 1754,
     "file": "Grasshopper GHR-8K.ssw",
@@ -5914,6 +6502,18 @@
     "bv2": 1707,
     "file": "Gravedigger GDR-1D.ssw",
     "year": 3105
+  },
+  {
+    "name": "Great Turtle GTR-1",
+    "bv2": 3152,
+    "file": "Great Turtle GTR-1.ssw",
+    "year": 3067
+  },
+  {
+    "name": "Great Turtle GTR-2",
+    "bv2": 2355,
+    "file": "Great Turtle GTR-2.ssw",
+    "year": 3068
   },
   {
     "name": "Great Wyrm",
@@ -5946,6 +6546,12 @@
     "year": 3144
   },
   {
+    "name": "Griffin GRF-1A",
+    "bv2": 1024,
+    "file": "Griffin GRF-1A.ssw",
+    "year": 2465
+  },
+  {
     "name": "Griffin GRF-1BL",
     "bv2": 1272,
     "file": "Griffin GRF-1BL.ssw",
@@ -5953,9 +6559,9 @@
   },
   {
     "name": "Griffin GRF-1DS",
-    "bv2": 1650,
+    "bv2": 1285,
     "file": "Griffin GRF-1DS.ssw",
-    "year": 3049
+    "year": 3052
   },
   {
     "name": "Griffin GRF-1DS",
@@ -5968,6 +6574,12 @@
     "bv2": 1449,
     "file": "Griffin GRF-1E Sparky.ssw",
     "year": 3035
+  },
+  {
+    "name": "Griffin GRF-1E2 'Sparky 2.0'",
+    "bv2": 1862,
+    "file": "Griffin GRF-1E2 Sparky 2.0.ssw",
+    "year": 3074
   },
   {
     "name": "Griffin GRF-1N",
@@ -6027,7 +6639,7 @@
     "name": "Griffin GRF-3M",
     "bv2": 1521,
     "file": "Griffin GRF-3M.ssw",
-    "year": 3049
+    "year": 3052
   },
   {
     "name": "Griffin GRF-3N",
@@ -6156,6 +6768,12 @@
     "year": 3069
   },
   {
+    "name": "Grim Reaper (Einar)",
+    "bv2": 2121,
+    "file": "Grim Reaper (Einar).ssw",
+    "year": 3073
+  },
+  {
     "name": "Grim Reaper GRM-R-PR29",
     "bv2": 1469,
     "file": "Grim Reaper GRM-R-PR29.ssw",
@@ -6172,6 +6790,12 @@
     "bv2": 1655,
     "file": "Grim Reaper GRM-R-PR31.ssw",
     "year": 3066
+  },
+  {
+    "name": "Grim Reaper GRM-R-PR62A",
+    "bv2": 1542,
+    "file": "Grim Reaper GRM-R-PR62A.ssw",
+    "year": 3072
   },
   {
     "name": "Grizzly",
@@ -6384,6 +7008,36 @@
     "year": 3060
   },
   {
+    "name": "Ha Otoko-HR",
+    "bv2": 1553,
+    "file": "Ha Otoko-HR.ssw",
+    "year": 3077
+  },
+  {
+    "name": "Hachiwara HCA-3T",
+    "bv2": 1646,
+    "file": "Hachiwara HCA-3T.ssw",
+    "year": 3064
+  },
+  {
+    "name": "Hachiwara HCA-4T",
+    "bv2": 1728,
+    "file": "Hachiwara HCA-4T.ssw",
+    "year": 3065
+  },
+  {
+    "name": "Hachiwara HCA-4U",
+    "bv2": 1786,
+    "file": "Hachiwara HCA-4U.ssw",
+    "year": 3066
+  },
+  {
+    "name": "Hachiwara HCA-6P",
+    "bv2": 2385,
+    "file": "Hachiwara HCA-6P.ssw",
+    "year": 3069
+  },
+  {
     "name": "Hammer HMR-3C 'Claw-Hammer'",
     "bv2": 976,
     "file": "Hammer HMR-3C Claw-Hammer.ssw",
@@ -6588,6 +7242,12 @@
     "year": 3076
   },
   {
+    "name": "Hatamoto-Kaeru HTM-35X",
+    "bv2": 1906,
+    "file": "Hatamoto-Kaeru HTM-35X.ssw",
+    "year": 3075
+  },
+  {
     "name": "Hatamoto-Kaze HTM-27V",
     "bv2": 1595,
     "file": "Hatamoto-Kaze HTM-27V.ssw",
@@ -6598,6 +7258,12 @@
     "bv2": 1563,
     "file": "Hatamoto-Ku HTM-27W.ssw",
     "year": 3048
+  },
+  {
+    "name": "Hatamoto-Ku HTM-27W2",
+    "bv2": 1699,
+    "file": "Hatamoto-Ku HTM-27W2.ssw",
+    "year": 3115
   },
   {
     "name": "Hatamoto-Mizo HTM-27Y",
@@ -6690,6 +7356,12 @@
     "year": 3064
   },
   {
+    "name": "Hatchetman HCT-7R",
+    "bv2": 1521,
+    "file": "Hatchetman HCT-7R.ssw",
+    "year": 3114
+  },
+  {
     "name": "Hatchetman HCT-7S",
     "bv2": 1243,
     "file": "Hatchetman HCT-7S.ssw",
@@ -6720,6 +7392,12 @@
     "year": 3112
   },
   {
+    "name": "HawkWolf HWK-3F",
+    "bv2": 1349,
+    "file": "HawkWolf HWK-3F.ssw",
+    "year": 3076
+  },
+  {
     "name": "HawkWolf HWK-4F",
     "bv2": 1428,
     "file": "HawkWolf HWK-4F.ssw",
@@ -6742,6 +7420,12 @@
     "bv2": 993,
     "file": "Hector HOR-1C.ssw",
     "year": 2476
+  },
+  {
+    "name": "Helepolis HEP-1H",
+    "bv2": 1063,
+    "file": "Helepolis HEP-1H.ssw",
+    "year": 2460
   },
   {
     "name": "Helepolis HEP-2H",
@@ -6880,6 +7564,12 @@
     "bv2": 1220,
     "file": "Hellspawn HSN-7D.ssw",
     "year": 3062
+  },
+  {
+    "name": "Hellspawn HSN-7D2 (Halperin)",
+    "bv2": 1431,
+    "file": "Hellspawn HSN-7D2 (Halperin).ssw",
+    "year": 3072
   },
   {
     "name": "Hellspawn HSN-8E",
@@ -7056,6 +7746,12 @@
     "year": 3062
   },
   {
+    "name": "Hermes II HER-7S",
+    "bv2": 1525,
+    "file": "Hermes II HER-7S.ssw",
+    "year": 3077
+  },
+  {
     "name": "Hermit Crab HMC-13",
     "bv2": 731,
     "file": "Hermit Crab HMC-13.ssw",
@@ -7080,6 +7776,12 @@
     "year": 3150
   },
   {
+    "name": "Highlander 641-X-2",
+    "bv2": 2185,
+    "file": "Highlander 641-X-2.ssw",
+    "year": 3070
+  },
+  {
     "name": "Highlander HGN-694",
     "bv2": 2358,
     "file": "Highlander HGN-694.ssw",
@@ -7096,6 +7798,12 @@
     "bv2": 2164,
     "file": "Highlander HGN-732 (Colleen).ssw",
     "year": 2820
+  },
+  {
+    "name": "Highlander HGN-732 (Jorgensson)",
+    "bv2": 2682,
+    "file": "Highlander HGN-732 (Jorgensson).ssw",
+    "year": 2834
   },
   {
     "name": "Highlander HGN-732b",
@@ -7296,6 +8004,12 @@
     "year": 3050
   },
   {
+    "name": "Hoplite HOP-4X",
+    "bv2": 1880,
+    "file": "Hoplite HOP-4X.ssw",
+    "year": 3075
+  },
+  {
     "name": "Horned Owl (Peregrine)",
     "bv2": 1434,
     "file": "Horned Owl (Peregrine).ssw",
@@ -7348,6 +8062,18 @@
     "bv2": 535,
     "file": "Hornet HNT-171.ssw",
     "year": 3051
+  },
+  {
+    "name": "Hornet HNT-181",
+    "bv2": 398,
+    "file": "Hornet HNT-181.ssw",
+    "year": 3130
+  },
+  {
+    "name": "Hornet HNT-182",
+    "bv2": 505,
+    "file": "Hornet HNT-182.ssw",
+    "year": 3130
   },
   {
     "name": "Hound HD-2F",
@@ -7524,6 +8250,18 @@
     "year": 3085
   },
   {
+    "name": "Hunchback HBK-7S",
+    "bv2": 1628,
+    "file": "Hunchback HBK-7S.ssw",
+    "year": 3134
+  },
+  {
+    "name": "Hunchback HBK-7X-4",
+    "bv2": 1208,
+    "file": "Hunchback HBK-7X-4.ssw",
+    "year": 3065
+  },
+  {
     "name": "Hunchback IIC",
     "bv2": 1679,
     "file": "Hunchback IIC.ssw",
@@ -7576,6 +8314,12 @@
     "bv2": 1585,
     "file": "Huron Warrior HUR-WO-R4O.ssw",
     "year": 3065
+  },
+  {
+    "name": "Huron Warrior HUR-WO-R4X",
+    "bv2": 1728,
+    "file": "Huron Warrior HUR-WO-R4X.ssw",
+    "year": 3076
   },
   {
     "name": "Hussar HSR-200-D",
@@ -7642,6 +8386,12 @@
     "bv2": 405,
     "file": "Hyena SalvageMech HYN-4B.ssw",
     "year": 3072
+  },
+  {
+    "name": "Icarus ICR-1X",
+    "bv2": 700,
+    "file": "Icarus ICR-1X.ssw",
+    "year": 2470
   },
   {
     "name": "Icarus II ICR-1S",
@@ -7737,7 +8487,7 @@
     "name": "Incubus (Vixen) 2",
     "bv2": 1913,
     "file": "Incubus (Vixen) 2.ssw",
-    "year": 2998
+    "year": 2960
   },
   {
     "name": "Incubus (Vixen) 3",
@@ -7800,6 +8550,12 @@
     "year": 3068
   },
   {
+    "name": "Inquisitor II ITW-200",
+    "bv2": 1186,
+    "file": "Inquisitor II ITW-200.ssw",
+    "year": 3100
+  },
+  {
     "name": "Jabberwocky JAW-65A EngineerMech",
     "bv2": 250,
     "file": "Jabberwocky JAW-65A EngineerMech.ssw",
@@ -7834,6 +8590,12 @@
     "bv2": 918,
     "file": "Jackal JA-KL-1532.ssw",
     "year": 3052
+  },
+  {
+    "name": "Jackal JA-KL-1579",
+    "bv2": 1269,
+    "file": "Jackal JA-KL-1579.ssw",
+    "year": 3077
   },
   {
     "name": "Jackal JA-KL-55",
@@ -8112,6 +8874,12 @@
     "year": 3132
   },
   {
+    "name": "Jenner JR10-X",
+    "bv2": 1269,
+    "file": "Jenner JR10-X.ssw",
+    "year": 3072
+  },
+  {
     "name": "Jenner JR7-A",
     "bv2": 712,
     "file": "Jenner JR7-A.ssw",
@@ -8196,10 +8964,40 @@
     "year": 3060
   },
   {
+    "name": "Jinggau JN-G8BX (Rush)",
+    "bv2": 1337,
+    "file": "Jinggau JN-G8BX (Rush).ssw",
+    "year": 3070
+  },
+  {
     "name": "Jinggau JN-G9CC",
     "bv2": 1656,
     "file": "Jinggau JN-G9CC.ssw",
     "year": 3072
+  },
+  {
+    "name": "Juggernaut JG-R9T1",
+    "bv2": 1719,
+    "file": "Juggernaut JG-R9T1.ssw",
+    "year": 3053
+  },
+  {
+    "name": "Juggernaut JG-R9T2",
+    "bv2": 1916,
+    "file": "Juggernaut JG-R9T2.ssw",
+    "year": 3057
+  },
+  {
+    "name": "Juggernaut JG-R9T3",
+    "bv2": 1959,
+    "file": "Juggernaut JG-R9T3.ssw",
+    "year": 3065
+  },
+  {
+    "name": "Juggernaut JG-R9TX1 'Leapin&apos; Lil'",
+    "bv2": 1946,
+    "file": "Juggernaut JG-R9TX1 Leapin Lil.ssw",
+    "year": 3074
   },
   {
     "name": "Juliano JLN-5A",
@@ -8442,6 +9240,12 @@
     "year": 2703
   },
   {
+    "name": "Kiso K-3N-KRHQ CommandMech",
+    "bv2": 940,
+    "file": "Kiso K-3N-KRHQ CommandMech.ssw",
+    "year": 2823
+  },
+  {
     "name": "Kit Fox (Uller)",
     "bv2": 1085,
     "file": "Kit Fox (Uller).ssw",
@@ -8452,6 +9256,12 @@
     "bv2": 2927,
     "file": "Kodiak.ssw",
     "year": 3001
+  },
+  {
+    "name": "Kodiak (Cale)",
+    "bv2": 2535,
+    "file": "Kodiak (Cale).ssw",
+    "year": 3068
   },
   {
     "name": "Kodiak 2",
@@ -8586,6 +9396,30 @@
     "year": 3095
   },
   {
+    "name": "Koto KT-P2",
+    "bv2": 631,
+    "file": "Koto KT-P2.ssw",
+    "year": 3052
+  },
+  {
+    "name": "Koto KTO-2A",
+    "bv2": 977,
+    "file": "Koto KTO-2A.ssw",
+    "year": 3057
+  },
+  {
+    "name": "Koto KTO-3A",
+    "bv2": 806,
+    "file": "Koto KTO-3A.ssw",
+    "year": 3062
+  },
+  {
+    "name": "Koto KTO-4A",
+    "bv2": 1073,
+    "file": "Koto KTO-4A.ssw",
+    "year": 3068
+  },
+  {
     "name": "Kraken (Bane)",
     "bv2": 1950,
     "file": "Kraken (Bane).ssw",
@@ -8608,6 +9442,12 @@
     "bv2": 2709,
     "file": "Kraken (Bane) 4.ssw",
     "year": 3066
+  },
+  {
+    "name": "Kraken-XR",
+    "bv2": 3055,
+    "file": "Kraken-XR.ssw",
+    "year": 3073
   },
   {
     "name": "Kuma",
@@ -8634,6 +9474,12 @@
     "year": 3141
   },
   {
+    "name": "Kyudo KY2-D-01",
+    "bv2": 748,
+    "file": "Kyudo KY2-D-01.ssw",
+    "year": 2443
+  },
+  {
     "name": "Kyudo KY2-D-02",
     "bv2": 1286,
     "file": "Kyudo KY2-D-02.ssw",
@@ -8650,6 +9496,12 @@
     "bv2": 1999,
     "file": "Lament LMT-2R.ssw",
     "year": 3126
+  },
+  {
+    "name": "Lament LMT-2R (Manes)",
+    "bv2": 2297,
+    "file": "Lament LMT-2R (Manes).ssw",
+    "year": 3141
   },
   {
     "name": "Lament LMT-3C",
@@ -8673,13 +9525,13 @@
     "name": "Lancelot C",
     "bv2": 1960,
     "file": "Lancelot C.ssw",
-    "year": 2832
+    "year": 2921
   },
   {
     "name": "Lancelot C 2",
     "bv2": 2571,
     "file": "Lancelot C 2.ssw",
-    "year": 2857
+    "year": 2921
   },
   {
     "name": "Lancelot LNC25-01",
@@ -8829,7 +9681,13 @@
     "name": "Legionnaire LGN-2K",
     "bv2": 1597,
     "file": "Legionnaire LGN-2K.ssw",
-    "year": 3132
+    "year": 3128
+  },
+  {
+    "name": "Legionnaire LGN-2X1 MUSE FIRE",
+    "bv2": 2032,
+    "file": "Legionnaire LGN-2X1 MUSE FIRE.ssw",
+    "year": 3077
   },
   {
     "name": "Legionnaire LGN-2XA",
@@ -8842,6 +9700,12 @@
     "bv2": 1128,
     "file": "Legionnaire LGN-2XU.ssw",
     "year": 3075
+  },
+  {
+    "name": "Liberator LIB-4T",
+    "bv2": 880,
+    "file": "Liberator LIB-4T.ssw",
+    "year": 3018
   },
   {
     "name": "LIGHTRAY",
@@ -9030,6 +9894,12 @@
     "year": 2750
   },
   {
+    "name": "Locust LCT-3D",
+    "bv2": 436,
+    "file": "Locust LCT-3D.ssw",
+    "year": 3049
+  },
+  {
     "name": "Locust LCT-3M",
     "bv2": 522,
     "file": "Locust LCT-3M.ssw",
@@ -9040,12 +9910,6 @@
     "bv2": 483,
     "file": "Locust LCT-3S.ssw",
     "year": 3049
-  },
-  {
-    "name": "Locust LCT-3V",
-    "bv2": 536,
-    "file": "Locust LCT-3D.ssw",
-    "year": 3004
   },
   {
     "name": "Locust LCT-3V",
@@ -9120,6 +9984,12 @@
     "year": 3121
   },
   {
+    "name": "Longbow LGB-0C",
+    "bv2": 1295,
+    "file": "Longbow LGB-0C.ssw",
+    "year": 2480
+  },
+  {
     "name": "Longbow LGB-0W",
     "bv2": 1337,
     "file": "Longbow LGB-0W.ssw",
@@ -9183,6 +10053,36 @@
     "name": "Longbow LGB-8V",
     "bv2": 1808,
     "file": "Longbow LGB-8V.ssw",
+    "year": 3068
+  },
+  {
+    "name": "Longshot LNG-1B",
+    "bv2": 899,
+    "file": "Longshot LNG-1B.ssw",
+    "year": 3054
+  },
+  {
+    "name": "Longshot LNG-2",
+    "bv2": 1215,
+    "file": "Longshot LNG-2.ssw",
+    "year": 3058
+  },
+  {
+    "name": "Longshot LNG-3",
+    "bv2": 955,
+    "file": "Longshot LNG-3.ssw",
+    "year": 3062
+  },
+  {
+    "name": "Longshot LNG-3C",
+    "bv2": 971,
+    "file": "Longshot LNG-3C.ssw",
+    "year": 3064
+  },
+  {
+    "name": "Longshot LNG-4",
+    "bv2": 1086,
+    "file": "Longshot LNG-4.ssw",
     "year": 3068
   },
   {
@@ -9252,6 +10152,12 @@
     "year": 3058
   },
   {
+    "name": "Mackie MSK-5S",
+    "bv2": 1436,
+    "file": "Mackie MSK-5S.ssw",
+    "year": 2439
+  },
+  {
     "name": "Mackie MSK-6S",
     "bv2": 1461,
     "file": "Mackie MSK-6S.ssw",
@@ -9283,9 +10189,15 @@
   },
   {
     "name": "Mad Cat III",
-    "bv2": 2061,
+    "bv2": 2400,
     "file": "Mad Cat III.ssw",
-    "year": 3132
+    "year": 3086
+  },
+  {
+    "name": "Mad Cat III (Eve)",
+    "bv2": 2393,
+    "file": "Mad Cat III (Eve).ssw",
+    "year": 3134
   },
   {
     "name": "Mad Cat III 2",
@@ -9310,6 +10222,18 @@
     "bv2": 2095,
     "file": "Mad Cat III 5.ssw",
     "year": 3097
+  },
+  {
+    "name": "Mad Cat III Eve",
+    "bv2": 2393,
+    "file": "Mad Cat III Eve.ssw",
+    "year": 3134
+  },
+  {
+    "name": "Mad Cat III-X",
+    "bv2": 2232,
+    "file": "Mad Cat III-X.ssw",
+    "year": 3076
   },
   {
     "name": "Mad Cat Mk II",
@@ -9474,6 +10398,42 @@
     "year": 3088
   },
   {
+    "name": "Mantis MTS-L",
+    "bv2": 1194,
+    "file": "Mantis MTS-L.ssw",
+    "year": 3064
+  },
+  {
+    "name": "Mantis MTS-S",
+    "bv2": 1128,
+    "file": "Mantis MTS-S.ssw",
+    "year": 3061
+  },
+  {
+    "name": "Mantis MTS-T",
+    "bv2": 1312,
+    "file": "Mantis MTS-T.ssw",
+    "year": 3063
+  },
+  {
+    "name": "Mantis MTS-T2",
+    "bv2": 1380,
+    "file": "Mantis MTS-T2.ssw",
+    "year": 3063
+  },
+  {
+    "name": "Mantis MTS-T3",
+    "bv2": 1380,
+    "file": "Mantis MTS-T3.ssw",
+    "year": 3063
+  },
+  {
+    "name": "Mantis SA-MN",
+    "bv2": 704,
+    "file": "Mantis SA-MN.ssw",
+    "year": 3052
+  },
+  {
     "name": "Marauder (Bounty Hunter 3015)",
     "bv2": 1919,
     "file": "Marauder (Bounty Hunter 3015).ssw",
@@ -9511,7 +10471,7 @@
   },
   {
     "name": "Marauder C",
-    "bv2": 1711,
+    "bv2": 1616,
     "file": "Marauder C.ssw",
     "year": 3050
   },
@@ -9567,13 +10527,13 @@
     "name": "Marauder II MAD-5A",
     "bv2": 2058,
     "file": "Marauder II MAD-5A.ssw",
-    "year": 3049
+    "year": 3035
   },
   {
     "name": "Marauder II MAD-5B",
     "bv2": 2589,
     "file": "Marauder II MAD-5B.ssw",
-    "year": 3050
+    "year": 3051
   },
   {
     "name": "Marauder II MAD-5BL-D",
@@ -9585,7 +10545,7 @@
     "name": "Marauder II MAD-5C",
     "bv2": 2024,
     "file": "Marauder II MAD-5C.ssw",
-    "year": 3052
+    "year": 3051
   },
   {
     "name": "Marauder II MAD-5W",
@@ -9624,6 +10584,12 @@
     "year": 3078
   },
   {
+    "name": "Marauder II MAD-6S",
+    "bv2": 2546,
+    "file": "Marauder II MAD-6S.ssw",
+    "year": 3133
+  },
+  {
     "name": "Marauder II MAD-8K",
     "bv2": 2849,
     "file": "Marauder II MAD-8K.ssw",
@@ -9633,7 +10599,7 @@
     "name": "Marauder IIC",
     "bv2": 2680,
     "file": "Marauder IIC.ssw",
-    "year": 2828
+    "year": 2820
   },
   {
     "name": "Marauder IIC 10",
@@ -9681,7 +10647,7 @@
     "name": "Marauder IIC 8",
     "bv2": 2554,
     "file": "Marauder IIC 8.ssw",
-    "year": 3025
+    "year": 2900
   },
   {
     "name": "Marauder IIC 9",
@@ -9795,7 +10761,7 @@
     "name": "Marauder MAD-5M",
     "bv2": 1471,
     "file": "Marauder MAD-5M.ssw",
-    "year": 3051
+    "year": 3053
   },
   {
     "name": "Marauder MAD-5R",
@@ -9807,7 +10773,7 @@
     "name": "Marauder MAD-5S",
     "bv2": 1799,
     "file": "Marauder MAD-5S.ssw",
-    "year": 3051
+    "year": 3053
   },
   {
     "name": "Marauder MAD-5T",
@@ -9886,6 +10852,12 @@
     "bv2": 1868,
     "file": "Marauder MAD-9W2.ssw",
     "year": 3080
+  },
+  {
+    "name": "Marauder MAD-SD (Douglass)",
+    "bv2": 1459,
+    "file": "Marauder MAD-SD (Douglass).ssw",
+    "year": 3025
   },
   {
     "name": "Marco MR-6 ExplorerMech",
@@ -10014,6 +10986,12 @@
     "year": 3062
   },
   {
+    "name": "Mauler MAL-4X 'Todesbote'",
+    "bv2": 1904,
+    "file": "Mauler MAL-4X Todesbote.ssw",
+    "year": 3070
+  },
+  {
     "name": "Mauler MAL-C",
     "bv2": 1473,
     "file": "Mauler MAL-C.ssw",
@@ -10092,6 +11070,12 @@
     "year": 3068
   },
   {
+    "name": "Merlin MLN-SX",
+    "bv2": 1181,
+    "file": "Merlin MLN-SX.ssw",
+    "year": 3075
+  },
+  {
     "name": "Minsk",
     "bv2": 2028,
     "file": "Minsk.ssw",
@@ -10128,10 +11112,22 @@
     "year": 3078
   },
   {
+    "name": "Mongoose C",
+    "bv2": 1386,
+    "file": "Mongoose C.ssw",
+    "year": 2835
+  },
+  {
     "name": "Mongoose C 2",
     "bv2": 1620,
     "file": "Mongoose C 2.ssw",
     "year": 2860
+  },
+  {
+    "name": "Mongoose Gunslinger MON-66GX",
+    "bv2": 887,
+    "file": "Mongoose Gunslinger MON-66GX.ssw",
+    "year": 2766
   },
   {
     "name": "Mongoose II MON-266",
@@ -10252,6 +11248,30 @@
     "bv2": 1358,
     "file": "Morpheus MPR-3 LMorte II.ssw",
     "year": 3067
+  },
+  {
+    "name": "Morpheus MR-P1",
+    "bv2": 1340,
+    "file": "Morpheus MR-P1.ssw",
+    "year": 3051
+  },
+  {
+    "name": "Morpheus MRP-3S",
+    "bv2": 1437,
+    "file": "Morpheus MRP-3S.ssw",
+    "year": 3062
+  },
+  {
+    "name": "Morpheus MRP-3T",
+    "bv2": 1925,
+    "file": "Morpheus MRP-3T.ssw",
+    "year": 3064
+  },
+  {
+    "name": "Morpheus MRP-3W",
+    "bv2": 1299,
+    "file": "Morpheus MRP-3W.ssw",
+    "year": 3066
   },
   {
     "name": "Morrigan",
@@ -10516,6 +11536,12 @@
     "year": 2764
   },
   {
+    "name": "Nightstar NSR-9J (Brubaker)",
+    "bv2": 2838,
+    "file": "Nightstar NSR-9J (Brubaker).ssw",
+    "year": 3058
+  },
+  {
     "name": "Nightstar NSR-9SS",
     "bv2": 2145,
     "file": "Nightstar NSR-9SS.ssw",
@@ -10568,6 +11594,12 @@
     "bv2": 1706,
     "file": "No-Dachi NDA-3S.ssw",
     "year": 3081
+  },
+  {
+    "name": "No-Dachi NDA-3X",
+    "bv2": 2609,
+    "file": "No-Dachi NDA-3X.ssw",
+    "year": 3075
   },
   {
     "name": "Nobori-nin (Huntsman)",
@@ -10696,10 +11728,46 @@
     "year": 3137
   },
   {
+    "name": "Onslaught SA-OS",
+    "bv2": 1562,
+    "file": "Onslaught SA-OS.ssw",
+    "year": 3052
+  },
+  {
+    "name": "Onslaught SA-OS2",
+    "bv2": 1693,
+    "file": "Onslaught SA-OS2.ssw",
+    "year": 3062
+  },
+  {
+    "name": "Onslaught SA-OS3",
+    "bv2": 1659,
+    "file": "Onslaught SA-OS3.ssw",
+    "year": 3062
+  },
+  {
     "name": "Orion IIC",
     "bv2": 2392,
     "file": "Orion IIC.ssw",
     "year": 2841
+  },
+  {
+    "name": "Orion IIC (Burton)",
+    "bv2": 2746,
+    "file": "Orion IIC (Burton).ssw",
+    "year": 3105
+  },
+  {
+    "name": "Orion ON1-C",
+    "bv2": 973,
+    "file": "Orion ON1-C.ssw",
+    "year": 2453
+  },
+  {
+    "name": "Orion ON1-H",
+    "bv2": 1307,
+    "file": "Orion ON1-H.ssw",
+    "year": 2456
   },
   {
     "name": "Orion ON1-K",
@@ -10780,6 +11848,12 @@
     "year": 3083
   },
   {
+    "name": "Orion ON3-MX",
+    "bv2": 1849,
+    "file": "Orion ON3-MX.ssw",
+    "year": 3075
+  },
+  {
     "name": "Orochi OR-2I",
     "bv2": 2077,
     "file": "Orochi OR-2I.ssw",
@@ -10838,6 +11912,12 @@
     "bv2": 1228,
     "file": "Ostroc OSR-2C.ssw",
     "year": 2511
+  },
+  {
+    "name": "Ostroc OSR-2C (Michi)",
+    "bv2": 1321,
+    "file": "Ostroc OSR-2C (Michi).ssw",
+    "year": 3028
   },
   {
     "name": "Ostroc OSR-2Cb",
@@ -10900,6 +11980,12 @@
     "year": 3070
   },
   {
+    "name": "Ostscout IIC",
+    "bv2": 520,
+    "file": "Ostscout IIC.ssw",
+    "year": 3063
+  },
+  {
     "name": "Ostscout OTT-10CS",
     "bv2": 862,
     "file": "Ostscout OTT-10CS.ssw",
@@ -10933,7 +12019,7 @@
     "name": "Ostscout OTT-7K",
     "bv2": 484,
     "file": "Ostscout OTT-7K.ssw",
-    "year": 3049
+    "year": 3051
   },
   {
     "name": "Ostscout OTT-8J",
@@ -11080,6 +12166,12 @@
     "year": 3077
   },
   {
+    "name": "Pack Hunter II (Isis)",
+    "bv2": 1276,
+    "file": "Pack Hunter II (Isis).ssw",
+    "year": 3133
+  },
+  {
     "name": "Pack Hunter II 2",
     "bv2": 1457,
     "file": "Pack Hunter II 2.ssw",
@@ -11098,10 +12190,34 @@
     "year": 3093
   },
   {
+    "name": "Paladin PAL-1",
+    "bv2": 1361,
+    "file": "Paladin PAL-1.ssw",
+    "year": 3053
+  },
+  {
+    "name": "Paladin PAL-2",
+    "bv2": 1617,
+    "file": "Paladin PAL-2.ssw",
+    "year": 3068
+  },
+  {
+    "name": "Paladin PAL-3",
+    "bv2": 1370,
+    "file": "Paladin PAL-3.ssw",
+    "year": 3068
+  },
+  {
     "name": "Pandarus LFA-1A",
     "bv2": 1589,
     "file": "Pandarus LFA-1A.ssw",
     "year": 3083
+  },
+  {
+    "name": "Pandarus LFA-1X",
+    "bv2": 1486,
+    "file": "Pandarus LFA-1X.ssw",
+    "year": 3078
   },
   {
     "name": "Panther PNT-10BL",
@@ -11212,6 +12328,12 @@
     "year": 3072
   },
   {
+    "name": "Pathfinder PFF-2",
+    "bv2": 452,
+    "file": "Pathfinder PFF-2.ssw",
+    "year": 3075
+  },
+  {
     "name": "Patriot PKM-2C",
     "bv2": 1613,
     "file": "Patriot PKM-2C.ssw",
@@ -11240,6 +12362,12 @@
     "bv2": 73,
     "file": "Patron LoaderMech PTN-1.ssw",
     "year": 2550
+  },
+  {
+    "name": "Patron MilitiaMech PTN-2",
+    "bv2": 143,
+    "file": "Patron MilitiaMech PTN-2.ssw",
+    "year": 3076
   },
   {
     "name": "Patron PatrolMech PTN-2M",
@@ -11278,10 +12406,22 @@
     "year": 3067
   },
   {
+    "name": "Peacemaker PM6",
+    "bv2": 426,
+    "file": "Peacemaker PM6.ssw",
+    "year": 3070
+  },
+  {
     "name": "Pendragon PDG-1R",
     "bv2": 2151,
     "file": "Pendragon PDG-1R.ssw",
     "year": 3083
+  },
+  {
+    "name": "Pendragon PDG-1X MUSE RED",
+    "bv2": 2230,
+    "file": "Pendragon PDG-1X MUSE RED.ssw",
+    "year": 3072
   },
   {
     "name": "Penetrator PTR-4D",
@@ -11330,6 +12470,12 @@
     "bv2": 1834,
     "file": "Penthesilea PEN-2MAF.ssw",
     "year": 3085
+  },
+  {
+    "name": "Penthesilea PEN-3H",
+    "bv2": 1666,
+    "file": "Penthesilea PEN-3H.ssw",
+    "year": 3129
   },
   {
     "name": "Peregrine (Horned Owl)",
@@ -11579,9 +12725,9 @@
   },
   {
     "name": "Phoenix PX-1R",
-    "bv2": 900,
+    "bv2": 917,
     "file": "Phoenix PX-1R.ssw",
-    "year": 2510
+    "year": 2474
   },
   {
     "name": "Phoenix PX-3R",
@@ -11624,6 +12770,12 @@
     "bv2": 2630,
     "file": "Pillager PLG-4BL-ZZ.ssw",
     "year": 3064
+  },
+  {
+    "name": "Pillager PLG-4X 'Anvil'",
+    "bv2": 1927,
+    "file": "Pillager PLG-4X Anvil.ssw",
+    "year": 3077
   },
   {
     "name": "Pillager PLG-4Z",
@@ -11716,6 +12868,24 @@
     "year": 3060
   },
   {
+    "name": "Pompier GM-FL FireMech",
+    "bv2": 88,
+    "file": "Pompier GM-FL FireMech.ssw",
+    "year": 3076
+  },
+  {
+    "name": "Porcupine PRC-1N",
+    "bv2": 870,
+    "file": "Porcupine PRC-1N.ssw",
+    "year": 3063
+  },
+  {
+    "name": "Porcupine PRC-2N",
+    "bv2": 901,
+    "file": "Porcupine PRC-2N.ssw",
+    "year": 3067
+  },
+  {
     "name": "Pouncer",
     "bv2": 2557,
     "file": "Pouncer.ssw",
@@ -11788,6 +12958,12 @@
     "year": 3075
   },
   {
+    "name": "Prefect PRF-1C",
+    "bv2": 1857,
+    "file": "Prefect PRF-1C.ssw",
+    "year": 3133
+  },
+  {
     "name": "Prefect PRF-1R",
     "bv2": 1847,
     "file": "Prefect PRF-1R.ssw",
@@ -11828,6 +13004,24 @@
     "bv2": 595,
     "file": "Prey Seeker PY-SR10.ssw",
     "year": 3136
+  },
+  {
+    "name": "Prometheus",
+    "bv2": 2401,
+    "file": "Prometheus.ssw",
+    "year": 3053
+  },
+  {
+    "name": "Prowler PWR-1X",
+    "bv2": 2019,
+    "file": "Prowler PWR-1X.ssw",
+    "year": 3068
+  },
+  {
+    "name": "Prowler PWR-1X1",
+    "bv2": 1922,
+    "file": "Prowler PWR-1X1.ssw",
+    "year": 3068
   },
   {
     "name": "Pulverizer",
@@ -11932,6 +13126,12 @@
     "year": 3084
   },
   {
+    "name": "Quickdraw QKD-8X",
+    "bv2": 1612,
+    "file": "Quickdraw QKD-8X.ssw",
+    "year": 3073
+  },
+  {
     "name": "Quickdraw QKD-9M",
     "bv2": 1690,
     "file": "Quickdraw QKD-9M.ssw",
@@ -12032,6 +13232,12 @@
     "bv2": 2130,
     "file": "Rampage RMP-4G.ssw",
     "year": 2750
+  },
+  {
+    "name": "Rampage RMP-4G (Benboudaoud)",
+    "bv2": 1751,
+    "file": "Rampage RMP-4G (Benboudaoud).ssw",
+    "year": 2766
   },
   {
     "name": "Rampage RMP-5G",
@@ -12160,6 +13366,12 @@
     "year": 3069
   },
   {
+    "name": "Raven X RVN-3X",
+    "bv2": 1021,
+    "file": "Raven X RVN-3X.ssw",
+    "year": 3078
+  },
+  {
     "name": "Razorback RZK-10S",
     "bv2": 821,
     "file": "Razorback RZK-10S.ssw",
@@ -12244,6 +13456,12 @@
     "year": 3144
   },
   {
+    "name": "Rhino",
+    "bv2": 2056,
+    "file": "Rhino.ssw",
+    "year": 3140
+  },
+  {
     "name": "Rifleman C",
     "bv2": 1335,
     "file": "Rifleman C.ssw",
@@ -12272,6 +13490,12 @@
     "bv2": 1768,
     "file": "Rifleman II RFL-3N-2 Legend-Killer.ssw",
     "year": 3015
+  },
+  {
+    "name": "Rifleman II RFL-3N-2 (Kataga)",
+    "bv2": 1991,
+    "file": "Rifleman II RFL-3N-2 (Kataga).ssw",
+    "year": 2766
   },
   {
     "name": "Rifleman IIC",
@@ -12322,6 +13546,24 @@
     "year": 3078
   },
   {
+    "name": "Rifleman III RF2-A",
+    "bv2": 1819,
+    "file": "Rifleman III RF2-A.ssw",
+    "year": 2776
+  },
+  {
+    "name": "Rifleman RFL-1N",
+    "bv2": 931,
+    "file": "Rifleman RFL-1N.ssw",
+    "year": 2504
+  },
+  {
+    "name": "Rifleman RFL-2N",
+    "bv2": 1093,
+    "file": "Rifleman RFL-2N.ssw",
+    "year": 2556
+  },
+  {
     "name": "Rifleman RFL-3C",
     "bv2": 1066,
     "file": "Rifleman RFL-3C.ssw",
@@ -12367,13 +13609,13 @@
     "name": "Rifleman RFL-5D",
     "bv2": 1395,
     "file": "Rifleman RFL-5D.ssw",
-    "year": 3050
+    "year": 3053
   },
   {
     "name": "Rifleman RFL-5M",
     "bv2": 1227,
     "file": "Rifleman RFL-5M.ssw",
-    "year": 3049
+    "year": 3052
   },
   {
     "name": "Rifleman RFL-6D",
@@ -12436,6 +13678,18 @@
     "year": 3071
   },
   {
+    "name": "Rifleman RFL-X3 MUSE WIND",
+    "bv2": 2012,
+    "file": "Rifleman RFL-X3 MUSE WIND.ssw",
+    "year": 3076
+  },
+  {
+    "name": "Roadrunner RD-1R",
+    "bv2": 888,
+    "file": "Roadrunner RD-1R.ssw",
+    "year": 2920
+  },
+  {
     "name": "Rokurokubi RK-4K",
     "bv2": 1286,
     "file": "Rokurokubi RK-4K.ssw",
@@ -12452,6 +13706,18 @@
     "bv2": 1858,
     "file": "Rokurokubi RK-4X.ssw",
     "year": 3136
+  },
+  {
+    "name": "Ronin SA-RN",
+    "bv2": 1084,
+    "file": "Ronin SA-RN.ssw",
+    "year": 3051
+  },
+  {
+    "name": "Ronin SA-RN7",
+    "bv2": 1180,
+    "file": "Ronin SA-RN7.ssw",
+    "year": 3063
   },
   {
     "name": "Rook NH-1A",
@@ -12476,6 +13742,12 @@
     "bv2": 1746,
     "file": "Rook NH-3X.ssw",
     "year": 3076
+  },
+  {
+    "name": "Rook-X NH-1B",
+    "bv2": 1187,
+    "file": "Rook-X NH-1B.ssw",
+    "year": 3077
   },
   {
     "name": "Ryoken (Stormcrow)",
@@ -12592,10 +13864,34 @@
     "year": 3122
   },
   {
+    "name": "Sarissa MN1-D",
+    "bv2": 850,
+    "file": "Sarissa MN1-D.ssw",
+    "year": 3080
+  },
+  {
     "name": "Sarissa MN2-A SecurityMech",
     "bv2": 771,
     "file": "Sarissa MN2-A SecurityMech.ssw",
     "year": 3082
+  },
+  {
+    "name": "Sasquatch SQS-TH-001",
+    "bv2": 1940,
+    "file": "Sasquatch SQS-TH-001.ssw",
+    "year": 3054
+  },
+  {
+    "name": "Sasquatch SQS-TH-002",
+    "bv2": 1993,
+    "file": "Sasquatch SQS-TH-002.ssw",
+    "year": 3065
+  },
+  {
+    "name": "Sasquatch SQS-TH-003",
+    "bv2": 1667,
+    "file": "Sasquatch SQS-TH-003.ssw",
+    "year": 3068
   },
   {
     "name": "Savage Coyote",
@@ -12869,7 +14165,7 @@
   },
   {
     "name": "Shadow Hawk C",
-    "bv2": 1348,
+    "bv2": 1260,
     "file": "Shadow Hawk C.ssw",
     "year": 3050
   },
@@ -12950,6 +14246,12 @@
     "bv2": 1265,
     "file": "Shadow Hawk SHD-1ELH.ssw",
     "year": 2803
+  },
+  {
+    "name": "Shadow Hawk SHD-1R",
+    "bv2": 851,
+    "file": "Shadow Hawk SHD-1R.ssw",
+    "year": 2457
   },
   {
     "name": "Shadow Hawk SHD-2BL",
@@ -13155,6 +14457,12 @@
     "year": 2775
   },
   {
+    "name": "Shootist ST-6KKK",
+    "bv2": 1342,
+    "file": "Shootist ST-6KKK.ssw",
+    "year": 3025
+  },
+  {
     "name": "Shootist ST-8A",
     "bv2": 1507,
     "file": "Shootist ST-8A.ssw",
@@ -13233,6 +14541,18 @@
     "year": 2627
   },
   {
+    "name": "Silver Fox SVR-5X",
+    "bv2": 1432,
+    "file": "Silver Fox SVR-5X.ssw",
+    "year": 3065
+  },
+  {
+    "name": "Silver Fox SVR-5Y",
+    "bv2": 1316,
+    "file": "Silver Fox SVR-5Y.ssw",
+    "year": 3067
+  },
+  {
     "name": "Sirocco SRC-3C",
     "bv2": 2154,
     "file": "Sirocco SRC-3C.ssw",
@@ -13303,6 +14623,12 @@
     "bv2": 807,
     "file": "Snow Fox.ssw",
     "year": 3015
+  },
+  {
+    "name": "Snow Fox (Omni)",
+    "bv2": 1464,
+    "file": "Snow Fox (Omni).ssw",
+    "year": 3140
   },
   {
     "name": "Snow Fox 2",
@@ -13381,6 +14707,18 @@
     "bv2": 1605,
     "file": "Spartan SPT-NF.ssw",
     "year": 2770
+  },
+  {
+    "name": "Spatha SP1-X",
+    "bv2": 2222,
+    "file": "Spatha SP1-X.ssw",
+    "year": 3067
+  },
+  {
+    "name": "Spatha SP2-X 'Warlord'",
+    "bv2": 1973,
+    "file": "Spatha SP2-X Warlord.ssw",
+    "year": 3069
   },
   {
     "name": "Spector SPR-4F",
@@ -13539,6 +14877,12 @@
     "year": 3054
   },
   {
+    "name": "Spindrift SDT-1 Aquatic SecurityMech",
+    "bv2": 441,
+    "file": "Spindrift SDT-1 Aquatic SecurityMech.ssw",
+    "year": 3069
+  },
+  {
     "name": "Spindrift SDT-1A Aquatic SecurityMech",
     "bv2": 465,
     "file": "Spindrift SDT-1A Aquatic SecurityMech.ssw",
@@ -13579,6 +14923,12 @@
     "bv2": 1559,
     "file": "Stalker STK-3F.ssw",
     "year": 2594
+  },
+  {
+    "name": "Stalker STK-3F (Jagawen)",
+    "bv2": 1570,
+    "file": "Stalker STK-3F (Jagawen).ssw",
+    "year": 3028
   },
   {
     "name": "Stalker STK-3F Jamison",
@@ -13743,6 +15093,12 @@
     "year": 3067
   },
   {
+    "name": "Stealth STH-5X",
+    "bv2": 2155,
+    "file": "Stealth STH-5X.ssw",
+    "year": 3076
+  },
+  {
     "name": "Stiletto STO-4A",
     "bv2": 859,
     "file": "Stiletto STO-4A.ssw",
@@ -13765,6 +15121,12 @@
     "bv2": 1171,
     "file": "Stiletto STO-6S.ssw",
     "year": 3083
+  },
+  {
+    "name": "Stiletto STO-6X",
+    "bv2": 1199,
+    "file": "Stiletto STO-6X.ssw",
+    "year": 3078
   },
   {
     "name": "Stinger IIC",
@@ -13872,7 +15234,7 @@
     "name": "Stone Rhino (Behemoth) 5",
     "bv2": 2157,
     "file": "Stone Rhino (Behemoth) 5.ssw",
-    "year": 2825
+    "year": 2846
   },
   {
     "name": "Stone Rhino (Behemoth) 6",
@@ -14031,6 +15393,17 @@
     "year": 3054
   },
   {
+    "name": "Super Griffin GRF-2N-X",
+    "bv2": 1269,
+    "file": "Super Griffin GRF-2N-X.ssw"
+  },
+  {
+    "name": "Super Wasp WSP-2A-X",
+    "bv2": 635,
+    "file": "Super Wasp WSP-2A-X.ssw",
+    "year": 3020
+  },
+  {
     "name": "Supernova",
     "bv2": 2801,
     "file": "Supernova.ssw",
@@ -14053,6 +15426,24 @@
     "bv2": 3158,
     "file": "Supernova 4.ssw",
     "year": 3067
+  },
+  {
+    "name": "Surtur SUR-T1",
+    "bv2": 1203,
+    "file": "Surtur SUR-T1.ssw",
+    "year": 3140
+  },
+  {
+    "name": "Swordsman SWD-1",
+    "bv2": 692,
+    "file": "Swordsman SWD-1.ssw",
+    "year": 2463
+  },
+  {
+    "name": "Swordsman SWD-2",
+    "bv2": 803,
+    "file": "Swordsman SWD-2.ssw",
+    "year": 2482
   },
   {
     "name": "Tai-sho TSH-7S",
@@ -14193,6 +15584,12 @@
     "year": 3062
   },
   {
+    "name": "Templar TLR1-O",
+    "bv2": 2045,
+    "file": "Wolverine WVR-1R.ssw",
+    "year": 3062
+  },
+  {
     "name": "Tenshi TN-10-O",
     "bv2": 2542,
     "file": "Tenshi TN-10-O.ssw",
@@ -14221,6 +15618,12 @@
     "bv2": 1547,
     "file": "Tessen TSN-C3M.ssw",
     "year": 3077
+  },
+  {
+    "name": "Tessen TSN-X-4",
+    "bv2": 1263,
+    "file": "Tessen TSN-X-4.ssw",
+    "year": 3074
   },
   {
     "name": "Thanatos THS-4S (Felix)",
@@ -14307,6 +15710,12 @@
     "year": 2865
   },
   {
+    "name": "Thresher (Edward)",
+    "bv2": 2104,
+    "file": "Thresher (Edward).ssw",
+    "year": 3058
+  },
+  {
     "name": "Thresher 2",
     "bv2": 2337,
     "file": "Thresher 2.ssw",
@@ -14317,6 +15726,12 @@
     "bv2": 3364,
     "file": "Thresher II.ssw",
     "year": 3149
+  },
+  {
+    "name": "Thug Jose THG-11ECX",
+    "bv2": 1720,
+    "file": "Thug Jose THG-11ECX.ssw",
+    "year": 2772
   },
   {
     "name": "Thug THG-10E",
@@ -14452,7 +15867,7 @@
   },
   {
     "name": "Thunderbolt C",
-    "bv2": 1671,
+    "bv2": 1593,
     "file": "Thunderbolt C.ssw",
     "year": 3050
   },
@@ -14503,6 +15918,12 @@
     "bv2": 1803,
     "file": "Thunderbolt TDR-17S.ssw",
     "year": 3070
+  },
+  {
+    "name": "Thunderbolt TDR-1C",
+    "bv2": 1237,
+    "file": "Thunderbolt TDR-1C.ssw",
+    "year": 2491
   },
   {
     "name": "Thunderbolt TDR-5 15 Blackmore",
@@ -14593,6 +16014,12 @@
     "bv2": 1525,
     "file": "Thunderbolt TDR-5S Salazar MkII.ssw",
     "year": 3070
+  },
+  {
+    "name": "Thunderbolt TDR-5S-T (Tallman)",
+    "bv2": 1447,
+    "file": "Thunderbolt TDR-5S-T (Tallman).ssw",
+    "year": 3025
   },
   {
     "name": "Thunderbolt TDR-5S1",
@@ -14763,6 +16190,12 @@
     "year": 3083
   },
   {
+    "name": "Ti Ts&apos;ang TSG-9DDC DDC",
+    "bv2": 2013,
+    "file": "Ti Tsang TSG-9DDC DDC.ssw",
+    "year": 3083
+  },
+  {
     "name": "Ti Ts&apos;ang TSG-9H",
     "bv2": 1880,
     "file": "Ti Tsang TSG-9H.ssw",
@@ -14797,6 +16230,12 @@
     "bv2": 2072,
     "file": "Tian-Zong TNZ-N3.ssw",
     "year": 3140
+  },
+  {
+    "name": "Tian-Zong TNZ-N3 (Jasminda)",
+    "bv2": 1826,
+    "file": "Tian-Zong TNZ-N3 (Jasminda).ssw",
+    "year": 3111
   },
   {
     "name": "Tiburon",
@@ -14847,6 +16286,12 @@
     "year": 3145
   },
   {
+    "name": "Tolva",
+    "bv2": 1449,
+    "file": "Tolva.ssw",
+    "year": 3140
+  },
+  {
     "name": "Tomahawk",
     "bv2": 3101,
     "file": "Tomahawk.ssw",
@@ -14860,7 +16305,7 @@
   },
   {
     "name": "Toro TR-A-1",
-    "bv2": 661,
+    "bv2": 671,
     "file": "Toro TR-A-1.ssw",
     "year": 2481
   },
@@ -15003,6 +16448,30 @@
     "year": 3088
   },
   {
+    "name": "Trebuchet TBT-XK7",
+    "bv2": 1549,
+    "file": "Trebuchet TBT-XK7.ssw",
+    "year": 3081
+  },
+  {
+    "name": "Trooper TP-1R",
+    "bv2": 236,
+    "file": "Trooper TP-1R.ssw",
+    "year": 2475
+  },
+  {
+    "name": "Tsunami TS-P1",
+    "bv2": 933,
+    "file": "Tsunami TS-P1.ssw",
+    "year": 3052
+  },
+  {
+    "name": "Tsunami TS-P1D",
+    "bv2": 1298,
+    "file": "Tsunami TS-P1D.ssw",
+    "year": 3063
+  },
+  {
     "name": "Tundra Wolf",
     "bv2": 3131,
     "file": "Tundra Wolf.ssw",
@@ -15129,10 +16598,10 @@
     "year": 3076
   },
   {
-    "name": "UrbanMech UM-R93",
-    "bv2": 852,
+    "name": "Urbanmech UM-R93",
+    "bv2": 894,
     "file": "UrbanMech UM-R93.ssw",
-    "year": 3149
+    "year": 3130
   },
   {
     "name": "Ursa URA-2A",
@@ -15169,6 +16638,12 @@
     "bv2": 2069,
     "file": "Ursus II.ssw",
     "year": 3078
+  },
+  {
+    "name": "Ursus-PR",
+    "bv2": 1194,
+    "file": "Ursus-PR.ssw",
+    "year": 3074
   },
   {
     "name": "Uziel UZL-2S",
@@ -15225,10 +16700,22 @@
     "year": 3068
   },
   {
+    "name": "Valiant VAL-NT-JX 'Hot Knife'",
+    "bv2": 989,
+    "file": "Valiant VAL-NT-JX Hot Knife.ssw",
+    "year": 3076
+  },
+  {
     "name": "Valiant VLN-3T",
     "bv2": 852,
     "file": "Valiant VLN-3T.ssw",
     "year": 3074
+  },
+  {
+    "name": "Valiant VLT-3E",
+    "bv2": 1019,
+    "file": "Valiant VLT-3E.ssw",
+    "year": 3098
   },
   {
     "name": "Valkyrie C",
@@ -15246,7 +16733,7 @@
     "name": "Valkyrie VLK-QD",
     "bv2": 807,
     "file": "Valkyrie VLK-QD.ssw",
-    "year": 3049
+    "year": 3052
   },
   {
     "name": "Valkyrie VLK-QD1",
@@ -15369,6 +16856,12 @@
     "year": 3071
   },
   {
+    "name": "Vanquisher VQR-7V (Pavuil)",
+    "bv2": 2073,
+    "file": "Vanquisher VQR-7V (Pavuil).ssw",
+    "year": 3072
+  },
+  {
     "name": "Vapor Eagle (Goshawk)",
     "bv2": 2368,
     "file": "Vapor Eagle (Goshawk).ssw",
@@ -15460,7 +16953,7 @@
   },
   {
     "name": "Victor C",
-    "bv2": 1950,
+    "bv2": 1925,
     "file": "Victor C.ssw",
     "year": 3050
   },
@@ -15507,10 +17000,26 @@
     "year": 2510
   },
   {
+    "name": "Victor VTR-9B (Li)",
+    "bv2": 1625,
+    "file": "Victor VTR-9B (Li).ssw",
+    "year": 3028
+  },
+  {
     "name": "Victor VTR-9K",
     "bv2": 1717,
     "file": "Victor VTR-9K.ssw",
     "year": 3049
+  },
+  {
+    "name": "Victor VTR-9K2 (St.James).ssw",
+    "bv2": 0,
+    "file": "Victor VTR-9K2 (St.James).ssw"
+  },
+  {
+    "name": "Victor VTR-9K2 St.James.ssw",
+    "bv2": 0,
+    "file": "Victor VTR-9K2 St.James.ssw"
   },
   {
     "name": "Victor VTR-9Ka",
@@ -15613,6 +17122,12 @@
     "bv2": 1105,
     "file": "Vindicator VND-3L.ssw",
     "year": 3051
+  },
+  {
+    "name": "Vindicator VND-3LD Dao",
+    "bv2": 1639,
+    "file": "Vindicator VND-3LD Dao.ssw",
+    "year": 3078
   },
   {
     "name": "Vindicator VND-3Lr",
@@ -15753,6 +17268,18 @@
     "year": 3150
   },
   {
+    "name": "Volkh VKH-1",
+    "bv2": 1635,
+    "file": "Volkh VKH-1.ssw",
+    "year": 3063
+  },
+  {
+    "name": "Volkh VKH-7",
+    "bv2": 1578,
+    "file": "Volkh VKH-7.ssw",
+    "year": 3066
+  },
+  {
     "name": "Von Rohrs (Hebi) VON 4RH-5",
     "bv2": 1170,
     "file": "Von Rohrs (Hebi) VON 4RH-5.ssw",
@@ -15867,7 +17394,7 @@
   },
   {
     "name": "Warhammer C",
-    "bv2": 1746,
+    "bv2": 1668,
     "file": "Warhammer C.ssw",
     "year": 3050
   },
@@ -15887,7 +17414,7 @@
     "name": "Warhammer IIC",
     "bv2": 2570,
     "file": "Warhammer IIC.ssw",
-    "year": 2829
+    "year": 3055
   },
   {
     "name": "Warhammer IIC 10",
@@ -15917,7 +17444,7 @@
     "name": "Warhammer IIC 2",
     "bv2": 2482,
     "file": "Warhammer IIC 2.ssw",
-    "year": 2920
+    "year": 3055
   },
   {
     "name": "Warhammer IIC 3",
@@ -16016,6 +17543,12 @@
     "year": 2830
   },
   {
+    "name": "Warhammer WHM-6K (Yorinaga)",
+    "bv2": 1305,
+    "file": "Warhammer WHM-6K (Yorinaga).ssw",
+    "year": 2830
+  },
+  {
     "name": "Warhammer WHM-6L",
     "bv2": 1311,
     "file": "Warhammer WHM-6L.ssw",
@@ -16049,7 +17582,7 @@
     "name": "Warhammer WHM-7K",
     "bv2": 1651,
     "file": "Warhammer WHM-7K.ssw",
-    "year": 3054
+    "year": 3051
   },
   {
     "name": "Warhammer WHM-7M",
@@ -16067,7 +17600,7 @@
     "name": "Warhammer WHM-7S",
     "bv2": 1477,
     "file": "Warhammer WHM-7S.ssw",
-    "year": 3050
+    "year": 3052
   },
   {
     "name": "Warhammer WHM-8D",
@@ -16166,6 +17699,12 @@
     "year": 3071
   },
   {
+    "name": "Warlord BLR-2XC",
+    "bv2": 1844,
+    "file": "Warlord BLR-2XC.ssw",
+    "year": 3075
+  },
+  {
     "name": "Warwolf",
     "bv2": 2706,
     "file": "Warwolf.ssw",
@@ -16176,6 +17715,12 @@
     "bv2": 755,
     "file": "Wasp C.ssw",
     "year": 3143
+  },
+  {
+    "name": "Wasp WSP-1",
+    "bv2": 314,
+    "file": "Wasp WSP-1.ssw",
+    "year": 2464
   },
   {
     "name": "Wasp WSP-1A",
@@ -16211,7 +17756,7 @@
     "name": "Wasp WSP-1S",
     "bv2": 423,
     "file": "Wasp WSP-1S.ssw",
-    "year": 3049
+    "year": 3051
   },
   {
     "name": "Wasp WSP-1W",
@@ -16241,7 +17786,7 @@
     "name": "Wasp WSP-3M",
     "bv2": 394,
     "file": "Wasp WSP-3M.ssw",
-    "year": 3051
+    "year": 3053
   },
   {
     "name": "Wasp WSP-3P",
@@ -16259,7 +17804,7 @@
     "name": "Wasp WSP-3W",
     "bv2": 342,
     "file": "Wasp WSP-3W.ssw",
-    "year": 3050
+    "year": 3052
   },
   {
     "name": "Wasp WSP-4W",
@@ -16314,6 +17859,18 @@
     "bv2": 2360,
     "file": "Wendigo-VP.ssw",
     "year": 3134
+  },
+  {
+    "name": "Werewolf WER-LF-004",
+    "bv2": 802,
+    "file": "Werewolf WER-LF-004.ssw",
+    "year": 3056
+  },
+  {
+    "name": "Werewolf WER-LF-005",
+    "bv2": 1082,
+    "file": "Werewolf WER-LF-005.ssw",
+    "year": 3060
   },
   {
     "name": "White Flame WHF-3B",
@@ -16376,6 +17933,12 @@
     "year": 3069
   },
   {
+    "name": "Whitworth WTH-5S",
+    "bv2": 1230,
+    "file": "Whitworth WTH-5S.ssw",
+    "year": 3074
+  },
+  {
     "name": "Whitworth WTH-K",
     "bv2": 819,
     "file": "Whitworth WTH-K.ssw",
@@ -16418,6 +17981,18 @@
     "year": 3076
   },
   {
+    "name": "Wight WGT-4NC 'Dezgra'",
+    "bv2": 1578,
+    "file": "Wight WGT-4NC Dezgra.ssw",
+    "year": 3074
+  },
+  {
+    "name": "Wildfire P1-WF",
+    "bv2": 1292,
+    "file": "Wildfire P1-WF.ssw",
+    "year": 3053
+  },
+  {
     "name": "Wolf Trap (Tora) WFT-1",
     "bv2": 1070,
     "file": "Wolf Trap (Tora) WFT-1.ssw",
@@ -16436,6 +18011,12 @@
     "year": 3071
   },
   {
+    "name": "Wolf Trap (Tora) WFT-2X 'Bear Trap'",
+    "bv2": 1211,
+    "file": "Wolf Trap (Tora) WFT-2X Bear Trap.ssw",
+    "year": 3075
+  },
+  {
     "name": "Wolf Trap (Tora) WFT-B",
     "bv2": 1021,
     "file": "Wolf Trap (Tora) WFT-B.ssw",
@@ -16452,6 +18033,12 @@
     "bv2": 1439,
     "file": "Wolf Trap WFT-2B.ssw",
     "year": 3080
+  },
+  {
+    "name": "Wolf Trap WFT-2X 'Bear Trap'",
+    "bv2": 1211,
+    "file": "Wolf Trap WFT-2X Bear Trap.ssw",
+    "year": 3075
   },
   {
     "name": "Wolfhound IIC 'Grinner'",
@@ -16496,6 +18083,12 @@
     "year": 3082
   },
   {
+    "name": "Wolfhound WLF-2X",
+    "bv2": 1842,
+    "file": "Wolfhound WLF-2X.ssw",
+    "year": 3072
+  },
+  {
     "name": "Wolfhound WLF-3M",
     "bv2": 786,
     "file": "Wolfhound WLF-3M.ssw",
@@ -16529,7 +18122,13 @@
     "name": "Wolverine II WVR-7H",
     "bv2": 1301,
     "file": "Wolverine II WVR-7H.ssw",
-    "year": 2766
+    "year": 2770
+  },
+  {
+    "name": "Wolverine WVR-3R",
+    "bv2": 867,
+    "file": "Wolverine WVR-3R.ssw",
+    "year": 2490
   },
   {
     "name": "Wolverine WVR-6BL-M",
@@ -16700,6 +18299,12 @@
     "year": 3057
   },
   {
+    "name": "Wraith TR2-X 'Alexander'",
+    "bv2": 1816,
+    "file": "Wraith TR2-X Alexander.ssw",
+    "year": 3076
+  },
+  {
     "name": "Wraith TR3",
     "bv2": 1310,
     "file": "Wraith TR3.ssw",
@@ -16710,6 +18315,12 @@
     "bv2": 983,
     "file": "Wulfen.ssw",
     "year": 3137
+  },
+  {
+    "name": "Wyvern City WVN-5UX",
+    "bv2": 1273,
+    "file": "Wyvern City WVN-5UX.ssw",
+    "year": 2685
   },
   {
     "name": "Wyvern IIC",
@@ -16839,9 +18450,21 @@
   },
   {
     "name": "Ymir BWP-X1 'Bipedal Weapons Platform'",
-    "bv2": 1212,
+    "bv2": 1194,
     "file": "Ymir BWP-X1 Bipedal Weapons Platform.ssw",
     "year": 2462
+  },
+  {
+    "name": "Yu Huang (Carson)",
+    "bv2": 2464,
+    "file": "Yu Huang (Carson).ssw",
+    "year": 3134
+  },
+  {
+    "name": "Yu Huang Carson",
+    "bv2": 2464,
+    "file": "Yu Huang Carson.ssw",
+    "year": 3134
   },
   {
     "name": "Yu Huang Y-H10G",
@@ -16872,6 +18495,12 @@
     "bv2": 2017,
     "file": "Yu Huang Y-H9GC.ssw",
     "year": 3067
+  },
+  {
+    "name": "Zeus (Leonidas)",
+    "bv2": 1878,
+    "file": "Zeus (Leonidas).ssw",
+    "year": 3056
   },
   {
     "name": "Zeus X ZEU-X",
@@ -16938,6 +18567,12 @@
     "bv2": 1436,
     "file": "Zeus ZEU-6T.ssw",
     "year": 3026
+  },
+  {
+    "name": "Zeus ZEU-6Y",
+    "bv2": 1323,
+    "file": "Zeus ZEU-6Y.ssw",
+    "year": 2922
   },
   {
     "name": "Zeus ZEU-9S",

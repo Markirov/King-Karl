@@ -5,10 +5,10 @@
     <cost>6775233.333333335</cost>
     <rules_level>1</rules_level>
     <era>2</era>
-    <productionera>5</productionera>
+    <productionera>0</productionera>
     <mech_type>BattleMech</mech_type>
     <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
-    <year restricted="FALSE">3054</year>
+    <year restricted="FALSE">3051</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="0">
         <type>Endo-Steel</type>
@@ -46,8 +46,8 @@
         <ll>30</ll>
         <rl>30</rl>
     </armor>
-    <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 7</source>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
+        <source>RS3085u-PP</source>
         <info>Warhammer WHM-7K 70t, 4/6/0, Std FE, ES; 13.5T/100% Armor; 18 DHS; 2 ML, 2 SSRM2, 2 SPL, 2 ERPPC, 1 TAG</info>
         <battleforce pv="17" wt="3" mv="4" s="4" m="4" l="2" e="0" ov="0" armor="7" internal="6" abilities="TAG, SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="FALSE" rla="TRUE" rh="FALSE"/>
@@ -55,33 +55,28 @@
         <heatsinks number="18" techbase="0">
             <type>Double Heat Sink</type>
 
-            <location index="3">LT</location>
-            <location index="0">LT</location>
-            <location index="0">RT</location>
-            <location index="3">LA</location>
             <location index="3">RA</location>
-            <location index="3">RT</location>
+            <location index="3">LA</location>
             <location index="6">RA</location>
+            <location index="0">LT</location>
+            <location index="3">LT</location>
+            <location index="0">RT</location>
+            <location index="3">RT</location>
         </heatsinks>
         <equipment>
-            <name manufacturer="">(IS) ER PPC</name>
-            <type>energy</type>
-            <location index="6">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) ER PPC</name>
-            <type>energy</type>
-            <location index="9">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) Medium Laser</name>
-            <type>energy</type>
-            <location index="6">LT</location>
+            <name manufacturer="">TAG</name>
+            <type>equipment</type>
+            <location index="3">HD</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) Medium Laser</name>
             <type>energy</type>
             <location index="6">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="6">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) Small Pulse Laser</name>
@@ -94,9 +89,14 @@
             <location index="7">LT</location>
         </equipment>
         <equipment>
-            <name manufacturer="">TAG</name>
-            <type>equipment</type>
-            <location index="3">HD</location>
+            <name manufacturer="">(IS) ER PPC</name>
+            <type>energy</type>
+            <location index="9">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) ER PPC</name>
+            <type>energy</type>
+            <location index="6">LA</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) Streak SRM-2</name>
@@ -122,28 +122,6 @@
         <variants></variants>
         <notables></notables>
         <additional></additional>
-        <quirks>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="true">
-                <Name>Rugged</Name>
-                <Cost>1</Cost>
-                <Description>Some â€™Mechs are extremely reliable, reducing the frequency with which they require maintenance. The cost is 1 point if the â€˜Mech can go for two times as long between maintenance periods as normal, and 2 points if it can go up to three times as long.</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="true">
-                <Name>Rugged</Name>
-                <Cost>1</Cost>
-                <Description>Some â€™Mechs are extremely reliable, reducing the frequency with which they require maintenance. The cost is 1 point if the â€˜Mech can go for two times as long between maintenance periods as normal, and 2 points if it can go up to three times as long.</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Stable</Name>
-                <Cost>2</Cost>
-                <Description>`Mech designs such as the Dragon are exceptionally stable, receiving a -1 target number modifier when forced to make a Piloting Skill roll as a result of a physical attack.</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Ubiquitous</Name>
-                <Cost>1</Cost>
-                <Description>Some â€™Mechs, such as the Archer, Wasp, and Locust, have been in production for literally centuries, with thousands or even tens of thousands produced in that time across multiple nations. For other â€™Mechs, the manufacturer has gone to exceptional lengths to ensure that parts are readily available, such as mass producing them or using parts from other, more common machines. Whatever the case, when attempting to locate replacement parts for these â€™Mechs, apply a â€“2 Target Number modifier.  Note that this quirk does not cross between the Clans and the Inner Sphere. For example, a machine Ubiquitous amongst the Clans would not be Ubiquitous in the Inner Sphere, and vice versa.</Description>
-            </quirk>
-        </quirks>
         <jumpjet_model>None</jumpjet_model>
         <commsystem>Unknown</commsystem>
         <tandtsystem>Unknown</tandtsystem>

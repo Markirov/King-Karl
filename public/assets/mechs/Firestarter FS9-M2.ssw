@@ -8,7 +8,7 @@
     <productionera>8</productionera>
     <mech_type>BattleMech</mech_type>
     <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
-    <year restricted="FALSE">3131</year>
+    <year restricted="FALSE">3101</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="0">
         <type>Endo-Steel</type>
@@ -47,7 +47,7 @@
         <rl>15</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RS MWDA</source>
+        <source>RS3145u</source>
         <info>Firestarter FS9-M2 35t, 6/9/6, Std FE, ES; 7.0T/94% Armor; 11 DHS; 6 Flmr, 1 ERML</info>
         <battleforce pv="8" wt="1" mv="6j" s="2" m="1" l="0" e="0" ov="0" armor="4" internal="3" abilities="ENE, HT2, SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="FALSE" rla="TRUE" rh="FALSE"/>

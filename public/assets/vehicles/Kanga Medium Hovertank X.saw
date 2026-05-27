@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Kanga Medium Hovertank" model="X" tons="50" motive="Hovercraft" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>2124</battle_value>
+    <motive type="Hovercraft" cruise="12" turret="Single Turret" />
+    <cost>6.333708333333333E7</cost>
+    <rules_level>3</rules_level>
+    <era>2</era>
+    <productionera>2</productionera>
+    <techbase manufacturer="Mitchell Vehicles" location="Graham IV (destroyed 2767)">Mixed</techbase>
+    <year restricted="FALSE">3070</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="true" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="600" manufacturer="Janzen" techbase="1">XXL Engine</engine>
+    <armor manufacturer="Durolex" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>17</front>
+        <left>13</left>
+        <right>13</right>
+        <rear>11</rear>
+        <primaryturret>13</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>Blackmore</source>
+        <info>Kanga Medium Hovertank X 50t, 12/18, XXLFE, 3.5T/31% FF Armor; 10 SHS; 1 TC, 1 SLRM20, 2 MPL, TC</info>
+        <battleforce pv="21" wt="2" mv="12h" s="4" m="4" l="2" e="0" ov="0" armor="2" internal="3" abilities="TUR(2/2/0)" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(CL) Streak LRM-20</name>
+            <type>missile</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Medium Pulse Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Medium Pulse Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ Streak LRM-20</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) Targeting Computer</name>
+            <type>TargetingComputer</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Stony AIX</commsystem>
+        <tandtsystem>AL2200 Track-Nav AI System</tandtsystem>
+    </fluff>
+</combatvehicle>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Kanga Medium Hovertank" model="X 2" tons="50" motive="Hovercraft" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1749</battle_value>
+    <motive type="Hovercraft" cruise="10" turret="No Turret" />
+    <cost>4.585416666666667E7</cost>
+    <rules_level>3</rules_level>
+    <era>2</era>
+    <productionera>2</productionera>
+    <techbase manufacturer="Mitchell Vehicles" location="Graham IV (destroyed 2767)">Mixed</techbase>
+    <year restricted="FALSE">0</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="true" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="500" manufacturer="Janzen" techbase="1">XXL Engine</engine>
+    <armor manufacturer="Durolex" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>15</front>
+        <left>12</left>
+        <right>12</right>
+        <rear>9</rear>
+        <primaryturret>0</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>Blackmore</source>
+        <info>Kanga Medium Hovertank X 2 50t, 10/15, XXLFE, 2.5T/22% FF Armor; 20 SHS; 1 TC, 2 LPL, TC</info>
+        <battleforce pv="17" wt="2" mv="10h" s="3" m="3" l="3" e="0" ov="0" armor="2" internal="2" abilities="ENE" />
+        <heatsinks number="20" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(CL) Large Pulse Laser</name>
+            <type>energy</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Large Pulse Laser</name>
+            <type>energy</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) Targeting Computer</name>
+            <type>TargetingComputer</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Stony AIX</commsystem>
+        <tandtsystem>AL2200 Track-Nav AI System</tandtsystem>
+    </fluff>
+</combatvehicle>

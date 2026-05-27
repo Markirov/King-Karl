@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Zephyros Infantry Support Vehicle" model="(Dual Turret)" tons="25" motive="Wheeled" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>844</battle_value>
+    <motive type="Wheeled" cruise="8" turret="Dual Turret" />
+    <cost>928375.0</cost>
+    <rules_level>3</rules_level>
+    <era>2</era>
+    <productionera>8</productionera>
+    <techbase manufacturer="Swedenborg Heavy Industries" location="Kirchbach">Clan</techbase>
+    <year restricted="FALSE">3086</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="false" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="200" manufacturer="" techbase="2">Fusion Engine</engine>
+    <armor manufacturer="&quot;Magnum&quot;" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>23</front>
+        <left>18</left>
+        <right>18</right>
+        <rear>14</rear>
+        <primaryturret>16</primaryturret>
+        <secondaryturret>16</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>RS3085u-CE</source>
+        <info>Zephyros Infantry Support Vehicle (Dual Turret) 25t, 8/12, Std FE, 5.5T/83% FF Armor; 10 SHS; 1 ECM, 2 ERML, 2 LMG</info>
+        <battleforce pv="8" wt="1" mv="8w" s="2" m="2" l="0" e="0" ov="0" armor="4" internal="2" abilities="ECM, TUR(2/2/0)" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Light Machine Gun</name>
+            <type>ballistic</type>
+            <location>Rear Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Light Machine Gun</name>
+            <type>ballistic</type>
+            <location>Rear Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">ECM Suite</name>
+            <type>equipment</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">@ Light Machine Gun (1/2)</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Build 1685 Tacticom</commsystem>
+        <tandtsystem>Series VI Integrated TTS</tandtsystem>
+    </fluff>
+</combatvehicle>

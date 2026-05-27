@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Kanga Medium Hovertank" model="X 1" tons="50" motive="Hovercraft" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1925</battle_value>
+    <motive type="Hovercraft" cruise="12" turret="Single Turret" />
+    <cost>6.282483333333333E7</cost>
+    <rules_level>3</rules_level>
+    <era>2</era>
+    <productionera>2</productionera>
+    <techbase manufacturer="Mitchell Vehicles" location="Graham IV (destroyed 2767)">Mixed</techbase>
+    <year restricted="FALSE">0</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="true" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="600" manufacturer="Janzen" techbase="1">XXL Engine</engine>
+    <armor manufacturer="Durolex" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>19</front>
+        <left>15</left>
+        <right>15</right>
+        <rear>12</rear>
+        <primaryturret>15</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>Blackmore</source>
+        <info>Kanga Medium Hovertank X 1 50t, 12/18, XXLFE, 4.0T/35% FF Armor; 10 SHS; 1 TC, 2 SSRM6, 1 LPL, TC</info>
+        <battleforce pv="19" wt="2" mv="12h" s="4" m="4" l="2" e="0" ov="0" armor="3" internal="3" abilities="TUR(2/2/2)" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(CL) Streak SRM-6</name>
+            <type>missile</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Streak SRM-6</name>
+            <type>missile</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Large Pulse Laser</name>
+            <type>energy</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) Targeting Computer</name>
+            <type>TargetingComputer</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ Streak SRM-6</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Stony AIX</commsystem>
+        <tandtsystem>AL2200 Track-Nav AI System</tandtsystem>
+    </fluff>
+</combatvehicle>
