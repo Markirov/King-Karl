@@ -21,11 +21,18 @@ const COMPONENTS = {
 };
 
 /**
- * BV multiplier por número de unidades en red C3 Standard.
- * N=1 → 1.00 (sin red). N≥2 → 1 + 0.05·N (lineal hasta N=12 → 1.60).
+ * Bonus C3 por unidad (TM p.315): cada unidad recibe +5% del BV total
+ * de la red. Bonus es UNIFORME absoluto, no proporcional a BV propio.
+ * N=1 → sin red, 0 bonus. N≥2 → bonus = round(0.05 × sumBV).
  */
-function c3Multiplier(n: number): number {
-  if (n <= 1) return 1.00;
+function c3BonusPerUnit(sumBV: number, n: number): number {
+  if (n < 2) return 0;
+  return Math.round(0.05 * sumBV);
+}
+
+/** Multiplicador efectivo del total (display informativo): 1 + 0.05·N */
+function c3TotalMultiplier(n: number): number {
+  if (n < 2) return 1.00;
   return 1.00 + 0.05 * n;
 }
 
@@ -70,8 +77,8 @@ function genId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-function bvWithC3(bv: number, n: number): number {
-  return Math.round(bv * c3Multiplier(n));
+function bvWithC3(adjBV: number, bonus: number): number {
+  return adjBV + bonus;
 }
 
 /**
@@ -188,10 +195,11 @@ export function C3CalculatorView() {
 
   // Cálculos
   const n = units.length;
-  const multiplier = c3Multiplier(n);
+  const multiplier = c3TotalMultiplier(n);
   const baseBV    = units.reduce((s, u) => s + u.bv, 0);
   const skillBV   = units.reduce((s, u) => s + bvAdjusted(u.bv, u.gunnery, u.piloting), 0);
-  const c3BV      = units.reduce((s, u) => s + bvWithC3(bvAdjusted(u.bv, u.gunnery, u.piloting), n), 0);
+  const bonus     = c3BonusPerUnit(skillBV, n);
+  const c3BV      = skillBV + n * bonus;
   const deltaBV   = c3BV - baseBV;
 
   const mastersCount = units.filter(u => u.isMaster).length;
@@ -316,14 +324,14 @@ export function C3CalculatorView() {
               <span className="text-center">P (Pilot)</span>
               <span className="text-right">BV base</span>
               <span className="text-right">BV skill</span>
-              <span className="text-right">BV ×{multiplier.toFixed(2)}</span>
+              <span className="text-right">BV C3 (+{fmt(bonus)})</span>
               <span />
             </div>
             <div className="space-y-1.5">
               {units.map(u => {
                 const sm = skillMultiplier(u.gunnery, u.piloting);
                 const adj = bvAdjusted(u.bv, u.gunnery, u.piloting);
-                const c3 = bvWithC3(adj, n);
+                const c3 = bvWithC3(adj, bonus);
                 return (
                   <div key={u.id}
                     className={`grid grid-cols-[78px_1fr_60px_60px_70px_80px_80px_24px] gap-2 items-center px-3 py-2 border transition-all ${
@@ -412,8 +420,8 @@ export function C3CalculatorView() {
                 <div className="font-headline text-xl font-black text-amber-400">{fmt(skillBV)}</div>
               </div>
               <div>
-                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">× C3 (N={n})</div>
-                <div className="font-mono text-sm text-primary-container">×{multiplier.toFixed(2)}</div>
+                <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">+ C3 (N={n})</div>
+                <div className="font-mono text-sm text-primary-container">+{fmt(bonus)}/u<br/><span className="text-[9px] text-outline">×{multiplier.toFixed(2)} total</span></div>
               </div>
               <div className="text-right">
                 <div className="font-mono text-[8px] text-outline tracking-[2px] uppercase">C3 Final</div>
@@ -431,7 +439,7 @@ export function C3CalculatorView() {
               </span>
             </div>
             <p className="font-mono text-[9px] text-outline/70 mt-2 leading-relaxed">
-              Cadena: BV publicado → ajuste por skills (G/P) → ajuste por red C3 (×{multiplier.toFixed(2)} si N={n}). Cada mech aporta su BV final al total.
+              TM p.315: cada unidad recibe +5% del BV total de la red como bonus ABSOLUTO uniforme. Suma final = base×skill × (1+0.05·N).
             </p>
           </div>
 
@@ -475,7 +483,10 @@ export function C3CalculatorView() {
         </div>
         <ul className="font-mono text-[10px] text-on-surface-variant/70 leading-relaxed space-y-1 list-disc list-inside">
           <li>Cada Master controla sí mismo + 3 Slaves. Masters mínimos: 1-4→1, 5-8→3, 9-12→4</li>
-          <li>Multiplicador BV C3 lineal: 1+0.05·N (N=2→1.10, N=12→1.60)</li>
+          <li>Cada unidad recibe +5% del BV total de la red (bonus ABSOLUTO uniforme, no proporcional). Total: 1+0.05·N</li>
+          <li>LOS Master↔Slave: máx ~60 hex. Guardian ECM enemigo (6 hex) bloquea conexión</li>
+          <li>Múltiples redes en mismo bando coexisten pero no comparten datos sin Master común</li>
+          <li>C3 siempre activo (no consume acción). Funciona como linterna: encendida o destruida</li>
           <li>Skill BV (TechManual p.315): tabla canon 9×9 (G×P). G4/P5 = base ×1.00. Mejores skills suben BV, peores bajan</li>
           <li>Slaves comparten datos de targeting via Master (to-hit usa distancia más corta de la red)</li>
           <li>Master destruido → red colapsa (Slaves desconectados)</li>
