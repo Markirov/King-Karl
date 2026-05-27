@@ -160,8 +160,8 @@ export function C3CalculatorView() {
   }
 
   function setSkill(id: string, field: 'gunnery' | 'piloting', val: number) {
-    const clamped = Math.max(0, Math.min(8, val));
-    setUnits(u => u.map(x => x.id === id ? { ...x, [field]: clamped } : x));
+    const clamped = Math.max(0, Math.min(8, isNaN(val) ? 0 : val));
+    setUnits(prev => prev.map(x => x.id === id ? { ...x, [field]: clamped } : x));
   }
 
   function removeUnit(id: string) {
@@ -295,11 +295,11 @@ export function C3CalculatorView() {
         ) : (
           <>
             {/* Header tabla */}
-            <div className="grid grid-cols-[78px_1fr_50px_50px_70px_80px_80px_24px] gap-2 px-3 py-1.5 font-mono text-[8px] text-outline tracking-[2px] uppercase">
+            <div className="grid grid-cols-[78px_1fr_60px_60px_70px_80px_80px_24px] gap-2 px-3 py-1.5 font-mono text-[8px] text-outline tracking-[2px] uppercase">
               <span>Rol</span>
               <span>Unidad</span>
-              <span className="text-center">G</span>
-              <span className="text-center">P</span>
+              <span className="text-center">G (Disp)</span>
+              <span className="text-center">P (Pilot)</span>
               <span className="text-right">BV base</span>
               <span className="text-right">BV skill</span>
               <span className="text-right">BV ×{multiplier.toFixed(2)}</span>
@@ -312,7 +312,7 @@ export function C3CalculatorView() {
                 const c3 = bvWithC3(adj, n);
                 return (
                   <div key={u.id}
-                    className={`grid grid-cols-[78px_1fr_50px_50px_70px_80px_80px_24px] gap-2 items-center px-3 py-2 border transition-all ${
+                    className={`grid grid-cols-[78px_1fr_60px_60px_70px_80px_80px_24px] gap-2 items-center px-3 py-2 border transition-all ${
                       u.isMaster
                         ? 'bg-amber-400/5 border-amber-400/30'
                         : 'bg-surface-container/40 border-outline-variant/10'
@@ -336,16 +336,20 @@ export function C3CalculatorView() {
                     </span>
 
                     {/* Gunnery */}
-                    <input type="number" min={0} max={8} value={u.gunnery}
-                      onChange={e => setSkill(u.id, 'gunnery', parseInt(e.target.value) || 0)}
+                    <select value={u.gunnery}
+                      onChange={e => setSkill(u.id, 'gunnery', parseInt(e.target.value, 10))}
                       title="Disparo (Gunnery) 0-8 · default 4"
-                      className="w-full h-7 bg-surface-container-lowest border border-outline-variant/30 px-1 font-mono text-[11px] text-on-surface text-center focus:outline-none focus:border-primary-container [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none" />
+                      className="w-full h-7 bg-surface-container-lowest border border-outline-variant/30 px-1 font-mono text-[11px] text-on-surface text-center focus:outline-none focus:border-primary-container cursor-pointer">
+                      {[0,1,2,3,4,5,6,7,8].map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
 
                     {/* Piloting */}
-                    <input type="number" min={0} max={8} value={u.piloting}
-                      onChange={e => setSkill(u.id, 'piloting', parseInt(e.target.value) || 0)}
+                    <select value={u.piloting}
+                      onChange={e => setSkill(u.id, 'piloting', parseInt(e.target.value, 10))}
                       title="Pilotaje (Piloting) 0-8 · default 5"
-                      className="w-full h-7 bg-surface-container-lowest border border-outline-variant/30 px-1 font-mono text-[11px] text-on-surface text-center focus:outline-none focus:border-primary-container [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none" />
+                      className="w-full h-7 bg-surface-container-lowest border border-outline-variant/30 px-1 font-mono text-[11px] text-on-surface text-center focus:outline-none focus:border-primary-container cursor-pointer">
+                      {[0,1,2,3,4,5,6,7,8].map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
 
                     {/* BV base */}
                     <span className="font-mono text-[11px] text-on-surface-variant text-right">
