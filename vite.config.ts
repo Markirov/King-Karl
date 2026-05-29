@@ -5,6 +5,11 @@ import { resolve } from 'path';
 
 export default defineConfig({
   base: '/',
+  server: {
+    host: true, // bind 0.0.0.0 -> accept 127.0.0.1, localhost, LAN
+    port: 5173,
+    strictPort: true,
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
