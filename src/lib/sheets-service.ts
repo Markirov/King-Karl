@@ -201,3 +201,36 @@ export const saveCronicaRemote = (c: CronicaRemote) =>
 
 export const deleteCronicaRemote = (id: string) =>
   sheetsPost({ action: 'deleteCronica', id });
+
+// ── Orden del Día (sheet dedicado v2.5) ────────────────────────
+export interface OrdenDiaRemote {
+  id:    string;
+  ts:    number;
+  pilot: string;
+  tipo:  string;
+  desc:  string;
+}
+
+export const loadOrdenDia = () => sheetsGet({ action: 'getOrdenDia' });
+
+export const saveOrdenDiaRemote = (o: OrdenDiaRemote) =>
+  sheetsPost({ action: 'saveOrdenDia', ...o });
+
+export const deleteOrdenDiaRemote = (id: string) =>
+  sheetsPost({ action: 'deleteOrdenDia', id });
+
+// ── Parte Diario (sheet dedicado v2.5) ─────────────────────────
+export interface ParteDiarioRemote {
+  id:   string;
+  ts:   number;
+  text: string;
+  tone: string;
+}
+
+export const loadParteDiario = () => sheetsGet({ action: 'getParteDiario' });
+
+export const saveParteDiarioRemote = (p: ParteDiarioRemote) =>
+  sheetsPost({ action: 'saveParteDiario', ...p });
+
+export const deleteParteDiarioRemote = (id: string) =>
+  sheetsPost({ action: 'deleteParteDiario', id });

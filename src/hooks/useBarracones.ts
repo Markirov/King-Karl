@@ -313,21 +313,21 @@ export function useBarracones() {
   // ── Attribute upgrade/downgrade ──
   const upgradeAttr = useCallback((attr: 'fue' | 'des' | 'int' | 'car', cost: number) => {
     const pilot = slots[activeIdx];
-    updatePilot(p => {
-      if (p.xpDisponible < cost) return p;
-      if (p[attr] >= 12) return p;
-      appendLog({
-        pilot: pilot?.callsign || pilot?.nombre || '?',
-        tipo: 'attr',
-        desc: `${attr.toUpperCase()} ${p[attr]} → ${p[attr] + 1} (−${cost} XP)`,
-      });
-      return {
-        ...p,
-        [attr]: p[attr] + 1,
-        xpDisponible: p.xpDisponible - cost,
-        attrUpgrades: { ...(p.attrUpgrades ?? {}), [attr]: ((p.attrUpgrades ?? {})[attr] ?? 0) + 1 },
-      };
+    if (!pilot) return;
+    if (pilot.xpDisponible < cost) return;
+    if (pilot[attr] >= 12) return;
+    // Side effect FUERA del updater para evitar dispatch dupe en React StrictMode
+    appendLog({
+      pilot: pilot.callsign || pilot.nombre || '?',
+      tipo: 'attr',
+      desc: `${attr.toUpperCase()} ${pilot[attr]} → ${pilot[attr] + 1} (−${cost} XP)`,
     });
+    updatePilot(p => ({
+      ...p,
+      [attr]: p[attr] + 1,
+      xpDisponible: p.xpDisponible - cost,
+      attrUpgrades: { ...(p.attrUpgrades ?? {}), [attr]: ((p.attrUpgrades ?? {})[attr] ?? 0) + 1 },
+    }));
   }, [slots, activeIdx, updatePilot]);
 
   const downgradeAttr = useCallback((attr: 'fue' | 'des' | 'int' | 'car', refund: number) => {
@@ -354,23 +354,23 @@ export function useBarracones() {
 
   const upgradeSkill = useCallback((nombre: string, cost: number) => {
     const pilot = slots[activeIdx];
-    updatePilot(p => {
-      if (p.xpDisponible < cost) return p;
-      const skill = p.habilidades.find(h => h.nombre === nombre);
-      if (!skill || skill.nivel >= 6) return p;
-      appendLog({
-        pilot: pilot?.callsign || pilot?.nombre || '?',
-        tipo: 'skill',
-        desc: `${nombre} niv ${skill.nivel} → ${skill.nivel + 1} (−${cost} XP)`,
-      });
-      return {
-        ...p,
-        xpDisponible: p.xpDisponible - cost,
-        habilidades: p.habilidades.map(h =>
-          h.nombre === nombre ? { ...h, nivel: h.nivel + 1, upgrades: (h.upgrades ?? 0) + 1 } : h
-        ),
-      };
+    if (!pilot) return;
+    if (pilot.xpDisponible < cost) return;
+    const skill = pilot.habilidades.find(h => h.nombre === nombre);
+    if (!skill || skill.nivel >= 6) return;
+    // Side effect fuera del updater (StrictMode dispatch dupe)
+    appendLog({
+      pilot: pilot.callsign || pilot.nombre || '?',
+      tipo: 'skill',
+      desc: `${nombre} niv ${skill.nivel} → ${skill.nivel + 1} (−${cost} XP)`,
     });
+    updatePilot(p => ({
+      ...p,
+      xpDisponible: p.xpDisponible - cost,
+      habilidades: p.habilidades.map(h =>
+        h.nombre === nombre ? { ...h, nivel: h.nivel + 1, upgrades: (h.upgrades ?? 0) + 1 } : h
+      ),
+    }));
   }, [slots, activeIdx, updatePilot]);
 
   const downgradeSkill = useCallback((nombre: string, refund: number) => {

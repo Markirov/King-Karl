@@ -171,17 +171,17 @@ Cliente usa `public/assets/mechs/index.json` del repo. Sheets:
 
 > Solo si quieres explotar datos (queries históricas, mejorar UI).
 
-### [ ] C1. `OrdenDia` (extraer de Configuracion.ORDEN_DIA)
+### [x] C1. `OrdenDia` (extraer de Configuracion.ORDEN_DIA) — hoja dedicada + 3 endpoints + cliente refactor + migración + bug dupe fixed (StrictMode dispatch en upgradeAttr/upgradeSkill)
 
 Cols: `Fecha | Piloto | Tipo | XP_Coste | Descripcion`
 
 Apps Script: nuevo `getOrdenDia` / `appendOrdenDia`. Cliente actualizar `useAppStore.ordenDia`.
 
-### [ ] C2. `ParteDiario` (extraer de Configuracion.PARTE_DIARIO)
+### [x] C2. `ParteDiario` (extraer de Configuracion.PARTE_DIARIO) — hoja dedicada + 3 endpoints + cliente refactor + migración
 
 Cols: `Fecha | Texto | Autor`
 
-### [ ] C3. `Compras_Mechs` (extraer de Configuracion W-Y)
+### [x] C3. `Compras_Mechs` (extraer de Configuracion W-Y) — descartado, calc muerta
 
 Cols: `Modelo | Precio | Descuento | Precio_final`
 
@@ -201,7 +201,18 @@ Cols: `Modelo | Precio | Descuento | Precio_final`
 
 ## D-bis. Bugs adicionales detectados
 
-### [ ] ORDEN_DIA duplica entradas
+### [x] Rerolls Hoja Servicio no se registran (FIXED)
+- Causa: budget gate en `handleReroll` bloqueaba increment cuando `xpDisponible < cost` → click no-op → rerolls=0 → "Nada que registrar"
+- Fix 1: drop budget gate. Rerolls fija al target sin condiciones. Si negativo, decisión del registrador
+- Fix 2: `hasAnything` chequea explícito `p.rerolls > 0 || p.chequeos > 0` como red de seguridad
+
+Síntoma: añadir rerolls a un piloto sin tocar XP ni Tesorería → `"Nada que registrar"`.
+
+Causa probable: `hasAnything` check en `handleRegister` filtra por `xpGanado > 0 || calcSpent(p) > 0`. Si `calcSpent` no incluye rerolls en su suma, los rerolls aislados son invisibles para el check.
+
+Verificar en `barracones-data.ts` (función `calcSpent`): debe sumar `p.rerolls * REROLL_CONFIG[p.nivel].cost`. Si no lo hace → fix.
+
+### [x] ORDEN_DIA duplica entradas (FIXED — appendLog fuera del updater + dedupe en migración)
 
 En `Configuracion.ORDEN_DIA` cada entrada aparece **dos veces con el mismo `ts`**. Cliente registra dos veces consecutivas por evento. Probable doble dispatch en `useBarracones` al subir attr/skill.
 

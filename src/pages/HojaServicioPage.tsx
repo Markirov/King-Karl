@@ -270,14 +270,10 @@ function PaperPilotRow({ player, index, isLast, onUpdate }: PaperPilotRowProps) 
   };
 
   function handleReroll(target: number) {
-    if (target === player.rerolls) {
-      onUpdate(index, { rerolls: target - 1 });
-    } else {
-      const additional = (target - player.rerolls) * rc.cost;
-      if (player.xpDisponible - spent - additional >= 0) {
-        onUpdate(index, { rerolls: target });
-      }
-    }
+    // Toggle off si pulsa el último activo, si no fija al target.
+    // Sin gate de presupuesto — registrador decide si pasa o no.
+    const next = target === player.rerolls ? target - 1 : target;
+    onUpdate(index, { rerolls: Math.max(0, next) });
   }
 
   return (
@@ -572,8 +568,9 @@ export function HojaServicioPage() {
       rerollsMap[p.name]  = p.rerolls;
     });
 
-    const hasAnything = players.some(p => p.xpGanado > 0 || calcSpent(p) > 0)
-                        || totalHaber > 0 || totalDebe > 0;
+    const hasAnything = players.some(p =>
+                          p.xpGanado > 0 || p.chequeos > 0 || p.rerolls > 0 || calcSpent(p) > 0
+                        ) || totalHaber > 0 || totalDebe > 0;
     if (!hasAnything) { setStatus('error'); setStatusMsg('Nada que registrar'); return; }
 
     setStatus('loading');
