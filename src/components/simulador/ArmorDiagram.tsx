@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import { X } from 'lucide-react';
 import type { MechState, MechSession } from '@/lib/combat-types';
 import { ARMOR_SLOTS } from '@/lib/combat-data';
+import { useDismissable } from '@/hooks/useDismissable';
 
 interface Props {
   state: MechState;
@@ -48,6 +50,8 @@ const GAP = 1;
 
 export function ArmorDiagram({ state, session, selectedSection, damageAmount, setDamageAmount, onSectionClick, onApplyDamage, setSelectedSection }: Props) {
   const MECH_ZONES = state.isQuad ? MECH_ZONES_QUAD : MECH_ZONES_BIPED;
+  const detailRef = useRef<HTMLDivElement>(null);
+  useDismissable(detailRef, !!selectedSection, () => setSelectedSection(null));
   return (
     <div className="bg-surface-container p-4 relative clip-chamfer border-t-2 border-primary-container/40 h-full flex flex-col">
       <div className="flex items-center justify-between mb-2 z-10">
@@ -128,11 +132,9 @@ export function ArmorDiagram({ state, session, selectedSection, damageAmount, se
             );
           })}
 
-          {/* Detail panel */}
+          {/* Detail panel - dismiss con click fuera o ESC via useDismissable */}
           {selectedSection && (
-            <>
-            <div className="absolute inset-0 z-20" onClick={() => setSelectedSection(null)} />
-            <div className="absolute top-0 right-0 w-52 bg-surface-container-high border-l-2 border-primary-container/50 p-3 clip-chamfer z-30 shadow-[0_0_20px_rgba(0,0,0,0.6)] backdrop-blur-md max-h-full overflow-y-auto custom-scrollbar">
+            <div ref={detailRef} className="absolute top-0 right-0 w-52 bg-surface-container-high border-l-2 border-primary-container/50 p-3 clip-chamfer z-30 shadow-[0_0_20px_rgba(0,0,0,0.6)] backdrop-blur-md max-h-full overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-start mb-2 border-b border-outline-variant pb-1">
                 <h3 className="font-headline text-xs font-bold text-primary-container uppercase">{selectedSection}</h3>
                 <button onClick={() => setSelectedSection(null)} className="text-secondary hover:text-primary"><X size={14} /></button>
@@ -174,7 +176,6 @@ export function ArmorDiagram({ state, session, selectedSection, damageAmount, se
                 </div>
               </div>
             </div>
-            </>
           )}
         </div>
       </div>

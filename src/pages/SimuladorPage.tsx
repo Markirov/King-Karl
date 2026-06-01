@@ -14,6 +14,8 @@ import { CombatLog } from '@/components/simulador/CombatLog';
 import { VehiclePanel } from '@/components/simulador/VehiclePanel';
 import { CatalogSearch } from '@/components/simulador/CatalogSearch';
 import { SimuladorPortada } from '@/components/simulador/SimuladorPortada';
+import { FuerzaSyncBar } from '@/components/simulador/FuerzaSyncBar';
+import { SubtabRightPortal } from '@/components/shell/SubtabRightPortal';
 import { useAppStore } from '@/lib/store';
 import { calcAttrAvg, calcTIR } from '@/lib/barracones-data';
 import type { FireTarget } from '@/lib/combat-types';
@@ -65,51 +67,49 @@ export function SimuladorPage() {
     } catch { return []; }
   }, []);
 
-  const header = (
-    <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-      <div className="flex items-center gap-3">
-        <h1 className="font-headline text-xl font-black text-primary-container tracking-tighter uppercase leading-none">
-          Simulador de Combate
-        </h1>
-        <div className="flex flex-col justify-between self-stretch py-px gap-0.5">
-          <label className="flex items-center gap-1 cursor-pointer group">
-            <div
-              onClick={() => setAllowClan(v => !v)}
-              className={`w-2 h-2 border shrink-0 transition-colors ${allowClan ? 'bg-primary-container border-primary-container' : 'bg-transparent border-outline-variant/40'}`}
-            />
-            <span className="font-mono text-[7px] tracking-widest uppercase text-secondary/50 group-hover:text-secondary/80 transition-colors select-none">
-              Clan
-            </span>
-          </label>
-          <label className="flex items-center gap-1 cursor-pointer group">
-            <div
-              onClick={() => setLimitToYear(v => !v)}
-              className={`w-2 h-2 border shrink-0 transition-colors ${limitToYear ? 'bg-primary-container border-primary-container' : 'bg-transparent border-outline-variant/40'}`}
-            />
-            <span className="font-mono text-[7px] tracking-widest uppercase text-secondary/50 group-hover:text-secondary/80 transition-colors select-none">
-              Año
-            </span>
-          </label>
-        </div>
-      </div>
-      <CatalogSearch
-        onLoad={(text, file) => { sim.loadUnitText(text, file); setSimuladorPortada(false); }}
-        allowClan={allowClan}
-        limitToYear={limitToYear}
-        onSwitchTab={tab => {
-          const subTab = TAB_MAP[tab] ?? tab;
-          setActiveSubTab(subTab);
-          sim.setActiveTab(tab as 'mechs' | 'vehicles');
-          setSimuladorPortada(false);
-        }}
-      />
+  // Toggles Clan + Año compactos (van pegados a CatalogSearch en el portal)
+  const flagToggles = (
+    <div className="flex items-center gap-2 mr-1">
+      <label
+        onClick={() => setAllowClan(v => !v)}
+        className="flex items-center gap-1 cursor-pointer group select-none"
+        title="Permitir tech Clan"
+      >
+        <div
+          className={`w-2 h-2 border shrink-0 transition-colors ${allowClan ? 'bg-primary-container border-primary-container' : 'bg-transparent border-outline-variant/40'}`}
+        />
+        <span className="font-mono text-[8px] tracking-widest uppercase text-secondary/60 group-hover:text-secondary">Clan</span>
+      </label>
+      <label
+        onClick={() => setLimitToYear(v => !v)}
+        className="flex items-center gap-1 cursor-pointer group select-none"
+        title="Limitar al año de campaña"
+      >
+        <div
+          className={`w-2 h-2 border shrink-0 transition-colors ${limitToYear ? 'bg-primary-container border-primary-container' : 'bg-transparent border-outline-variant/40'}`}
+        />
+        <span className="font-mono text-[8px] tracking-widest uppercase text-secondary/60 group-hover:text-secondary">Año</span>
+      </label>
     </div>
   );
 
   if (simuladorPortada) {
     return (
       <div className="p-6 animate-[fadeInUp_0.3s_ease]">
-        {header}
+        <SubtabRightPortal>
+          {flagToggles}
+          <CatalogSearch
+            onLoad={(text, file) => { sim.loadUnitText(text, file); setSimuladorPortada(false); }}
+            allowClan={allowClan}
+            limitToYear={limitToYear}
+            onSwitchTab={tab => {
+              const subTab = TAB_MAP[tab] ?? tab;
+              setActiveSubTab(subTab);
+              sim.setActiveTab(tab as 'mechs' | 'vehicles');
+              setSimuladorPortada(false);
+            }}
+          />
+        </SubtabRightPortal>
         <SimuladorPortada
           allowClan={allowClan}
           limitToYear={limitToYear}
@@ -148,53 +148,39 @@ export function SimuladorPage() {
 
   return (
     <div className="p-6 animate-[fadeInUp_0.3s_ease]">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="font-headline text-xl font-black text-primary-container tracking-tighter uppercase leading-none">
-            Simulador de Combate
-          </h1>
-          <div className="flex flex-col justify-between self-stretch py-px gap-0.5">
-            <label className="flex items-center gap-1 cursor-pointer group">
-              <div
-                onClick={() => setAllowClan(v => !v)}
-                className={`w-2 h-2 border shrink-0 transition-colors ${allowClan ? 'bg-primary-container border-primary-container' : 'bg-transparent border-outline-variant/40'}`}
-              />
-              <span className="font-mono text-[7px] tracking-widest uppercase text-secondary/50 group-hover:text-secondary/80 transition-colors select-none">
-                Clan
-              </span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer group">
-              <div
-                onClick={() => setLimitToYear(v => !v)}
-                className={`w-2 h-2 border shrink-0 transition-colors ${limitToYear ? 'bg-primary-container border-primary-container' : 'bg-transparent border-outline-variant/40'}`}
-              />
-              <span className="font-mono text-[7px] tracking-widest uppercase text-secondary/50 group-hover:text-secondary/80 transition-colors select-none">
-                Año
-              </span>
-            </label>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <CatalogSearch
-            onLoad={sim.loadUnitText}
-            allowClan={allowClan}
-            limitToYear={limitToYear}
-            onSwitchTab={tab => {
-              const subTab = TAB_MAP[tab] ?? tab;
-              setActiveSubTab(subTab);
-              sim.setActiveTab(tab as 'mechs' | 'vehicles');
-            }}
-          />
-          <UnitSlots
-            slotNames={slotNames}
-            slotCount={slotCount}
-            activeIndex={activeIdx}
-            onSelectIndex={i => isMech ? sim.setCurrentMechIdx(i) : sim.setCurrentVehicleIdx(i)}
-            onFileUpload={sim.handleFileUpload}
-          />
-        </div>
-      </div>
+      {/* Subtab right-slot: flags + search + slot picker + sync */}
+      <SubtabRightPortal>
+        {flagToggles}
+        <CatalogSearch
+          onLoad={sim.loadUnitText}
+          allowClan={allowClan}
+          limitToYear={limitToYear}
+          onSwitchTab={tab => {
+            const subTab = TAB_MAP[tab] ?? tab;
+            setActiveSubTab(subTab);
+            sim.setActiveTab(tab as 'mechs' | 'vehicles');
+          }}
+        />
+        <UnitSlots
+          slotNames={slotNames}
+          slotCount={slotCount}
+          activeIndex={activeIdx}
+          onSelectIndex={i => isMech ? sim.setCurrentMechIdx(i) : sim.setCurrentVehicleIdx(i)}
+          onFileUpload={sim.handleFileUpload}
+        />
+        <FuerzaSyncBar
+          dirty={sim.dirty}
+          lastLocalSave={sim.lastLocalSave}
+          getSnapshot={sim.getSnapshot}
+          hydrateFromSnapshot={sim.hydrateFromSnapshot}
+          resetSession={sim.resetSession}
+          markSynced={sim.markSynced}
+          bvTotal={
+            sim.mechSlots.reduce((acc, s) => acc + (s.state?.bv ?? 0), 0) +
+            sim.vehicleSlots.reduce((acc, s) => acc + ((s.state as any)?.bv ?? 0), 0)
+          }
+        />
+      </SubtabRightPortal>
 
       {!sim.isLoaded ? (
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 opacity-40">

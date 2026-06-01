@@ -1,23 +1,28 @@
 // ══════════════════════════════════════════════════════════════
 //  CRÓNICAS STORE — Bitácora narrativa de la unidad
-//  Persiste en localStorage (cronicas_v1) + sync Sheets (CRONICAS)
+//  v2: localStorage cache + sync per-action a hoja `Cronicas` dedicada
+//  (sustituye al blob CRONICAS JSON en Configuracion)
 // ══════════════════════════════════════════════════════════════
 
-import { saveConfigBatch, loadConfig } from '@/lib/sheets-service';
+import {
+  loadCronicas as loadCronicasEndpoint,
+  saveCronicaRemote,
+  deleteCronicaRemote,
+} from '@/lib/sheets-service';
 
 export type CronicaAutor = 'mando' | 'contratista' | 'narrador';
 export type CronicaTag   = 'aar' | 'politica' | 'personal' | 'salto';
 
 export interface CronicaEntry {
   id:             string;
-  ts:             number;          // creación, fallback de orden
+  ts:             number;
   campaignYear:   number;
-  campaignMonth:  number;          // 1-12
-  campaignDay:    number;          // 1-30
+  campaignMonth:  number;
+  campaignDay:    number;
   autor:          CronicaAutor;
-  autorNombre?:   string;          // override opcional (ej: "Sgto. Dayffid")
+  autorNombre?:   string;
   titulo:         string;
-  cuerpo:         string;          // markdown ligero
+  cuerpo:         string;
   tag:            CronicaTag;
 }
 
@@ -35,19 +40,50 @@ export function readCronicas(): CronicaEntry[] {
   } catch { return []; }
 }
 
-function writeCronicas(list: CronicaEntry[]): void {
+function writeCronicasLocal(list: CronicaEntry[]): void {
   try {
     const trimmed = list.slice(0, MAX_ENTRIES);
     localStorage.setItem(KEY, JSON.stringify(trimmed));
-    syncToSheets(trimmed).catch(() => {});
   } catch { /* silent */ }
+}
+
+/** Coerciones para tolerar valores remotos algo sucios. */
+function normalize(remote: any): CronicaEntry {
+  const autor: CronicaAutor =
+    ['mando', 'contratista', 'narrador'].includes(remote.autor) ? remote.autor : 'mando';
+  const tag: CronicaTag =
+    ['aar', 'politica', 'personal', 'salto'].includes(remote.tag) ? remote.tag : 'aar';
+  return {
+    id:            String(remote.id || genId()),
+    ts:            Number(remote.ts) || Date.now(),
+    campaignYear:  Number(remote.campaignYear)  || 0,
+    campaignMonth: Number(remote.campaignMonth) || 1,
+    campaignDay:   Number(remote.campaignDay)   || 1,
+    autor,
+    autorNombre:   remote.autorNombre ? String(remote.autorNombre) : undefined,
+    titulo:        String(remote.titulo || ''),
+    cuerpo:        String(remote.cuerpo || ''),
+    tag,
+  };
 }
 
 export function addCronica(entry: Omit<CronicaEntry, 'id' | 'ts'>): CronicaEntry {
   const full: CronicaEntry = { ...entry, id: genId(), ts: Date.now() };
   const list = readCronicas();
   list.unshift(full);
-  writeCronicas(list);
+  writeCronicasLocal(list);
+  // Sync remoto (fire & forget; en error queda solo en cache local)
+  saveCronicaRemote({
+    id: full.id, ts: full.ts,
+    campaignYear: full.campaignYear,
+    campaignMonth: full.campaignMonth,
+    campaignDay: full.campaignDay,
+    autor: full.autor,
+    autorNombre: full.autorNombre ?? '',
+    tag: full.tag,
+    titulo: full.titulo,
+    cuerpo: full.cuerpo,
+  }).catch(() => { /* TODO: queue offline */ });
   return full;
 }
 
@@ -55,26 +91,36 @@ export function updateCronica(id: string, patch: Partial<Omit<CronicaEntry, 'id'
   const list = readCronicas();
   const i = list.findIndex(e => e.id === id);
   if (i < 0) return;
-  list[i] = { ...list[i], ...patch };
-  writeCronicas(list);
+  const updated = { ...list[i], ...patch };
+  list[i] = updated;
+  writeCronicasLocal(list);
+  saveCronicaRemote({
+    id: updated.id, ts: updated.ts,
+    campaignYear: updated.campaignYear,
+    campaignMonth: updated.campaignMonth,
+    campaignDay: updated.campaignDay,
+    autor: updated.autor,
+    autorNombre: updated.autorNombre ?? '',
+    tag: updated.tag,
+    titulo: updated.titulo,
+    cuerpo: updated.cuerpo,
+  }).catch(() => {});
 }
 
 export function deleteCronica(id: string): void {
-  writeCronicas(readCronicas().filter(e => e.id !== id));
-}
-
-async function syncToSheets(list: CronicaEntry[]): Promise<void> {
-  await saveConfigBatch({ CRONICAS: JSON.stringify(list) });
+  writeCronicasLocal(readCronicas().filter(e => e.id !== id));
+  deleteCronicaRemote(id).catch(() => {});
 }
 
 export async function loadCronicasFromSheets(): Promise<CronicaEntry[] | null> {
-  const res = await loadConfig();
+  const res = await loadCronicasEndpoint();
   if (!res.success) return null;
-  const d = res.data?.config ?? res.data;
-  const raw = d?.['CRONICAS'];
-  if (!raw) return null;
-  try { return JSON.parse(raw) as CronicaEntry[]; }
-  catch { return null; }
+  const arr = (res.data as any)?.cronicas;
+  if (!Array.isArray(arr)) return null;
+  const list = arr.map(normalize);
+  // Refresca cache local con remoto
+  writeCronicasLocal(list);
+  return list;
 }
 
 /** Orden: campaña descendente (año→mes→día), desempate por ts desc */

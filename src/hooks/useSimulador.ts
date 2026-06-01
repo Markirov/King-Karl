@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { mechParseMech, vehicleParseSAW } from '@/lib/parsers';
 import { mechAmmoMetaForWeapon } from '@/lib/weapons';
 import type { MechSlot, VehicleSlot, MechState, MechSession, MoveMode, VehicleSession, InfantrySlot, BASlot, FireTarget } from '@/lib/combat-types';
 import { INFANTRY_CATALOG, BA_CATALOG, buildInfantrySession, buildBASession } from '@/lib/infantry-catalog';
 import { infantryFire, baFire, infantryNextTurn, baNextTurn, infantryApplyDamage, baApplyDamage } from '@/lib/infantry-combat';
 import type { DamageFlags } from '@/lib/combat-types';
+import { loadLocalSnapshot, saveLocalSnapshot, clearLocalSnapshot } from '@/lib/simulador-persistence';
+import type { SimuladorSnapshot } from '@/lib/simulador-persistence';
 import {
   mechInitSession, mechApplyDamage, mechApplyHeal,
   mechNextTurn, mechToggleWeapon, mechToggleCrit,
@@ -28,17 +30,101 @@ function emptyInfSlot(): InfantrySlot { return { state: null, session: null }; }
 function emptyBASlot(): BASlot { return { state: null, session: null }; }
 
 export function useSimulador() {
-  const [mechSlots, setMechSlots] = useState<MechSlot[]>(Array(MECH_SLOTS).fill(null).map(emptyMechSlot));
-  const [vehicleSlots, setVehicleSlots] = useState<VehicleSlot[]>(Array(VEHICLE_SLOTS).fill(null).map(emptyVehicleSlot));
-  const [infantrySlots, setInfantrySlots] = useState<InfantrySlot[]>(Array(INF_SLOTS).fill(null).map(emptyInfSlot));
-  const [baSlots, setBASlots] = useState<BASlot[]>(Array(BA_SLOTS).fill(null).map(emptyBASlot));
-  const [activeInfantryIdx, setActiveInfantryIdx] = useState(0);
-  const [activeBAIdx, setActiveBAIdx] = useState(0);
-  const [activeTab, setActiveTab] = useState<'mechs' | 'vehicles'>('mechs');
-  const [currentMechIdx, setCurrentMechIdx] = useState(0);
-  const [currentVehicleIdx, setCurrentVehicleIdx] = useState(0);
+  // ── Lazy hydration from localStorage ──
+  const initial = (() => loadLocalSnapshot())();
+
+  const [mechSlots, setMechSlots] = useState<MechSlot[]>(
+    () => initial?.mechSlots ?? Array(MECH_SLOTS).fill(null).map(emptyMechSlot)
+  );
+  const [vehicleSlots, setVehicleSlots] = useState<VehicleSlot[]>(
+    () => initial?.vehicleSlots ?? Array(VEHICLE_SLOTS).fill(null).map(emptyVehicleSlot)
+  );
+  const [infantrySlots, setInfantrySlots] = useState<InfantrySlot[]>(
+    () => initial?.infantrySlots ?? Array(INF_SLOTS).fill(null).map(emptyInfSlot)
+  );
+  const [baSlots, setBASlots] = useState<BASlot[]>(
+    () => initial?.baSlots ?? Array(BA_SLOTS).fill(null).map(emptyBASlot)
+  );
+  const [activeInfantryIdx, setActiveInfantryIdx] = useState(() => initial?.activeInfantryIdx ?? 0);
+  const [activeBAIdx, setActiveBAIdx] = useState(() => initial?.activeBAIdx ?? 0);
+  const [activeTab, setActiveTab] = useState<'mechs' | 'vehicles'>(() => initial?.activeTab ?? 'mechs');
+  const [currentMechIdx, setCurrentMechIdx] = useState(() => initial?.currentMechIdx ?? 0);
+  const [currentVehicleIdx, setCurrentVehicleIdx] = useState(() => initial?.currentVehicleIdx ?? 0);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 const [damageAmount, setDamageAmount] = useState(0);
+
+  // dirty flag: hay cambios locales sin push a Fuerzas
+  const [dirty, setDirty] = useState(false);
+  const [lastLocalSave, setLastLocalSave] = useState<string | null>(initial?.updatedAt ?? null);
+
+  // ── Autosave a localStorage en cada cambio relevante ──
+  useEffect(() => {
+    saveLocalSnapshot({
+      activeTab,
+      currentMechIdx,
+      currentVehicleIdx,
+      activeInfantryIdx,
+      activeBAIdx,
+      mechSlots,
+      vehicleSlots,
+      infantrySlots,
+      baSlots,
+    });
+    setLastLocalSave(new Date().toISOString());
+    setDirty(true);
+  }, [
+    activeTab, currentMechIdx, currentVehicleIdx,
+    activeInfantryIdx, activeBAIdx,
+    mechSlots, vehicleSlots, infantrySlots, baSlots,
+  ]);
+
+  /** Snapshot actual sin schemaVersion/updatedAt (para push remoto o consumir UI). */
+  const getSnapshot = useCallback((): Omit<SimuladorSnapshot, 'schemaVersion' | 'updatedAt'> => ({
+    activeTab,
+    currentMechIdx,
+    currentVehicleIdx,
+    activeInfantryIdx,
+    activeBAIdx,
+    mechSlots,
+    vehicleSlots,
+    infantrySlots,
+    baSlots,
+  }), [
+    activeTab, currentMechIdx, currentVehicleIdx,
+    activeInfantryIdx, activeBAIdx,
+    mechSlots, vehicleSlots, infantrySlots, baSlots,
+  ]);
+
+  /** Hidrata desde un snapshot remoto (sustituye estado completo). */
+  const hydrateFromSnapshot = useCallback((snap: SimuladorSnapshot) => {
+    setMechSlots(snap.mechSlots);
+    setVehicleSlots(snap.vehicleSlots);
+    setInfantrySlots(snap.infantrySlots);
+    setBASlots(snap.baSlots);
+    setActiveTab(snap.activeTab);
+    setCurrentMechIdx(snap.currentMechIdx);
+    setCurrentVehicleIdx(snap.currentVehicleIdx);
+    setActiveInfantryIdx(snap.activeInfantryIdx);
+    setActiveBAIdx(snap.activeBAIdx);
+  }, []);
+
+  /** Limpia sesión: snapshot local + slots reseteados. Útil al cerrar misión. */
+  const resetSession = useCallback(() => {
+    setMechSlots(Array(MECH_SLOTS).fill(null).map(emptyMechSlot));
+    setVehicleSlots(Array(VEHICLE_SLOTS).fill(null).map(emptyVehicleSlot));
+    setInfantrySlots(Array(INF_SLOTS).fill(null).map(emptyInfSlot));
+    setBASlots(Array(BA_SLOTS).fill(null).map(emptyBASlot));
+    setActiveInfantryIdx(0);
+    setActiveBAIdx(0);
+    setActiveTab('mechs');
+    setCurrentMechIdx(0);
+    setCurrentVehicleIdx(0);
+    clearLocalSnapshot();
+    setDirty(false);
+  }, []);
+
+  /** Marca estado como sincronizado tras push remoto OK. */
+  const markSynced = useCallback(() => setDirty(false), []);
 
   // ── Current slot accessors ──
   const currentSlot = activeTab === 'mechs' ? mechSlots[currentMechIdx] : vehicleSlots[currentVehicleIdx];
@@ -571,5 +657,9 @@ const [damageAmount, setDamageAmount] = useState(0);
     assignBA, clearBA,
     infantryFireAction, infantryFireAtAction, infantryNextTurnAction, infantryApplyDamageAction, infantryDirectLossAction,
     baFireAction, baFireAtAction, baNextTurnAction, baApplyDamageAction,
+
+    // Persistence
+    dirty, lastLocalSave,
+    getSnapshot, hydrateFromSnapshot, resetSession, markSynced,
   };
 }

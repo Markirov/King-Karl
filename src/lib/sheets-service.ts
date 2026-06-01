@@ -56,6 +56,72 @@ export const registerMission = (xp: Record<string, number>, dinero: number, gast
     gastos:       String(gastos),
   });
 
+// ── Mission registration GRANULAR (Hoja de Servicio P3) ──────
+// Cliente envía TODOS los campos. Apps Script `appendRegistroRow`
+// hace match case-insensitive contra row 1 de "Respuestas de
+// formulario 1". Para guardar un campo nuevo basta con añadir su
+// header a la hoja — no toca código backend.
+export interface MissionFullPayload {
+  // Meta
+  missionId:     string;
+  fecha:         string;
+  codUnidad:     string;
+  oficial:       string;
+  missionType:   string;
+  duration:      string;
+  // Pilot breakdown (handles → XP / chequeos / rerolls)
+  xpMap:         Record<string, number>;
+  chequeosMap:   Record<string, number>;
+  rerollsMap:    Record<string, number>;
+  // Tesorería · HABER
+  pago:          number;
+  salvamento:    number;
+  extrasHaber:   number;
+  // Tesorería · DEBE
+  reparacion:    number;
+  municion:      number;
+  blindaje:      number;
+  extrasDebe:    number;
+  // Computed
+  totalHaber:    number;
+  totalDebe:     number;
+  balance:       number;
+  // Note
+  bitacoraNote:  string;
+}
+
+export const registerMissionFull = (p: MissionFullPayload) =>
+  sheetsPost({
+    action: 'registrarMision',
+    // Meta
+    missionId:    p.missionId,
+    fechaPropia:  p.fecha,
+    codUnidad:    p.codUnidad,
+    oficial:      p.oficial,
+    missionType:  p.missionType,
+    duration:     p.duration,
+    // Pilot maps (JSON, header-matched)
+    xpMap:        JSON.stringify(p.xpMap),
+    chequeosMap:  JSON.stringify(p.chequeosMap),
+    rerollsMap:   JSON.stringify(p.rerollsMap),
+    // Tesorería granular
+    pago:         p.pago,
+    salvamento:   p.salvamento,
+    extrasHaber:  p.extrasHaber,
+    reparacion:   p.reparacion,
+    municion:     p.municion,
+    blindaje:     p.blindaje,
+    extrasDebe:   p.extrasDebe,
+    // Totales (compat con `Dinero` / `Gastos` existentes)
+    dineroGanado: p.totalHaber,
+    gastos:       p.totalDebe,
+    totalHaber:   p.totalHaber,
+    totalDebe:    p.totalDebe,
+    balance:      p.balance,
+    // Note
+    bitacoraNote: p.bitacoraNote,
+  });
+
 export const loadLogros = () => sheetsGet({ action: 'getLogros' });
 export const loadHistorial = () => sheetsGet({ action: 'getHistorial' });
 
@@ -72,3 +138,66 @@ export const saveConfigBatch = (config: Record<string, string>) =>
     action: 'saveConfiguracionBatch',
     config: JSON.stringify(config),
   });
+
+// ── Fuerzas (simulador snapshots) ───────────────────────────────
+// Schema sheet Fuerzas: ID | Nombre | Fecha | BV | JSON
+import type { SimuladorSnapshot } from './simulador-persistence';
+
+export interface FuerzaEntry {
+  id: string;
+  nombre: string;
+  fecha: string;
+  bv: number;
+  snapshot: SimuladorSnapshot;
+}
+
+export const loadFuerzas = () => sheetsGet({ action: 'getFuerzas' });
+
+export const saveFuerza = (data: {
+  id?: string;
+  nombre: string;
+  bv: number;
+  snapshot: SimuladorSnapshot;
+}) =>
+  sheetsPost({
+    action: 'saveFuerzas',
+    id: data.id ?? '',
+    nombre: data.nombre,
+    fecha: new Date().toISOString(),
+    bv: data.bv,
+    json: JSON.stringify(data.snapshot),
+  });
+
+// ── Cronicas (sheet dedicado v2.4) ─────────────────────────────
+export interface CronicaRemote {
+  id:            string;
+  ts:            number;
+  campaignYear:  number;
+  campaignMonth: number;
+  campaignDay:   number;
+  autor:         string;
+  autorNombre:   string;
+  tag:           string;
+  titulo:        string;
+  cuerpo:        string;
+}
+
+export const loadCronicas = () => sheetsGet({ action: 'getCronicas' });
+
+export const saveCronicaRemote = (c: CronicaRemote) =>
+  sheetsPost({
+    action: 'saveCronica',
+    id:            c.id,
+    ts:            c.ts,
+    campaignYear:  c.campaignYear,
+    campaignMonth: c.campaignMonth,
+    campaignDay:   c.campaignDay,
+    autor:         c.autor,
+    autorNombre:   c.autorNombre,
+    tag:           c.tag,
+    titulo:        c.titulo,
+    cuerpo:        c.cuerpo,
+  });
+
+export const deleteCronicaRemote = (id: string) =>
+  sheetsPost({ action: 'deleteCronica', id });

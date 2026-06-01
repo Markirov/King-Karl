@@ -11,6 +11,8 @@ Backend Google Apps Script para King Karl's Kürassiers. Conecta Google Sheets c
 
 ⚠️ **Crítico**: tras editar código, debe seleccionarse **"New version"** en dropdown al hacer Deploy. Sin esto, URL exec sigue sirviendo código antiguo.
 
+⚠️ **Si "New version" no toma cambios**: a veces el deployment queda corrupto y "Edit deployment → New version" sigue sirviendo viejo. **Solución**: `Deploy → New deployment` (desplegar uno nuevo), copiar nueva URL exec, pegar en `localStorage.GOOGLE_SCRIPT_URL_CUSTOM` del cliente. Eliminar deployment viejo cuando confirme.
+
 ---
 
 ## Pestañas (sheets) usadas
@@ -78,7 +80,7 @@ Backend Google Apps Script para King Karl's Kürassiers. Conecta Google Sheets c
 
 ## "Respuestas de formulario 1" — schema dinámico
 
-**Row 1 = HEADERS** que Apps Script mapea a columnas. Convención:
+**Row 1 = HEADERS** que Apps Script mapea a columnas. Convención mínima:
 
 ```
 Fecha | Marcos | Jaime | Joan | [otros jugadores] | Dinero | Gastos | Tipo | Descripcion
@@ -89,6 +91,36 @@ Headers case-insensitive. Cualquier handle de jugador con header en row 1 puede 
 Apps Script `appendRegistroRow` busca cada header lowercase. Si añades col "Alex", piloto Alex puede recibir XP.
 
 Para nueva expansión: añadir col con header = handle exacto del jugador.
+
+### Headers granulares opcionales (Hoja de Servicio P3 — `registrarMision`)
+
+Cliente (`registerMissionFull`) ahora envía TODOS los campos. Apps Script los guarda si existen headers; los ignora si no. Headers reconocidos:
+
+| Header | Tipo | Campo cliente |
+|---|---|---|
+| `missionId`     | string | `meta.missionId` |
+| `fechaPropia`   | string | `meta.fecha` (ej. "14 · IV · MMMXXVI") |
+| `codUnidad`     | string | `meta.codUnidad` |
+| `oficial`       | string | `meta.oficial` |
+| `missionType`   | string | `missionType` |
+| `duration`      | string | `duration` |
+| `pago`          | number | HABER - Pago contrato |
+| `salvamento`    | number | HABER - Salvamento |
+| `extrasHaber`   | number | HABER - Extras |
+| `reparacion`    | number | DEBE - Reparación |
+| `municion`      | number | DEBE - Munición |
+| `blindaje`      | number | DEBE - Blindaje |
+| `extrasDebe`    | number | DEBE - Extras |
+| `totalHaber`    | number | Σ HABER |
+| `totalDebe`     | number | Σ DEBE |
+| `balance`       | number | totalHaber - totalDebe |
+| `bitacoraNote`  | string | "X y Y siguen al frente..." |
+| `<handle>_chequeos` | number | Chequeos por piloto (e.g. `marcos_chequeos`) |
+| `<handle>_rerolls`  | number | Re-rolls por piloto |
+
+**Compat**: `dineroGanado` y `gastos` siguen enviándose con totales agregados (los headers existentes `Dinero` / `Gastos` mantienen comportamiento legacy).
+
+**Per-pilot maps**: `chequeosMap` y `rerollsMap` se envían como JSON (formato igual que `xpMap`). El backend debe extender `appendRegistroRow` para buscar headers tipo `marcos_chequeos`, `jaime_rerolls` si quieres granularidad por piloto. Si no se extiende, los JSON se ignoran sin error.
 
 ---
 

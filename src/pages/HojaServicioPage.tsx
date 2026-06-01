@@ -4,10 +4,10 @@
 //  Lógica intacta: registerMission + registerXPExpense
 // ══════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { getVeterancy } from '@/lib/barracones-data';
 import { useAppStore } from '@/lib/store';
-import { registerMission, registerXPExpense } from '@/lib/sheets-service';
+import { registerMissionFull, registerXPExpense } from '@/lib/sheets-service';
 import { isActivo } from '@/lib/roster';
 
 // ── Constants ──────────────────────────────────────────────
@@ -453,8 +453,11 @@ export function HojaServicioPage() {
   const [duration]                    = useState('24:00:00');
   const [pago, setPago]               = useState(0);
   const [salvamento, setSalvamento]   = useState(0);
+  const [extrasHaber, setExtrasHaber] = useState(0);
   const [reparacion, setReparacion]   = useState(0);
   const [municion, setMunicion]       = useState(0);
+  const [blindaje, setBlindaje]       = useState(0);
+  const [extrasDebe, setExtrasDebe]   = useState(0);
 
   const [meta, setMeta] = useState({
     missionId: 'FS-OPS-3026-04',
@@ -516,24 +519,80 @@ export function HojaServicioPage() {
 
   // Computed
   const totalSquadXp = players.reduce((s, p) => s + (p.xpGanado + p.chequeos - calcSpent(p)), 0);
-  const balance      = pago + salvamento - reparacion - municion;
+  const totalHaber   = pago + salvamento + extrasHaber;
+  const totalDebe    = reparacion + municion + blindaje + extrasDebe;
+  const balance      = totalHaber - totalDebe;
   const totalRerolls = players.reduce((s, p) => s + p.rerolls, 0);
   const ringText     = '· COMISIÓN DE REVISIÓN · INFORME DE OPERACIONES · ANNO MMMXXVI ·';
 
-  // Register (preserva lógica de la versión legacy)
+  // ── Comentario al pie del Libro de Bitácora ──
+  // PJ con más XP en la partida + 1 PNJ aleatorio del resto del roster.
+  // rerollSeed permite forzar re-roll del PNJ desde el botón Σ.
+  const [rerollSeed, setRerollSeed] = useState(0);
+
+  const topXpPlayer = useMemo(() => {
+    if (players.length === 0) return null;
+    return [...players]
+      .map(p => ({ ...p, _xpNet: p.xpGanado + p.chequeos - calcSpent(p) }))
+      .sort((a, b) => b._xpNet - a._xpNet)[0];
+  }, [players]);
+
+  // PNJ pool: roster activos NO en PC_JUGADORES
+  const pnjPool = useMemo(() => {
+    if (pcSet.size === 0) return []; // sin filtro PC → no se distingue PNJ
+    return roster.filter(r => isActivo(r) && !pcSet.has(r.jugador.toLowerCase()));
+  }, [roster, pcSet]);
+
+  const companionPnj = useMemo(() => {
+    if (pnjPool.length === 0) return null;
+    return pnjPool[Math.floor(Math.random() * pnjPool.length)];
+    // rerollSeed en deps fuerza nueva selección
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pnjPool, topXpPlayer?.name, rerollSeed]);
+
+  const bitacoraNote = (() => {
+    if (!topXpPlayer) return null;
+    const a = topXpPlayer.callsign || topXpPlayer.nombre || '—';
+    if (!companionPnj) return `"${a} sigue al frente — felicitar"`;
+    const b = companionPnj.apodo || companionPnj.nombre || companionPnj.jugador || '—';
+    return `"${a} y ${b} siguen al frente — felicitar"`;
+  })();
+
+  // Register: envío granular para reflejo milimétrico en Sheets.
+  // Apps Script `appendRegistroRow` matchea cada campo contra headers
+  // row 1 de "Respuestas de formulario 1". Para nuevas columnas basta
+  // añadir el header — el backend las recoge sin tocar código.
   const handleRegister = async () => {
-    const xpMap: Record<string, number> = {};
-    players.forEach(p => { xpMap[p.name] = p.xpGanado; });
+    const xpMap:       Record<string, number> = {};
+    const chequeosMap: Record<string, number> = {};
+    const rerollsMap:  Record<string, number> = {};
+    players.forEach(p => {
+      xpMap[p.name]       = p.xpGanado;
+      chequeosMap[p.name] = p.chequeos;
+      rerollsMap[p.name]  = p.rerolls;
+    });
 
     const hasAnything = players.some(p => p.xpGanado > 0 || calcSpent(p) > 0)
-                        || pago > 0 || salvamento > 0 || reparacion > 0 || municion > 0;
+                        || totalHaber > 0 || totalDebe > 0;
     if (!hasAnything) { setStatus('error'); setStatusMsg('Nada que registrar'); return; }
 
     setStatus('loading');
     setStatusMsg('Registrando misión…');
 
     try {
-      const res = await registerMission(xpMap, pago + salvamento, reparacion + municion);
+      const res = await registerMissionFull({
+        missionId:    meta.missionId,
+        fecha:        meta.fecha,
+        codUnidad:    meta.codUnidad,
+        oficial:      meta.oficial,
+        missionType,
+        duration,
+        xpMap, chequeosMap, rerollsMap,
+        pago, salvamento, extrasHaber,
+        reparacion, municion, blindaje, extrasDebe,
+        totalHaber, totalDebe, balance,
+        bitacoraNote: bitacoraNote ?? '',
+      });
       if (!res.success) throw new Error(res.error ?? 'Error de red');
 
       for (const p of players) {
@@ -549,7 +608,8 @@ export function HojaServicioPage() {
       setStatus('ok');
       setStatusMsg('Misión visada y archivada');
       setPlayers(prev => prev.map(p => ({ ...p, xpGanado: 0, chequeos: 0, rerolls: 0 })));
-      setPago(0); setSalvamento(0); setReparacion(0); setMunicion(0);
+      setPago(0); setSalvamento(0); setExtrasHaber(0);
+      setReparacion(0); setMunicion(0); setBlindaje(0); setExtrasDebe(0);
     } catch (e: any) {
       setStatus('error');
       setStatusMsg(`Error: ${e.message || e}`);
@@ -748,9 +808,19 @@ export function HojaServicioPage() {
               marginTop: 14, paddingTop: 10, borderTop: `2px solid ${C.ink}`,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 13, fontStyle: 'italic', color: C.inkSoft }}>
+              <button
+                onClick={() => setRerollSeed(s => s + 1)}
+                title="Re-roll del compañero nombrado"
+                style={{
+                  background: 'transparent', border: 'none', padding: 0, cursor: 'pointer',
+                  fontFamily: '"Cormorant Garamond", serif', fontSize: 13, fontStyle: 'italic',
+                  color: C.inkSoft, outline: 'none',
+                  textDecoration: 'underline', textDecorationStyle: 'dotted',
+                  textDecorationColor: `${C.redDeep}55`, textUnderlineOffset: 3,
+                }}
+              >
                 Σ Escuadrón ·
-              </span>
+              </button>
               <span style={{
                 fontFamily: '"Cormorant Garamond", serif', fontSize: 26, fontStyle: 'italic', fontWeight: 700,
                 color: totalSquadXp > 0 ? C.greenDeep : totalSquadXp < 0 ? C.redDeep : C.ink,
@@ -759,13 +829,15 @@ export function HojaServicioPage() {
                 <span style={{ fontSize: 13, color: C.goldDeep, fontFamily: '"Share Tech Mono", monospace', fontStyle: 'normal' }}>XP</span>
               </span>
             </div>
-            <div style={{
-              marginTop: 8, padding: '6px 8px', borderLeft: `3px solid ${C.redDeep}`,
-              background: `${C.paperHi}88`, fontFamily: 'Caveat, cursive', fontSize: 16,
-              color: C.redDeep, fontStyle: 'italic',
-            }}>
-              "Castigador y Halcón siguen al frente — felicitar"
-            </div>
+            {bitacoraNote && (
+              <div style={{
+                marginTop: 8, padding: '6px 8px', borderLeft: `3px solid ${C.redDeep}`,
+                background: `${C.paperHi}88`, fontFamily: 'Caveat, cursive', fontSize: 16,
+                color: C.redDeep, fontStyle: 'italic',
+              }}>
+                {bitacoraNote}
+              </div>
+            )}
           </PaperSheet>
 
           {/* HOJA DERECHA · TESORERÍA */}
@@ -778,8 +850,9 @@ export function HojaServicioPage() {
                 fontFamily: '"Share Tech Mono", monospace',
                 marginBottom: 4, paddingBottom: 2, borderBottom: `1px solid ${C.greenDeep}55`,
               }}>HABER · ENTRADAS</div>
-              <TesRow label="Pago por contrato" sign=""  value={pago}       onChange={setPago}       color={C.ink} />
-              <TesRow label="Salvamento"        sign="+" value={salvamento} onChange={setSalvamento} color={C.greenDeep} />
+              <TesRow label="Pago por contrato" sign=""  value={pago}        onChange={setPago}        color={C.ink} />
+              <TesRow label="Salvamento"        sign="+" value={salvamento}  onChange={setSalvamento}  color={C.greenDeep} />
+              <TesRow label="Extras"            sign="+" value={extrasHaber} onChange={setExtrasHaber} color={C.greenDeep} />
 
               <div style={{
                 fontSize: 9, letterSpacing: 3, color: C.redDeep,
@@ -787,7 +860,9 @@ export function HojaServicioPage() {
                 marginTop: 12, marginBottom: 4, paddingBottom: 2, borderBottom: `1px solid ${C.redDeep}55`,
               }}>DEBE · GASTOS</div>
               <TesRow label="Costes de reparación" sign="−" value={reparacion} onChange={setReparacion} color={C.redDeep} />
-              <TesRow label="Munición · resupply"  sign="−" value={municion}   onChange={setMunicion}   color={C.redDeep} />
+              <TesRow label="Munición"             sign="−" value={municion}   onChange={setMunicion}   color={C.redDeep} />
+              <TesRow label="Blindaje"             sign="−" value={blindaje}   onChange={setBlindaje}   color={C.redDeep} />
+              <TesRow label="Extras"               sign="−" value={extrasDebe} onChange={setExtrasDebe} color={C.redDeep} />
             </div>
 
             <div style={{

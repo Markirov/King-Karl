@@ -4,6 +4,8 @@ interface SectionTabsProps {
   tabs: { id: string; label: string }[];
 }
 
+export const SUBTAB_RIGHT_SLOT_ID = 'subtab-right-slot';
+
 export function SectionTabs({ tabs }: SectionTabsProps) {
   const { activeSubTab, setActiveSubTab } = useAppStore();
 
@@ -12,7 +14,7 @@ export function SectionTabs({ tabs }: SectionTabsProps) {
       className="
         fixed top-12 left-0 lg:left-[220px] right-0 h-10
         bg-background/[0.98] border-b border-primary-container/10
-        flex items-stretch gap-0 px-5 z-[98]
+        flex items-stretch gap-0 pl-5 pr-3 z-[98]
         backdrop-blur-lg
       "
     >
@@ -35,6 +37,8 @@ export function SectionTabs({ tabs }: SectionTabsProps) {
           </button>
         );
       })}
+      {/* Right slot: pages can portal extra controls here (search / slots / sync) */}
+      <div id={SUBTAB_RIGHT_SLOT_ID} className="ml-auto flex items-center gap-2" />
     </div>
   );
 }
