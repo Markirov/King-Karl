@@ -12,6 +12,8 @@ import type { LogEntry } from '@/lib/barracones-log';
 import { readCronicas, loadCronicasFromSheets, sortCronicas, type CronicaEntry } from '@/lib/cronicas-store';
 import { stripMarkdownLite } from '@/lib/markdown-lite';
 import { readPartes, loadPartesFromSheets, type ParteEntry, type ParteTone } from '@/lib/parte-store';
+import { loadMovimientos, type MovimientoEntry } from '@/lib/sheets-service';
+import { isActivo } from '@/lib/roster';
 
 const SLOTS_KEY = 'barracones_slots_v1';
 const SLOT_COUNT = 6;
@@ -635,6 +637,90 @@ function ParteDiario() {
   );
 }
 
+// ── Últimos Movimientos (Dashboard F1) ─────────────────────
+function UltimosMovimientos() {
+  const [movs, setMovs] = useState<MovimientoEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await loadMovimientos(5);
+        if (cancelled) return;
+        if (res.success && Array.isArray((res.data as any)?.movimientos)) {
+          setMovs((res.data as any).movimientos);
+        }
+      } catch { /* silent */ }
+      finally { if (!cancelled) setLoading(false); }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const fmtAmount = (m: MovimientoEntry): { txt: string; color: string; sign: '+' | '-' | '' } => {
+    const neto = (m.dinero || 0) - (m.gastos || 0);
+    if (neto > 0) return { txt: new Intl.NumberFormat('es-ES').format(neto) + ' ₡', color: '#9bd28a', sign: '+' };
+    if (neto < 0) return { txt: new Intl.NumberFormat('es-ES').format(Math.abs(neto)) + ' ₡', color: T.bloodLight, sign: '-' };
+    return { txt: '0 ₡', color: T.outline, sign: '' };
+  };
+
+  const fmtDate = (iso: string): string => {
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso.slice(0, 10);
+      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    } catch { return iso.slice(0, 10); }
+  };
+
+  return (
+    <div>
+      <SmallLabel>Últimos Movimientos</SmallLabel>
+      {loading ? (
+        <div style={{
+          fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+          color: T.outline, letterSpacing: 1.5, padding: '6px 0',
+        }}>CARGANDO…</div>
+      ) : movs.length === 0 ? (
+        <div style={{
+          fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+          color: T.outline, letterSpacing: 1.5, padding: '6px 0',
+        }}>SIN MOVIMIENTOS RECIENTES</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {movs.map((m, i) => {
+            const a = fmtAmount(m);
+            return (
+              <div key={i} style={{
+                display: 'grid', gridTemplateColumns: '36px 1fr auto',
+                gap: 8, alignItems: 'baseline',
+                padding: '3px 0',
+                borderBottom: `1px solid ${T.outlineV}30`,
+              }}>
+                <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 1 }}>
+                  {fmtDate(m.fecha)}
+                </span>
+                <span style={{
+                  fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+                  color: T.cream, lineHeight: 1.25,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }} title={m.descripcion}>
+                  {m.descripcion || m.tipo || '—'}
+                </span>
+                <span style={{
+                  fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+                  color: a.color, fontWeight: 700, letterSpacing: 0.5,
+                }}>
+                  {a.sign}{a.txt}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ────────────────────────────────────────────────────
 
 export function ComisionPage() {
@@ -743,6 +829,14 @@ export function ComisionPage() {
     ? `${total} UNIDADES · ${ready} OPERATIVAS · ${inBahia} EN BAHÍA`
     : `${total} UNIDADES · TODAS OPERATIVAS`;
 
+  // KPI agregados Dashboard (F1)
+  const bvTotal      = mechCards.reduce((s, c) => s + (c?.bv || 0), 0);
+  const personalAct  = roster.filter(isActivo).length;
+  const personalTot  = roster.length;
+  const bvTotalFmt   = new Intl.NumberFormat('es-ES').format(bvTotal);
+  const mechsOpFmt   = `${ready} / ${total}`;
+  const personalFmt  = `${personalAct} / ${personalTot}`;
+
   return (
     <div style={{
       display: 'grid', gridTemplateColumns: '1fr 380px',
@@ -823,15 +917,18 @@ export function ComisionPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 40 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, auto)', columnGap: 32, rowGap: 14 }}>
                 {([
                   ['Tesoreria',          contratoFmt],
-                  ['Lanza',              campaign.totalMechs || '—'],
+                  ['BV Total',           bvTotalFmt],
+                  ['Mechs Operativos',   mechsOpFmt],
                   ['Valor de la Unidad', valorUnidadFmt],
+                  ['Lanza',              String(campaign.totalMechs || '—')],
+                  ['Personal',           personalFmt],
                 ] as [string, string][]).map(([k, v], i) => (
                   <div key={i}>
                     <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 2 }}>{k.toUpperCase()}</div>
-                    <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 22, fontWeight: 700, color: T.creamHi, marginTop: 2 }}>{v}</div>
+                    <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 20, fontWeight: 700, color: T.creamHi, marginTop: 2 }}>{v}</div>
                   </div>
                 ))}
               </div>
@@ -886,6 +983,9 @@ export function ComisionPage() {
 
         {/* Última entrada · Crónicas */}
         <UltimaCronica />
+
+        {/* Últimos Movimientos (Dashboard F1) */}
+        <UltimosMovimientos />
 
         {/* Parte diario + moral */}
         <div style={{ marginTop: 'auto' }}>

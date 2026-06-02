@@ -234,3 +234,15 @@ export const saveParteDiarioRemote = (p: ParteDiarioRemote) =>
 
 export const deleteParteDiarioRemote = (id: string) =>
   sheetsPost({ action: 'deleteParteDiario', id });
+
+// ── Movimientos (últimas N filas Respuestas formulario 1) ──────
+export interface MovimientoEntry {
+  fecha:       string;
+  dinero:      number;
+  gastos:      number;
+  tipo:        string;
+  descripcion: string;
+}
+
+export const loadMovimientos = (limit = 5) =>
+  sheetsGet({ action: 'getMovimientos', limit: String(limit) });
