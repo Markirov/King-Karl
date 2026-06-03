@@ -4,6 +4,7 @@
 // ══════════════════════════════════════════════════════════════
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import type { Pilot } from '@/lib/barracones-types';
 import { calcHp } from '@/lib/barracones-data';
@@ -725,6 +726,7 @@ function UltimosMovimientos() {
 
 export function ComisionPage() {
   const { campaign, roster } = useAppStore();
+  const navigate = useNavigate();
   const BASE = import.meta.env.BASE_URL;
 
   const mesNombre = MESES[(campaign.campaignMonth ?? 1) - 1] ?? 'Enero';
@@ -917,7 +919,32 @@ export function ComisionPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, auto)', columnGap: 32, rowGap: 14 }}>
+              <button
+                onClick={() => navigate('/finanzas')}
+                title="Ir a Finanzas"
+                style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(3, auto)',
+                  columnGap: 32, rowGap: 14,
+                  padding: '14px 22px',
+                  background: 'rgba(199,151,100,0.05)',
+                  border: '1px solid #c79764',
+                  borderLeft: '2px solid #c79764',
+                  borderRight: '2px solid #c79764',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  textAlign: 'left',
+                  fontFamily: 'inherit', color: 'inherit',
+                  transition: 'background 0.15s, border-color 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.12)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.05)'; }}
+              >
+                {/* Esquinas decorativas bronce */}
+                <span style={{ position: 'absolute', top: -1, left: -1, width: 8, height: 8, borderTop: '2px solid #c79764', borderLeft: '2px solid #c79764' }} />
+                <span style={{ position: 'absolute', top: -1, right: -1, width: 8, height: 8, borderTop: '2px solid #c79764', borderRight: '2px solid #c79764' }} />
+                <span style={{ position: 'absolute', bottom: -1, left: -1, width: 8, height: 8, borderBottom: '2px solid #c79764', borderLeft: '2px solid #c79764' }} />
+                <span style={{ position: 'absolute', bottom: -1, right: -1, width: 8, height: 8, borderBottom: '2px solid #c79764', borderRight: '2px solid #c79764' }} />
+
                 {([
                   ['Tesoreria',          contratoFmt],
                   ['BV Total',           bvTotalFmt],
@@ -927,11 +954,18 @@ export function ComisionPage() {
                   ['Personal',           personalFmt],
                 ] as [string, string][]).map(([k, v], i) => (
                   <div key={i}>
-                    <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 2 }}>{k.toUpperCase()}</div>
+                    <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: '#c79764', letterSpacing: 2 }}>{k.toUpperCase()}</div>
                     <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 20, fontWeight: 700, color: T.creamHi, marginTop: 2 }}>{v}</div>
                   </div>
                 ))}
-              </div>
+
+                {/* Hint ir a finanzas */}
+                <div style={{
+                  position: 'absolute', bottom: 4, right: 10,
+                  fontFamily: '"Share Tech Mono", monospace', fontSize: 8,
+                  color: '#c79764', letterSpacing: 2, opacity: 0.7,
+                }}>FINANZAS →</div>
+              </button>
             </div>
           </div>
         </div>

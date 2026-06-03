@@ -5,9 +5,11 @@
 ---
 
 ## MTF → SSW conversión
+
 Status: parked. MTF files se aceptan as-is en `import-units.cjs`, pero index extrae solo nombre (BV2 = 0).
 
 Para conversión real:
+
 - Opción A: GUI manual SSW (File → Open MTF → Save As SSW). Funcional, tedioso para lote.
 - Opción B: implementar parser+BV calculator en Node (~500 líneas). Heavy.
 - Opción C: investigar herramientas community (MegaMek CLI, etc.) — TODO
@@ -21,6 +23,7 @@ Cuando se necesite BV2 exacto para un MTF: convertir vía SSW GUI manualmente, i
 Fase 1 completada (commit `565efec`). 18 botones distribuidos en 6 grupos. Backend Rust con `stream_shell`, `get_git_status`, `check_port`, `open_url`, config persistence. Frontend Stitch theme amber.
 
 Fase 2 pendiente:
+
 - Kill process desde UI (matar dev server arrancado, etc.)
 - Build portable .exe real (`npm run tauri build` produce `target/release/launcher-app.exe` ~10-30 MB self-contained)
 - Iconos custom (defaults Tauri rojo poco profesional)
@@ -55,21 +58,41 @@ Mayoría completada (`SHEETS_REORG.md`). Pendientes menores:
 ---
 
 ## Páginas placeholder (fase futura)
+
 - `ReclutamientoPage` — generador de personaje
 - `TROPage` — Technical Readout searchable
 
 ---
 
 ## Features backend OK sin UI cliente
+
 - **Historial Combates** (`getHistorial` endpoint listo) — sin UI viewer
 - **Vehículos VehicleSession** — combate completo en motor, slot disponible, panel y crítico OK. Falta: testing exhaustivo + casos límite vehículos VTOL/Naval
 - **AI Crónicas Gemini** — `PROMPT_INSTRUCCIONES` + `PROMPT_TONO` definidos en Configuracion. Sin integración API. Pensado para generar/asistir entradas crónica via Gemini.
 
 ---
 
-## CLAUDE.md desactualizado
+#### Integración con Telegram
+
+Status: pendiente. Sin detalles definidos aún.
+
+Ideas iniciales (a confirmar):
+
+- Bot Telegram recibe notificaciones eventos web (misión registrada, alta personal, alerta tesorería negativa)
+- Comandos rápidos `/roster`, `/tesoreria`, `/cronica X` desde móvil
+- Webhook bidireccional: web → bot → grupo jugadores; grupo → bot → Sheets (parte del día por chat)
+- Auth: `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` en Configuracion
+- Stack: Apps Script via `UrlFetchApp.fetch` directo a Telegram Bot API (sin server intermedio)
+
+Definir:
+
+- ¿Solo notificaciones salientes o bidireccional?
+- ¿Grupo único o broadcast a varios?
+- ¿Qué eventos disparan mensaje?
+- ¿Texto solo o media (fotos pilotos / mechs)?CLAUDE.md desactualizado
 
 Refleja estado pre-reskin. Actualizar con:
+
 - Hoja Servicio P3 Two-Tone (vs Legacy)
 - Barracones P2 Medallón (vs Legacy)
 - USE_LEGACY_DESIGNS toggle

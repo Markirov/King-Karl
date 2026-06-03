@@ -246,3 +246,66 @@ export interface MovimientoEntry {
 
 export const loadMovimientos = (limit = 5) =>
   sheetsGet({ action: 'getMovimientos', limit: String(limit) });
+
+// ── Libro Mayor (sheet dedicado v2.7) ──────────────────────────
+export type LibroMayorTipo = 'ingreso' | 'gasto';
+export type LibroMayorCategoria =
+  | 'contrato_secundario'
+  | 'compra_mech'
+  | 'venta_mech'
+  | 'repuestos'
+  | 'sueldo_extra'
+  | 'soborno'
+  | 'mantenimiento_mensual'
+  | 'gasto_misc'
+  | 'ingreso_misc';
+
+export interface LibroMayorEntry {
+  id:        string;
+  fecha:     string;
+  concepto:  string;
+  cantidad:  number;
+  tipo:      LibroMayorTipo;
+  categoria: LibroMayorCategoria;
+  nota:      string;
+  jugador:   string;
+}
+
+export const loadLibroMayor = () => sheetsGet({ action: 'getLibroMayor' });
+
+export const saveLibroMayorEntry = (e: LibroMayorEntry) =>
+  sheetsPost({ action: 'saveLibroMayor', ...e });
+
+export const deleteLibroMayorEntry = (id: string) =>
+  sheetsPost({ action: 'deleteLibroMayor', id });
+
+// ── Personal (sheet dedicado v2.7) ─────────────────────────────
+export type PersonalRol =
+  | 'mech_tech' | 'astech' | 'medico' | 'representante' | 'seguridad'
+  | 'administrativo' | 'infanteria' | 'tripulacion_vehiculo'
+  | 'tripulacion_nave' | 'piloto_aerospace' | 'battle_armor'
+  | 'quartermaster' | 'oficial_radio' | 'comstar_liaison'
+  | 'ingeniero_combate' | 'intel_officer' | 'chaplain' | 'otros';
+
+export type PersonalNivel = 'green' | 'regular' | 'veteran' | 'elite';
+export type PersonalEstado = 'activo' | 'baja' | 'kia' | 'retirado';
+
+export interface PersonalEntry {
+  id:         string;
+  rol:        PersonalRol;
+  nombre:     string;
+  nivel:      PersonalNivel;
+  sueldoMes:  number;
+  fechaAlta:  string;
+  estado:     PersonalEstado;
+  nota:       string;
+  cantidad:   number; // p.ej. 6 astechs como 1 entrada de cantidad=6
+}
+
+export const loadPersonal = () => sheetsGet({ action: 'getPersonal' });
+
+export const savePersonalEntry = (e: PersonalEntry) =>
+  sheetsPost({ action: 'savePersonal', ...e });
+
+export const deletePersonalEntry = (id: string) =>
+  sheetsPost({ action: 'deletePersonal', id });

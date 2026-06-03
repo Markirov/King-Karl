@@ -17,6 +17,12 @@ export const NAV_SECTIONS: NavSection[] = [
       { id: 'reclutamiento', label: 'Reclutamiento',    icon: '👤', path: '/reclutamiento', palette: 'amber' },
       { id: 'barracones',    label: 'Barracones',       icon: '🏠', path: '/barracones',    palette: 'amber' },
       { id: 'hoja',          label: 'Hoja de Servicio', icon: '📝', path: '/hoja-servicio', palette: 'amber' },
+      { id: 'finanzas',      label: 'Finanzas',         icon: '💰', path: '/finanzas',      palette: 'amber',
+        tabs: [
+          { id: 'libro-mayor', label: 'Libro Mayor' },
+          { id: 'personal',    label: 'Personal' },
+        ],
+      },
       {
         id: 'simulador', label: 'Simulador', icon: '⚔️', path: '/simulador', palette: 'green',
         tabs: [
