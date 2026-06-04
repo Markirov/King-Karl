@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { isActivo } from '@/lib/roster';
 import {
   loadLibroMayor, saveLibroMayorEntry, deleteLibroMayorEntry,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
@@ -87,6 +88,13 @@ const fmtDate = (iso: string) => {
 const genId = (prefix: string) =>
   `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
 
+/** Fecha de campaña como YYYY-MM-DD (día 1 por defecto, sin tener campaignDay). */
+function getCampaignDateISO(year: number | undefined, month: number | undefined): string {
+  const y = year ?? new Date().getFullYear();
+  const m = month ?? 1;
+  return `${y}-${String(m).padStart(2, '0')}-01`;
+}
+
 const rolLabel = (k: PersonalRol) => ROLES.find(r => r.key === k)?.label ?? k;
 const catLabel = (k: LibroMayorCategoria) => CATEGORIAS.find(c => c.key === k)?.label ?? k;
 
@@ -95,8 +103,9 @@ const catLabel = (k: LibroMayorCategoria) => CATEGORIAS.find(c => c.key === k)?.
 // ══════════════════════════════════════════════════════════
 
 export function FinanzasPage() {
-  const { activeSubTab } = useAppStore();
+  const { activeSubTab, campaign, roster } = useAppStore();
   const tab = (activeSubTab === 'personal' ? 'personal' : 'libro-mayor') as 'libro-mayor' | 'personal';
+  const campaignDate = getCampaignDateISO(campaign?.campaignYear, campaign?.campaignMonth);
 
   return (
     <div style={{
@@ -105,7 +114,9 @@ export function FinanzasPage() {
       fontFamily: 'Inter, sans-serif',
       padding: '24px 36px 36px',
     }}>
-      {tab === 'libro-mayor' ? <LibroMayorTab /> : <PersonalTab />}
+      {tab === 'libro-mayor'
+        ? <LibroMayorTab campaignDate={campaignDate} campaignYear={campaign?.campaignYear ?? 3026} campaignMonth={campaign?.campaignMonth ?? 1} roster={roster} />
+        : <PersonalTab campaignDate={campaignDate} />}
     </div>
   );
 }
@@ -114,18 +125,30 @@ export function FinanzasPage() {
 //  LIBRO MAYOR
 // ══════════════════════════════════════════════════════════
 
-function LibroMayorTab() {
+interface LibroMayorTabProps {
+  campaignDate: string;
+  campaignYear: number;
+  campaignMonth: number;
+  roster: any[];
+}
+
+function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: LibroMayorTabProps) {
   const [entries, setEntries] = useState<LibroMayorEntry[]>([]);
+  const [personal, setPersonal] = useState<PersonalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<LibroMayorEntry | null>(null);
   const [filterCat, setFilterCat] = useState<LibroMayorCategoria | 'all'>('all');
+  const [projectorOpen, setProjectorOpen] = useState(false);
 
   const refresh = async () => {
     setLoading(true);
-    const res = await loadLibroMayor();
-    if (res.success && Array.isArray((res.data as any)?.entries)) {
-      setEntries((res.data as any).entries as LibroMayorEntry[]);
+    const [resLm, resPers] = await Promise.all([loadLibroMayor(), loadPersonal()]);
+    if (resLm.success && Array.isArray((resLm.data as any)?.entries)) {
+      setEntries((resLm.data as any).entries as LibroMayorEntry[]);
+    }
+    if (resPers.success && Array.isArray((resPers.data as any)?.entries)) {
+      setPersonal((resPers.data as any).entries as PersonalEntry[]);
     }
     setLoading(false);
   };
@@ -148,7 +171,7 @@ function LibroMayorTab() {
   const openNew = () => {
     setEditing({
       id: '',
-      fecha: new Date().toISOString().slice(0, 10),
+      fecha: campaignDate,
       concepto: '',
       cantidad: 0,
       tipo: 'gasto',
@@ -184,8 +207,41 @@ function LibroMayorTab() {
       <Header
         title="Libro Mayor"
         subtitle="Ingresos y gastos ad-hoc fuera de misión"
-        action={!editorOpen ? <PrimaryBtn onClick={openNew}>+ NUEVA ENTRADA</PrimaryBtn> : null}
+        action={!editorOpen ? (
+          <div style={{ display: 'flex', gap: 10 }}>
+            <SecondaryBtn onClick={() => setProjectorOpen(true)}>📊 PROYECTAR MES</SecondaryBtn>
+            <PrimaryBtn onClick={openNew}>+ NUEVA ENTRADA</PrimaryBtn>
+          </div>
+        ) : null}
       />
+
+      {projectorOpen && (
+        <MaintenanceModal
+          roster={roster}
+          personal={personal}
+          campaignYear={campaignYear}
+          campaignMonth={campaignMonth}
+          onClose={() => setProjectorOpen(false)}
+          onCommit={async (total, detalles) => {
+            const fechaProyectada = getCampaignDateISO(
+              campaignMonth === 12 ? campaignYear + 1 : campaignYear,
+              campaignMonth === 12 ? 1 : campaignMonth + 1,
+            );
+            await saveLibroMayorEntry({
+              id: genId('lm'),
+              fecha: fechaProyectada,
+              concepto: `Mantenimiento mensual (sueldos + personal + mechs)`,
+              cantidad: Math.round(total),
+              tipo: 'gasto',
+              categoria: 'mantenimiento_mensual',
+              nota: detalles,
+              jugador: '',
+            });
+            setProjectorOpen(false);
+            refresh();
+          }}
+        />
+      )}
 
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
@@ -337,7 +393,7 @@ function LibroMayorEditor({ entry, setEntry, onSave, onCancel }: {
 //  PERSONAL
 // ══════════════════════════════════════════════════════════
 
-function PersonalTab() {
+function PersonalTab({ campaignDate }: { campaignDate: string }) {
   const [entries, setEntries] = useState<PersonalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -374,7 +430,7 @@ function PersonalTab() {
       nombre: '',
       nivel: 'regular',
       sueldoMes: 800,
-      fechaAlta: new Date().toISOString().slice(0, 10),
+      fechaAlta: campaignDate,
       estado: 'activo',
       nota: '',
       cantidad: 1,
@@ -778,4 +834,251 @@ function smallBtn(color: string): React.CSSProperties {
     fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1.5,
     cursor: 'pointer',
   };
+}
+
+// ══════════════════════════════════════════════════════════
+//  MAINTENANCE MODAL (F3)
+// ══════════════════════════════════════════════════════════
+
+interface MaintenanceModalProps {
+  roster: any[];
+  personal: PersonalEntry[];
+  campaignYear: number;
+  campaignMonth: number;
+  onClose: () => void;
+  onCommit: (total: number, detalles: string) => Promise<void>;
+}
+
+const MESES_NOMBRE = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClose, onCommit }: MaintenanceModalProps) {
+  // Editables in-place — defaults StratOps
+  const [mantenimientoMechMes, setMantenimientoMechMes] = useState(30000); // ₡/mes/mech
+  const [suministrosPct, setSuministrosPct] = useState(10);                 // % sobre subtotal
+  const [cubiertoContrato, setCubiertoContrato] = useState(false);          // FM Mercs: Salary/Support coverage
+  const [committing, setCommitting] = useState(false);
+
+  // Pilotos activos con sueldo desde roster (col R Personajes)
+  const pilotos = useMemo(() => {
+    return roster
+      .filter(isActivo)
+      .map(r => {
+        // sueldo puede venir como número o string formateado
+        const raw = String(r.sueldo ?? '').replace(/[^\d.-]/g, '');
+        const n = parseInt(raw, 10);
+        return {
+          nombre: r.apodo || r.nombre || r.jugador || '?',
+          sueldo: Number.isFinite(n) ? n : 0,
+        };
+      })
+      .filter(p => p.sueldo > 0);
+  }, [roster]);
+
+  // Personal activo agrupado por rol
+  const personalActivo = useMemo(() => {
+    return personal
+      .filter(p => p.estado === 'activo')
+      .map(p => ({
+        rol: rolLabel(p.rol),
+        cantidad: p.cantidad || 1,
+        sueldoUnit: p.sueldoMes,
+        total: (p.sueldoMes || 0) * (p.cantidad || 1),
+        nombre: p.nombre,
+      }));
+  }, [personal]);
+
+  const sueldosPilotos  = pilotos.reduce((s, p) => s + p.sueldo, 0);
+  const sueldosPersonal = personalActivo.reduce((s, p) => s + p.total, 0);
+  const mechsCount      = roster.filter(r => r.mech).length;
+  const mantenimientoMechs = mechsCount * mantenimientoMechMes;
+
+  const subtotal = sueldosPilotos + sueldosPersonal + mantenimientoMechs;
+  const suministros = Math.round(subtotal * (suministrosPct / 100));
+  const subtotalConSuministros = subtotal + suministros;
+  // Si contrato cubre → total real para la unidad = 0 (empleador paga)
+  const total = cubiertoContrato ? 0 : subtotalConSuministros;
+
+  const mesProximo = campaignMonth === 12 ? 1 : campaignMonth + 1;
+  const yearProximo = campaignMonth === 12 ? campaignYear + 1 : campaignYear;
+  const labelMes = `${MESES_NOMBRE[mesProximo - 1]} ${yearProximo}`;
+
+  const detallesText = [
+    `Mantenimiento ${labelMes}${cubiertoContrato ? ' [CUBIERTO POR CONTRATO]' : ''}`,
+    `Sueldos pilotos: ${fmtMoney(sueldosPilotos)}`,
+    `Sueldos personal (${personalActivo.reduce((s, p) => s + p.cantidad, 0)}): ${fmtMoney(sueldosPersonal)}`,
+    `Mantenimiento mechs (${mechsCount} × ${fmtMoney(mantenimientoMechMes)}): ${fmtMoney(mantenimientoMechs)}`,
+    `Suministros (${suministrosPct}%): ${fmtMoney(suministros)}`,
+    cubiertoContrato
+      ? `TOTAL ASUMIDO POR EMPLEADOR: ${fmtMoney(subtotalConSuministros)} · IMPUTADO A UNIDAD: 0 ₡`
+      : `TOTAL: ${fmtMoney(subtotalConSuministros)}`,
+  ].join(' | ');
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(0,0,0,0.75)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 100,
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: T.surface,
+        border: `1px solid ${T.gold}`,
+        padding: 28, minWidth: 720, maxWidth: 900,
+        maxHeight: '90vh', overflow: 'auto',
+        clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
+      }}>
+        <SmallLabel>Proyección · {labelMes}</SmallLabel>
+        <h2 style={{
+          margin: '6px 0 14px',
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 24, fontWeight: 800,
+          color: T.creamHi, letterSpacing: -0.4,
+        }}>MANTENIMIENTO MENSUAL PROYECTADO</h2>
+
+        {/* Parámetros editables */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18 }}>
+          <div>
+            <FieldLabel>Mantenimiento mech (₡/mes/mech)</FieldLabel>
+            <input type="number" min={0} value={mantenimientoMechMes}
+              onChange={e => setMantenimientoMechMes(Math.max(0, parseInt(e.target.value, 10) || 0))}
+              style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right' }} />
+          </div>
+          <div>
+            <FieldLabel>Suministros (% sobre subtotal)</FieldLabel>
+            <input type="number" min={0} max={100} value={suministrosPct}
+              onChange={e => setSuministrosPct(Math.max(0, Math.min(100, parseInt(e.target.value, 10) || 0)))}
+              style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right' }} />
+          </div>
+        </div>
+
+        {/* Cobertura contrato (FM Mercs / StratOps salary+support) */}
+        <label style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '10px 14px',
+          background: cubiertoContrato ? `${T.greenDeep}15` : T.void,
+          border: `1px solid ${cubiertoContrato ? T.greenDeep : T.outlineV}`,
+          marginBottom: 18, cursor: 'pointer',
+          transition: 'background 0.15s, border-color 0.15s',
+        }}>
+          <input
+            type="checkbox"
+            checked={cubiertoContrato}
+            onChange={e => setCubiertoContrato(e.target.checked)}
+            style={{ accentColor: T.greenDeep, width: 16, height: 16, cursor: 'pointer' }}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontFamily: '"Share Tech Mono", monospace', fontSize: 11,
+              color: cubiertoContrato ? T.greenDeep : T.cream,
+              letterSpacing: 1.5, fontWeight: 700,
+            }}>
+              CUBIERTO POR CONTRATO
+            </div>
+            <div style={{
+              fontSize: 10, color: T.outline, marginTop: 2,
+              fontFamily: 'Inter, sans-serif',
+            }}>
+              {cubiertoContrato
+                ? 'Empleador paga sueldos, mantenimiento y suministros. Entrada al Libro Mayor = 0 ₡.'
+                : 'Coste asumido por la unidad. Marca esta casilla si el contrato incluye salary+support coverage.'}
+            </div>
+          </div>
+        </label>
+
+        {/* Desglose */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+          <BreakdownRow label="Sueldos pilotos" detail={`${pilotos.length} activos`} value={sueldosPilotos} />
+          <BreakdownRow label="Sueldos personal" detail={`${personalActivo.reduce((s, p) => s + p.cantidad, 0)} cabezas`} value={sueldosPersonal} />
+          <BreakdownRow label="Mantenimiento mechs" detail={`${mechsCount} × ${fmtMoney(mantenimientoMechMes)}`} value={mantenimientoMechs} />
+          <div style={{ borderTop: `1px solid ${T.outlineV}`, paddingTop: 8, marginTop: 4 }}>
+            <BreakdownRow label="Subtotal" detail="" value={subtotal} color={T.gold} />
+          </div>
+          <BreakdownRow label="Suministros" detail={`${suministrosPct}%`} value={suministros} />
+          {cubiertoContrato && (
+            <div style={{ borderTop: `1px dashed ${T.greenDeep}`, paddingTop: 8, marginTop: 4 }}>
+              <BreakdownRow label="Asume empleador" detail="contrato salary+support" value={subtotalConSuministros} color={T.greenDeep} />
+            </div>
+          )}
+          <div style={{ borderTop: `2px solid ${T.gold}`, paddingTop: 10, marginTop: 4 }}>
+            <BreakdownRow
+              label={cubiertoContrato ? 'IMPUTADO A UNIDAD' : 'TOTAL MES'}
+              detail={cubiertoContrato ? 'CUBIERTO POR CONTRATO' : labelMes.toUpperCase()}
+              value={total}
+              color={cubiertoContrato ? T.greenDeep : T.bloodLight}
+              bold
+            />
+          </div>
+        </div>
+
+        {/* Pilotos detalle (collapsible-style siempre visible) */}
+        {pilotos.length > 0 && (
+          <details style={{ marginBottom: 12 }}>
+            <summary style={{ cursor: 'pointer', fontSize: 11, color: T.outline, fontFamily: '"Share Tech Mono", monospace', letterSpacing: 1.5 }}>
+              ▸ Detalle pilotos ({pilotos.length})
+            </summary>
+            <div style={{ marginTop: 8, fontSize: 11, color: T.bone, fontFamily: '"Share Tech Mono", monospace' }}>
+              {pilotos.map((p, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>{p.nombre}</span>
+                  <span>{fmtMoney(p.sueldo)}</span>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+
+        {personalActivo.length > 0 && (
+          <details style={{ marginBottom: 12 }}>
+            <summary style={{ cursor: 'pointer', fontSize: 11, color: T.outline, fontFamily: '"Share Tech Mono", monospace', letterSpacing: 1.5 }}>
+              ▸ Detalle personal ({personalActivo.length} grupos)
+            </summary>
+            <div style={{ marginTop: 8, fontSize: 11, color: T.bone, fontFamily: '"Share Tech Mono", monospace' }}>
+              {personalActivo.map((p, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>{p.rol} × {p.cantidad}{p.nombre ? ` (${p.nombre})` : ''}</span>
+                  <span>{fmtMoney(p.total)}</span>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18 }}>
+          <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
+          <PrimaryBtn
+            disabled={committing || total === 0}
+            onClick={async () => {
+              setCommitting(true);
+              await onCommit(total, detallesText);
+              setCommitting(false);
+            }}
+          >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BreakdownRow({ label, detail, value, color, bold }: {
+  label: string; detail: string; value: number; color?: string; bold?: boolean;
+}) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16, alignItems: 'baseline' }}>
+      <div style={{
+        fontFamily: 'Inter, sans-serif', fontSize: bold ? 14 : 13,
+        fontWeight: bold ? 800 : 500,
+        color: color ?? T.cream,
+      }}>{label}</div>
+      <div style={{
+        fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+        color: T.outline, letterSpacing: 1,
+      }}>{detail}</div>
+      <div style={{
+        fontFamily: '"Share Tech Mono", monospace',
+        fontSize: bold ? 18 : 14,
+        fontWeight: bold ? 800 : 700,
+        color: color ?? T.creamHi,
+        textAlign: 'right', minWidth: 140,
+      }}>{fmtMoney(value)}</div>
+    </div>
+  );
 }
