@@ -7,6 +7,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { isActivo } from '@/lib/roster';
+import { calcSalary, RANK_LABELS, type Quality } from '@/lib/salary-calc';
+import { calcHangarMonthlyMaintenance, mechWeightClass, type HangarUnit, type UnitClass } from '@/lib/maintenance-calc';
+import {
+  getAcquisitionPrice, getPriceLabel,
+  ACQUISITION_KINDS, WEIGHT_CLASSES as ACQ_WEIGHT_CLASSES, LEVELS as ACQ_LEVELS,
+  type AcquisitionKind, type MechWeightClass, type ExperienceLevel,
+} from '@/lib/asset-prices';
 import {
   loadLibroMayor, saveLibroMayorEntry, deleteLibroMayorEntry,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
@@ -140,6 +147,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
   const [editing, setEditing] = useState<LibroMayorEntry | null>(null);
   const [filterCat, setFilterCat] = useState<LibroMayorCategoria | 'all'>('all');
   const [projectorOpen, setProjectorOpen] = useState(false);
+  const [acqOpen, setAcqOpen] = useState(false);
 
   const refresh = async () => {
     setLoading(true);
@@ -209,11 +217,35 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
         subtitle="Ingresos y gastos ad-hoc fuera de misión"
         action={!editorOpen ? (
           <div style={{ display: 'flex', gap: 10 }}>
+            <SecondaryBtn onClick={() => setAcqOpen(true)}>🛒 COMPRAS</SecondaryBtn>
             <SecondaryBtn onClick={() => setProjectorOpen(true)}>📊 PROYECTAR MES</SecondaryBtn>
             <PrimaryBtn onClick={openNew}>+ NUEVA ENTRADA</PrimaryBtn>
           </div>
         ) : null}
       />
+
+      {acqOpen && (
+        <AcquisitionModal
+          campaignDate={campaignDate}
+          onClose={() => setAcqOpen(false)}
+          onCommit={async (price, label, level) => {
+            await saveLibroMayorEntry({
+              id: genId('lm'),
+              fecha: campaignDate,
+              concepto: `${label} (${level})`,
+              cantidad: Math.round(price),
+              tipo: 'gasto',
+              categoria: label.toLowerCase().includes('mech') ? 'compra_mech'
+                       : label.toLowerCase().includes('repuestos') ? 'repuestos'
+                       : 'gasto_misc',
+              nota: `Adquisición tabla Hoja 28 nivel ${level}`,
+              jugador: '',
+            });
+            setAcqOpen(false);
+            refresh();
+          }}
+        />
+      )}
 
       {projectorOpen && (
         <MaintenanceModal
@@ -547,12 +579,25 @@ function PersonalEditor({ entry, setEntry, onSave, onCancel }: {
 }) {
   const valid = entry.sueldoMes >= 0 && entry.cantidad >= 1;
 
-  // Auto-sueldo según rol+nivel
+  // Auto-sueldo según rol+nivel (rule-of-thumb actual)
   const recalcSueldo = (rol: PersonalRol, nivel: PersonalNivel) => {
     const base = ROLES.find(r => r.key === rol)?.sueldoDefault ?? 0;
     const mult = NIVELES.find(n => n.key === nivel)?.mult ?? 1;
     return Math.round(base * mult);
   };
+
+  // ── Calculadora canónica FM Mercs (A2 — INFORME_COSTES) ──
+  const [canonOpen, setCanonOpen] = useState(false);
+  const [canonBase, setCanonBase] = useState<number>(
+    () => ROLES.find(r => r.key === entry.rol)?.sueldoDefault ?? 800
+  );
+  const [canonOfficer, setCanonOfficer] = useState(false);
+  const [canonRank, setCanonRank] = useState(0);
+  const canonQuality: Quality =
+    entry.nivel === 'green' ? 'green' :
+    entry.nivel === 'veteran' ? 'veteran' :
+    entry.nivel === 'elite' ? 'elite' : 'regular';
+  const canonResult = calcSalary(canonBase, canonQuality, canonOfficer, canonRank);
 
   return (
     <div style={editorBox}>
@@ -618,6 +663,78 @@ function PersonalEditor({ entry, setEntry, onSave, onCancel }: {
             placeholder="Especialidad, asignación, comentarios"
             style={inputStyle} />
         </div>
+      </div>
+
+      {/* Calculadora canónica FM Mercs */}
+      <div style={{ marginTop: 14, border: `1px solid ${T.outlineV}`, background: T.void }}>
+        <button
+          onClick={() => setCanonOpen(o => !o)}
+          style={{
+            width: '100%', padding: '8px 12px',
+            background: 'transparent', border: 'none',
+            color: T.gold,
+            fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: 2,
+            cursor: 'pointer', textAlign: 'left',
+          }}
+        >
+          {canonOpen ? '▼' : '▶'} CALCULADORA CANÓNICA · FM MERCS (BASE × QUALITY × OFFICER × RANK/2)
+        </button>
+        {canonOpen && (
+          <div style={{ padding: '0 14px 14px', display: 'grid', gridTemplateColumns: '1fr 110px 1fr 110px 160px', gap: 10, alignItems: 'end' }}>
+            <div>
+              <FieldLabel>Sueldo base ₡/mes</FieldLabel>
+              <input type="number" min={0} value={canonBase}
+                onChange={e => setCanonBase(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right' }} />
+            </div>
+            <div>
+              <FieldLabel>Quality</FieldLabel>
+              <input type="text" value={`${canonQuality} (${canonQuality === 'veteran' ? '×1.6' : canonQuality === 'elite' ? '×2.0' : canonQuality === 'green' ? '×0.5' : '×1.0'})`}
+                readOnly
+                style={{ ...inputStyle, opacity: 0.7, fontSize: 10 }} />
+            </div>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', border: `1px solid ${canonOfficer ? T.gold : T.outlineV}`, background: canonOfficer ? `${T.gold}10` : T.void, cursor: 'pointer' }}>
+                <input type="checkbox" checked={canonOfficer} onChange={e => setCanonOfficer(e.target.checked)} style={{ accentColor: T.gold }} />
+                <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: canonOfficer ? T.gold : T.cream, letterSpacing: 1.5 }}>
+                  OFICIAL ×1.2
+                </span>
+              </label>
+            </div>
+            <div>
+              <FieldLabel>Rango</FieldLabel>
+              <select value={canonRank}
+                onChange={e => setCanonRank(parseInt(e.target.value, 10) || 0)}
+                style={inputStyle}>
+                {RANK_LABELS.map(r => (
+                  <option key={r.rank} value={r.rank}>{r.rank} · {r.label}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <FieldLabel>= Sueldo final</FieldLabel>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <div style={{
+                  flex: 1, padding: '8px 10px',
+                  background: T.surfaceLow, border: `1px solid ${T.gold}`,
+                  fontFamily: '"Share Tech Mono", monospace', fontSize: 13,
+                  color: T.gold, fontWeight: 700, textAlign: 'right',
+                }}>
+                  {fmtMoney(canonResult)}
+                </div>
+                <button onClick={() => setEntry({ ...entry, sueldoMes: canonResult })}
+                  style={{
+                    padding: '6px 10px',
+                    background: T.gold, color: T.void,
+                    border: 'none', cursor: 'pointer',
+                    fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1.5, fontWeight: 700,
+                  }}>
+                  ←APLICAR
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
@@ -852,8 +969,9 @@ interface MaintenanceModalProps {
 const MESES_NOMBRE = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClose, onCommit }: MaintenanceModalProps) {
-  // Editables in-place — defaults StratOps
-  const [mantenimientoMechMes, setMantenimientoMechMes] = useState(30000); // ₡/mes/mech
+  // Editables in-place — defaults StratOps / FM Mercs
+  const [useCanonMaintenance, setUseCanonMaintenance] = useState(true);     // A4: toggle canon vs flat
+  const [mantenimientoMechMes, setMantenimientoMechMes] = useState(30000); // ₡/mes/mech (legacy flat)
   const [suministrosPct, setSuministrosPct] = useState(10);                 // % sobre subtotal
   const [cubiertoContrato, setCubiertoContrato] = useState(false);          // FM Mercs: Salary/Support coverage
   const [committing, setCommitting] = useState(false);
@@ -890,7 +1008,15 @@ function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClo
   const sueldosPilotos  = pilotos.reduce((s, p) => s + p.sueldo, 0);
   const sueldosPersonal = personalActivo.reduce((s, p) => s + p.total, 0);
   const mechsCount      = roster.filter(r => r.mech).length;
-  const mantenimientoMechs = mechsCount * mantenimientoMechMes;
+
+  // A4 — Mantenimiento canon FM Mercs vs flat legacy
+  const canonHangar = useMemo<HangarUnit[]>(() => {
+    // Roster sin tonelaje per mech; usamos 60t (peso medio) como aproximación
+    // hasta integrar precio/peso desde TRO/Listado de Mechs
+    return roster.filter(r => r.mech).map(_ => ({ cls: 'battlemech' as UnitClass, tons: 60 }));
+  }, [roster]);
+  const canonResult = useMemo(() => calcHangarMonthlyMaintenance(canonHangar), [canonHangar]);
+  const mantenimientoMechs = useCanonMaintenance ? canonResult.total : mechsCount * mantenimientoMechMes;
 
   const subtotal = sueldosPilotos + sueldosPersonal + mantenimientoMechs;
   const suministros = Math.round(subtotal * (suministrosPct / 100));
@@ -934,13 +1060,45 @@ function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClo
           color: T.creamHi, letterSpacing: -0.4,
         }}>MANTENIMIENTO MENSUAL PROYECTADO</h2>
 
+        {/* Toggle canon vs flat */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          <button
+            onClick={() => setUseCanonMaintenance(true)}
+            style={{
+              flex: 1, padding: '6px 10px',
+              background: useCanonMaintenance ? T.gold : 'transparent',
+              color: useCanonMaintenance ? T.void : T.gold,
+              border: `1px solid ${T.gold}`,
+              fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1.5, fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >CANON FM MERCS (75 ₡/sem × 4)</button>
+          <button
+            onClick={() => setUseCanonMaintenance(false)}
+            style={{
+              flex: 1, padding: '6px 10px',
+              background: !useCanonMaintenance ? T.outline : 'transparent',
+              color: !useCanonMaintenance ? T.void : T.outline,
+              border: `1px solid ${T.outline}`,
+              fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1.5, fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >FLAT LEGACY (30 k/mes/mech)</button>
+        </div>
+
         {/* Parámetros editables */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18 }}>
           <div>
             <FieldLabel>Mantenimiento mech (₡/mes/mech)</FieldLabel>
             <input type="number" min={0} value={mantenimientoMechMes}
+              disabled={useCanonMaintenance}
               onChange={e => setMantenimientoMechMes(Math.max(0, parseInt(e.target.value, 10) || 0))}
-              style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right' }} />
+              style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right', opacity: useCanonMaintenance ? 0.4 : 1 }} />
+            {useCanonMaintenance && (
+              <div style={{ fontSize: 9, color: T.outline, marginTop: 3, fontFamily: '"Share Tech Mono", monospace', letterSpacing: 1 }}>
+                Auto-calc: BattleMech 75 × 4 = 300 ₡/mech (peso medio 60t asumido)
+              </div>
+            )}
           </div>
           <div>
             <FieldLabel>Suministros (% sobre subtotal)</FieldLabel>
@@ -1049,6 +1207,125 @@ function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClo
             onClick={async () => {
               setCommitting(true);
               await onCommit(total, detallesText);
+              setCommitting(false);
+            }}
+          >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  ACQUISITION MODAL (A3) — calculadora compra/venta Hoja 28
+// ══════════════════════════════════════════════════════════
+
+function AcquisitionModal({ campaignDate, onClose, onCommit }: {
+  campaignDate: string;
+  onClose: () => void;
+  onCommit: (price: number, label: string, level: ExperienceLevel) => Promise<void>;
+}) {
+  const [kind, setKind] = useState<AcquisitionKind>('mech_new');
+  const [weight, setWeight] = useState<MechWeightClass>('medium');
+  const [level, setLevel] = useState<ExperienceLevel>('regular');
+  const [qty, setQty] = useState(1);
+  const [discountPct, setDiscountPct] = useState(0); // % descuento mercado
+  const [committing, setCommitting] = useState(false);
+
+  const kindDef = ACQUISITION_KINDS.find(k => k.kind === kind);
+  const needsWeight = !!kindDef?.needsWeight;
+  const unitPrice = getAcquisitionPrice(kind, level, needsWeight ? weight : undefined);
+  const subtotal = unitPrice * qty;
+  const discount = Math.round(subtotal * (discountPct / 100));
+  const total = subtotal - discount;
+  const label = getPriceLabel(kind, needsWeight ? weight : undefined);
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(0,0,0,0.75)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 100,
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: T.surface, border: `1px solid ${T.gold}`,
+        padding: 28, minWidth: 720, maxWidth: 900,
+        maxHeight: '90vh', overflow: 'auto',
+        clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
+      }}>
+        <SmallLabel>Calculadora Adquisiciones · Hoja 28</SmallLabel>
+        <h2 style={{
+          margin: '6px 0 14px',
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 24, fontWeight: 800,
+          color: T.creamHi, letterSpacing: -0.4,
+        }}>COMPRA / COTIZACIÓN</h2>
+
+        {/* Form */}
+        <div style={{ display: 'grid', gridTemplateColumns: needsWeight ? '1.4fr 1fr 1fr 80px 100px' : '1.6fr 1fr 100px 110px', gap: 12, marginBottom: 18 }}>
+          <div>
+            <FieldLabel>Tipo activo</FieldLabel>
+            <select value={kind}
+              onChange={e => setKind(e.target.value as AcquisitionKind)}
+              style={inputStyle}>
+              {ACQUISITION_KINDS.map(k => (
+                <option key={k.kind} value={k.kind}>{k.label}</option>
+              ))}
+            </select>
+          </div>
+          {needsWeight && (
+            <div>
+              <FieldLabel>Peso</FieldLabel>
+              <select value={weight}
+                onChange={e => setWeight(e.target.value as MechWeightClass)}
+                style={inputStyle}>
+                {ACQ_WEIGHT_CLASSES.map(w => (
+                  <option key={w.key} value={w.key}>{w.label} ({w.range})</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div>
+            <FieldLabel>Nivel exp.</FieldLabel>
+            <select value={level}
+              onChange={e => setLevel(e.target.value as ExperienceLevel)}
+              style={inputStyle}>
+              {ACQ_LEVELS.map(l => (
+                <option key={l} value={l}>{l.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <FieldLabel>Cantidad</FieldLabel>
+            <input type="number" min={1} value={qty}
+              onChange={e => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
+              style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right' }} />
+          </div>
+          <div>
+            <FieldLabel>Desc. %</FieldLabel>
+            <input type="number" min={0} max={100} value={discountPct}
+              onChange={e => setDiscountPct(Math.max(0, Math.min(100, parseInt(e.target.value, 10) || 0)))}
+              style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right' }} />
+          </div>
+        </div>
+
+        {/* Desglose */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+          <BreakdownRow label={label} detail={`${qty} × ${fmtMoney(unitPrice)}`} value={subtotal} />
+          {discount > 0 && (
+            <BreakdownRow label="Descuento" detail={`${discountPct}%`} value={-discount} color={T.greenDeep} />
+          )}
+          <div style={{ borderTop: `2px solid ${T.gold}`, paddingTop: 10, marginTop: 4 }}>
+            <BreakdownRow label="TOTAL" detail={level.toUpperCase()} value={total} color={T.bloodLight} bold />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18 }}>
+          <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
+          <PrimaryBtn
+            disabled={committing || total === 0}
+            onClick={async () => {
+              setCommitting(true);
+              await onCommit(total, `${label} ×${qty}`, level);
               setCommitting(false);
             }}
           >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
