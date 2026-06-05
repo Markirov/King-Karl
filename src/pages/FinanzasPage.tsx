@@ -12,8 +12,10 @@ import { calcHangarMonthlyMaintenance, mechWeightClass, type HangarUnit, type Un
 import {
   getAcquisitionPrice, getPriceLabel,
   ACQUISITION_KINDS, WEIGHT_CLASSES as ACQ_WEIGHT_CLASSES, LEVELS as ACQ_LEVELS,
+  classifyMechWeight,
   type AcquisitionKind, type MechWeightClass, type ExperienceLevel,
 } from '@/lib/asset-prices';
+import { useMechCatalog, findMechByName, type CatalogMech } from '@/hooks/useMechCatalog';
 import {
   loadLibroMayor, saveLibroMayorEntry, deleteLibroMayorEntry,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
@@ -1010,12 +1012,21 @@ function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClo
   const mechsCount      = roster.filter(r => r.mech).length;
 
   // A4 — Mantenimiento canon FM Mercs vs flat legacy
-  const canonHangar = useMemo<HangarUnit[]>(() => {
-    // Roster sin tonelaje per mech; usamos 60t (peso medio) como aproximación
-    // hasta integrar precio/peso desde TRO/Listado de Mechs
-    return roster.filter(r => r.mech).map(_ => ({ cls: 'battlemech' as UnitClass, tons: 60 }));
-  }, [roster]);
-  const canonResult = useMemo(() => calcHangarMonthlyMaintenance(canonHangar), [canonHangar]);
+  // Lookup tonelaje real per mech del catálogo enriquecido (index.json)
+  const { catalog: mechCatalog } = useMechCatalog();
+  const canonHangar = useMemo<{ units: HangarUnit[]; matches: { mech: string; tons: number; match: boolean }[] }>(() => {
+    const mechs = mechCatalog?.mechs ?? [];
+    const matches: { mech: string; tons: number; match: boolean }[] = [];
+    const units: HangarUnit[] = [];
+    for (const r of roster.filter(r => r.mech)) {
+      const found = findMechByName(mechs, r.mech);
+      const tons = found?.tons ?? 60;  // fallback 60t medio si no encuentra
+      matches.push({ mech: r.mech, tons, match: !!found });
+      units.push({ cls: 'battlemech', tons });
+    }
+    return { units, matches };
+  }, [roster, mechCatalog]);
+  const canonResult = useMemo(() => calcHangarMonthlyMaintenance(canonHangar.units), [canonHangar]);
   const mantenimientoMechs = useCanonMaintenance ? canonResult.total : mechsCount * mantenimientoMechMes;
 
   const subtotal = sueldosPilotos + sueldosPersonal + mantenimientoMechs;
@@ -1096,7 +1107,12 @@ function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClo
               style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right', opacity: useCanonMaintenance ? 0.4 : 1 }} />
             {useCanonMaintenance && (
               <div style={{ fontSize: 9, color: T.outline, marginTop: 3, fontFamily: '"Share Tech Mono", monospace', letterSpacing: 1 }}>
-                Auto-calc: BattleMech 75 × 4 = 300 ₡/mech (peso medio 60t asumido)
+                Auto-calc: 75 ₡/sem × 4 = 300 ₡/mech (peso real per mech via catálogo enriquecido)
+                {canonHangar.matches.length > 0 && (
+                  <span style={{ color: T.bone, marginLeft: 4 }}>
+                    · {canonHangar.matches.filter(m => m.match).length}/{canonHangar.matches.length} mechs identificados
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -1229,16 +1245,45 @@ function AcquisitionModal({ campaignDate, onClose, onCommit }: {
   const [weight, setWeight] = useState<MechWeightClass>('medium');
   const [level, setLevel] = useState<ExperienceLevel>('regular');
   const [qty, setQty] = useState(1);
-  const [discountPct, setDiscountPct] = useState(0); // % descuento mercado
+  const [discountPct, setDiscountPct] = useState(0);
   const [committing, setCommitting] = useState(false);
+
+  // Catálogo SSW para autocomplete precio canon
+  const { catalog } = useMechCatalog();
+  const [mechQuery, setMechQuery] = useState('');
+  const [selectedMech, setSelectedMech] = useState<CatalogMech | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const isMechKind = kind === 'mech_new' || kind === 'mech_salvaged';
+  const isFighterKind = kind === 'fighter_new' || kind === 'fighter_salvaged';
+  const isSalvaged = kind === 'mech_salvaged' || kind === 'fighter_salvaged';
+
+  // Suggestions: filter catalog por query
+  const suggestions = useMemo(() => {
+    if (!catalog || mechQuery.trim().length < 2) return [];
+    const q = mechQuery.trim().toLowerCase();
+    return catalog.mechs
+      .filter(m => m.cost > 0 && m.fullName.toLowerCase().includes(q))
+      .slice(0, 12);
+  }, [catalog, mechQuery]);
 
   const kindDef = ACQUISITION_KINDS.find(k => k.kind === kind);
   const needsWeight = !!kindDef?.needsWeight;
-  const unitPrice = getAcquisitionPrice(kind, level, needsWeight ? weight : undefined);
+
+  // Si hay mech seleccionado, usa cost real (salvaged = 40% del nuevo, FM Mercs convention)
+  const sswPrice = selectedMech
+    ? (isSalvaged ? Math.round(selectedMech.cost * 0.4) : selectedMech.cost)
+    : 0;
+  const tablePrice = getAcquisitionPrice(kind, level, needsWeight ? weight : undefined);
+  const unitPrice = sswPrice > 0 ? sswPrice : tablePrice;
+  const priceSource = sswPrice > 0 ? 'SSW' : 'Hoja 28';
+
   const subtotal = unitPrice * qty;
   const discount = Math.round(subtotal * (discountPct / 100));
   const total = subtotal - discount;
-  const label = getPriceLabel(kind, needsWeight ? weight : undefined);
+  const label = selectedMech
+    ? `${selectedMech.fullName}${isSalvaged ? ' (recuperado)' : ''}`
+    : getPriceLabel(kind, needsWeight ? weight : undefined);
 
   return (
     <div style={{
@@ -1253,12 +1298,78 @@ function AcquisitionModal({ campaignDate, onClose, onCommit }: {
         maxHeight: '90vh', overflow: 'auto',
         clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
       }}>
-        <SmallLabel>Calculadora Adquisiciones · Hoja 28</SmallLabel>
+        <SmallLabel>Calculadora Adquisiciones · Hoja 28 + Catálogo SSW</SmallLabel>
         <h2 style={{
           margin: '6px 0 14px',
           fontFamily: '"Space Grotesk", sans-serif', fontSize: 24, fontWeight: 800,
           color: T.creamHi, letterSpacing: -0.4,
         }}>COMPRA / COTIZACIÓN</h2>
+
+        {/* Search box catálogo SSW — visible solo para mechs/fighters */}
+        {(isMechKind || isFighterKind) && (
+          <div style={{ marginBottom: 14, position: 'relative' }}>
+            <FieldLabel>Buscar modelo específico (catálogo SSW) — opcional</FieldLabel>
+            <input type="text"
+              value={selectedMech ? selectedMech.fullName : mechQuery}
+              onChange={e => {
+                setMechQuery(e.target.value);
+                setSelectedMech(null);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+              placeholder="Ej: Atlas AS7-D, Marauder MAD-3R..."
+              style={inputStyle} />
+            {selectedMech && (
+              <button onClick={() => { setSelectedMech(null); setMechQuery(''); }}
+                style={{
+                  position: 'absolute', right: 8, top: 26,
+                  background: 'transparent', border: 'none', color: T.gold,
+                  cursor: 'pointer', fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+                }}>× CLEAR</button>
+            )}
+            {showSuggestions && suggestions.length > 0 && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0,
+                background: T.surface, border: `1px solid ${T.gold}`,
+                maxHeight: 240, overflow: 'auto', zIndex: 10,
+                marginTop: 2,
+              }}>
+                {suggestions.map((m, i) => (
+                  <button key={i}
+                    onClick={() => {
+                      setSelectedMech(m);
+                      setMechQuery(m.fullName);
+                      setShowSuggestions(false);
+                      // Auto-update weight class según peso real
+                      setWeight(classifyMechWeight(m.tons));
+                    }}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left',
+                      padding: '6px 10px',
+                      background: 'transparent',
+                      border: 'none', borderBottom: `1px solid ${T.outlineV}40`,
+                      color: T.cream,
+                      cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 12,
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${T.gold}15`}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+                  >
+                    <span style={{ fontWeight: 700 }}>{m.fullName}</span>
+                    <span style={{ color: T.outline, marginLeft: 8, fontFamily: '"Share Tech Mono", monospace', fontSize: 10 }}>
+                      {m.tons}t · {m.categoria} · BV{m.bv2} · {fmtMoney(m.cost)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedMech && (
+              <div style={{ marginTop: 6, fontSize: 10, color: T.gold, fontFamily: '"Share Tech Mono", monospace', letterSpacing: 1 }}>
+                ✓ SSW: {selectedMech.tons}t · {selectedMech.categoria} · BV {selectedMech.bv2} · Coste base {fmtMoney(selectedMech.cost)} ₡
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Form */}
         <div style={{ display: 'grid', gridTemplateColumns: needsWeight ? '1.4fr 1fr 1fr 80px 100px' : '1.6fr 1fr 100px 110px', gap: 12, marginBottom: 18 }}>
@@ -1310,7 +1421,7 @@ function AcquisitionModal({ campaignDate, onClose, onCommit }: {
 
         {/* Desglose */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
-          <BreakdownRow label={label} detail={`${qty} × ${fmtMoney(unitPrice)}`} value={subtotal} />
+          <BreakdownRow label={label} detail={`${qty} × ${fmtMoney(unitPrice)} · ${priceSource}`} value={subtotal} />
           {discount > 0 && (
             <BreakdownRow label="Descuento" detail={`${discountPct}%`} value={-discount} color={T.greenDeep} />
           )}
