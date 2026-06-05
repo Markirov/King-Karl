@@ -15,3 +15,10 @@ Thumbs.db
 MRCB.html
 design_handoff_reskin/
 manuales/
+
+# CRITICAL: credenciales nunca al repo público
+credenciales*.json
+*-credentials.json
+*service-account*.json
+.secrets/
+secrets.*

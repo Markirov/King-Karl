@@ -20,12 +20,13 @@ interface PriceTable {
   label: string;
 }
 
-/** Mechs nuevos por categoría peso × experiencia. Valores en miles ₡. */
+/** Mechs nuevos por categoría peso × experiencia. Valores en miles ₡.
+ *  Rangos canónicos BattleTech: Light 20-35 · Medium 40-55 · Heavy 60-75 · Assault 80-100. */
 export const MECH_NEW_PRICES: Record<MechWeightClass, PriceTable> = {
-  light:   { green: 230,  regular: 460,   veteran: 920,   elite: 1840, label: "Mech Light (0-39 t)" },
-  medium:  { green: 390,  regular: 780,   veteran: 1560,  elite: 3120, label: "Mech Medium (40-59 t)" },
-  heavy:   { green: 570,  regular: 1140,  veteran: 2280,  elite: 4560, label: "Mech Heavy (60-79 t)" },
-  assault: { green: 820,  regular: 1640,  veteran: 3280,  elite: 6560, label: "Mech Assault (80+ t)" },
+  light:   { green: 230,  regular: 460,   veteran: 920,   elite: 1840, label: "Mech Ligero (20-35 t)" },
+  medium:  { green: 390,  regular: 780,   veteran: 1560,  elite: 3120, label: "Mech Medio (40-55 t)" },
+  heavy:   { green: 570,  regular: 1140,  veteran: 2280,  elite: 4560, label: "Mech Pesado (60-75 t)" },
+  assault: { green: 820,  regular: 1640,  veteran: 3280,  elite: 6560, label: "Mech Asalto (80-100 t)" },
 };
 
 /** Mechs recuperados ~40% del precio nuevo. */
@@ -108,11 +109,29 @@ export const ACQUISITION_KINDS: { kind: AcquisitionKind; label: string; needsWei
   { kind: 'support_tech',       label: 'Personal técnico',      needsWeight: false },
 ];
 
-export const WEIGHT_CLASSES: { key: MechWeightClass; label: string; range: string }[] = [
-  { key: 'light',   label: 'Ligero',   range: '0-39 t' },
-  { key: 'medium',  label: 'Medio',    range: '40-59 t' },
-  { key: 'heavy',   label: 'Pesado',   range: '60-79 t' },
-  { key: 'assault', label: 'Asalto',   range: '80+ t' },
+/** Rangos canónicos BattleTech (TR3025 onwards):
+ *  Light 20-35 · Medium 40-55 · Heavy 60-75 · Assault 80-100. */
+export const WEIGHT_CLASSES: { key: MechWeightClass; label: string; range: string; min: number; max: number }[] = [
+  { key: 'light',   label: 'Ligero', range: '20-35 t',  min: 20, max: 35  },
+  { key: 'medium',  label: 'Medio',  range: '40-55 t',  min: 40, max: 55  },
+  { key: 'heavy',   label: 'Pesado', range: '60-75 t',  min: 60, max: 75  },
+  { key: 'assault', label: 'Asalto', range: '80-100 t', min: 80, max: 100 },
 ];
+
+/** Canónica weight class lookup por tons. */
+export function classifyMechWeight(tons: number): MechWeightClass {
+  if (tons <= 35) return 'light';
+  if (tons <= 55) return 'medium';
+  if (tons <= 75) return 'heavy';
+  return 'assault';
+}
+
+/** Etiqueta en español (Hoja 28 / Personajes nomenclature). */
+export function categoriaES(tons: number): string {
+  if (tons <= 35) return 'Ligero';
+  if (tons <= 55) return 'Medio';
+  if (tons <= 75) return 'Pesado';
+  return 'Asalto';
+}
 
 export const LEVELS: ExperienceLevel[] = ['green', 'regular', 'veteran', 'elite'];

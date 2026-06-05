@@ -4,7 +4,7 @@ set "ROOT=%~dp0.."
 cd /d "%ROOT%"
 
 echo ==========================================
-echo  Rebuild Mech/Vehicle Indexes
+echo  Rebuild Mech/Vehicle Indexes (Enriched)
 echo ==========================================
 echo.
 
@@ -15,13 +15,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not exist "scripts\rebuild-indexes.cjs" (
-  echo [ERROR] No se encontro scripts\rebuild-indexes.cjs
+if not exist "scripts\build-mech-data.cjs" (
+  echo [ERROR] No se encontro scripts\build-mech-data.cjs
   pause
   exit /b 1
 )
 
-node "scripts\rebuild-indexes.cjs"
+node "scripts\build-mech-data.cjs"
 set "RC=%ERRORLEVEL%"
 if not "%RC%"=="0" (
   echo [ERROR] Fallo al reconstruir indices. Codigo: %RC%
@@ -29,5 +29,5 @@ if not "%RC%"=="0" (
   exit /b %RC%
 )
 
-echo [OK] Indices regenerados correctamente.
+echo [OK] Indices enriquecidos regenerados.
 exit /b 0
