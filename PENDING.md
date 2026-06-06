@@ -106,6 +106,20 @@ Refleja estado pre-reskin. Actualizar con:
 
 ---
 
+## StratOps Repair Rules — revisar contra Taller propio
+
+Sistema actual `repair-engine.ts` reescrito para respetar Taller (Ayudas BW:BX + AA1:AA31 estado %).
+
+Pendiente revisar:
+- StratOps p.179 usa `repair difficulty × tech rating × salvage rolls` (multiplicadores tabla)
+- Tu Taller usa: precio fijo per componente × peso × pts dañados × estado %
+- Decidir si añadir modo dual canon/propio (toggle como en MaintenanceModal)
+- Si te quedas con el tuyo, marcar como "house rule documentada"
+
+Archivos a tocar si se integra StratOps: `lib/repair-engine.ts` + TallerModal toggle.
+
+---
+
 ## Tema sugerido por usuario para próxima sesión
 
 - **Mercenarios** (a discutir, sin definir todavía)

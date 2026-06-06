@@ -17,7 +17,8 @@ import {
 } from '@/lib/asset-prices';
 import { useMechCatalog, findMechByName, type CatalogMech } from '@/hooks/useMechCatalog';
 import {
-  calcRepairCost, configFromCatalog, emptyDamage, ESTADO_FACTURA,
+  calcRepairCost, configFromCatalog, emptyDamage,
+  ESTADO_FACTURA_PCT, ESTADO_COLOR,
   PRECIO_ACTUADOR,
   type MechRepairConfig, type MechRepairDamage, type RepairBreakdown,
 } from '@/lib/repair-engine';
@@ -1518,6 +1519,7 @@ function TallerModal({ onClose, onCommit }: {
   const [config, setConfig] = useState<MechRepairConfig | null>(null);
   const [damage, setDamage] = useState<MechRepairDamage>(emptyDamage);
   const [estadoPct, setEstadoPct] = useState(100);
+  const [pctDañoTotal, setPctDañoTotal] = useState(0);
 
   // Sugerencias
   const suggestions = useMemo(() => {
@@ -1544,7 +1546,7 @@ function TallerModal({ onClose, onCommit }: {
   };
 
   // Factura
-  const factura: RepairBreakdown | null = config ? calcRepairCost(config, damage, estadoPct) : null;
+  const factura: RepairBreakdown | null = config ? calcRepairCost(config, damage, estadoPct, pctDañoTotal) : null;
 
   // Helper actualizar damage
   const updDmg = <K extends keyof MechRepairDamage>(k: K, v: MechRepairDamage[K]) =>
@@ -1624,18 +1626,37 @@ function TallerModal({ onClose, onCommit }: {
           <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
             {/* Daños — IZQUIERDA */}
             <div>
-              <SmallLabel>Daños declarados</SmallLabel>
+              <SmallLabel>Daños declarados (Taller G5-G17)</SmallLabel>
               <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <DmgNum label="Reactor (0-3)"      value={damage.reactor}     onChange={v => updDmg('reactor', v)}     max={3} />
-                <DmgNum label="Gyro (0-2)"          value={damage.gyro}        onChange={v => updDmg('gyro', v)}        max={2} />
-                <DmgNum label="Cabina (0-1)"        value={damage.cabina}      onChange={v => updDmg('cabina', v)}      max={1} />
-                <DmgNum label="Soporte vida (0-1)"  value={damage.soporteVida} onChange={v => updDmg('soporteVida', v)} max={1} />
-                <DmgNum label="Sensores (0-2)"      value={damage.sensores}    onChange={v => updDmg('sensores', v)}    max={2} />
-                <DmgNum label="Miomero (0-2)"       value={damage.miomero}     onChange={v => updDmg('miomero', v)}     max={2} />
-                <DmgNum label="Estructura (pts)"    value={damage.estructura}  onChange={v => updDmg('estructura', v)}  max={999} />
-                <DmgNum label="Blindaje (pts)"      value={damage.blindaje}    onChange={v => updDmg('blindaje', v)}    max={999} />
-                <DmgNum label="Retros (% dañados)"  value={damage.retros}      onChange={v => updDmg('retros', v)}      max={100} />
-                <DmgNum label="Radiadores (uds)"    value={damage.radiadores}  onChange={v => updDmg('radiadores', v)}  max={config.tons} />
+                <DmgNum label="Reactor (0-3 · 3=DESTRUIDO)" value={damage.reactor}     onChange={v => updDmg('reactor', v)}     max={3} />
+                <DmgNum label="Gyro (0-2)"                  value={damage.gyro}        onChange={v => updDmg('gyro', v)}        max={2} />
+                {/* Cabina booleana */}
+                <div>
+                  <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 1.5, marginBottom: 3 }}>
+                    Cabina (SI/NO)
+                  </div>
+                  <label style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '6px 10px',
+                    background: damage.cabinaDañada ? `${T.bloodLight}15` : T.void,
+                    border: `1px solid ${damage.cabinaDañada ? T.bloodLight : T.outlineV}`,
+                    cursor: 'pointer',
+                  }}>
+                    <input type="checkbox" checked={damage.cabinaDañada}
+                      onChange={e => updDmg('cabinaDañada', e.target.checked)}
+                      style={{ accentColor: T.bloodLight }} />
+                    <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: damage.cabinaDañada ? T.bloodLight : T.cream }}>
+                      {damage.cabinaDañada ? 'DAÑADA (200k)' : 'OK'}
+                    </span>
+                  </label>
+                </div>
+                <DmgNum label="Soporte vida (uds dañadas)"  value={damage.soporteVida} onChange={v => updDmg('soporteVida', v)} max={20} />
+                <DmgNum label="Sensores (uds dañadas)"      value={damage.sensores}    onChange={v => updDmg('sensores', v)}    max={20} />
+                <DmgNum label="Miomero (uds dañadas)"       value={damage.miomero}     onChange={v => updDmg('miomero', v)}     max={20} />
+                <DmgNum label="Estructura (pts perdidos)"   value={damage.estructura}  onChange={v => updDmg('estructura', v)}  max={999} />
+                <DmgNum label="Blindaje (pts → ton)"        value={damage.blindaje}    onChange={v => updDmg('blindaje', v)}    max={999} />
+                <DmgNum label="Retros (uds dañadas)"        value={damage.retros}      onChange={v => updDmg('retros', v)}      max={20} />
+                <DmgNum label="Radiadores (uds dañadas)"    value={damage.radiadores}  onChange={v => updDmg('radiadores', v)}  max={config.tons} />
               </div>
 
               <SmallLabel>Actuadores</SmallLabel>
@@ -1650,18 +1671,19 @@ function TallerModal({ onClose, onCommit }: {
               </div>
 
               <SmallLabel>Otros</SmallLabel>
-              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <DmgNum label="Munición consumida ₡" value={damage.municion ?? 0} onChange={v => updDmg('municion', v)} max={9999999} />
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                <DmgNum label="Munición ₡" value={damage.municion ?? 0} onChange={v => updDmg('municion', v)} max={9999999} />
                 <div>
                   <FieldLabel>Estado factura (%)</FieldLabel>
                   <select value={estadoPct}
                     onChange={e => setEstadoPct(parseInt(e.target.value, 10) || 100)}
                     style={inputStyle}>
-                    {[...ESTADO_FACTURA].map(p => (
+                    {[...ESTADO_FACTURA_PCT].map(p => (
                       <option key={p} value={p}>{p}% factura</option>
                     ))}
                   </select>
                 </div>
+                <DmgNum label="% daño total mech" value={pctDañoTotal} onChange={v => setPctDañoTotal(v)} max={100} />
               </div>
 
               <SmallLabel>Config detectada (catálogo SSW)</SmallLabel>
@@ -1699,7 +1721,24 @@ function TallerModal({ onClose, onCommit }: {
                     <FacturaRow label="Subtotal" value={factura.subtotal} color={T.gold} bold />
                   </div>
                   <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: T.outline, padding: '4px 0' }}>
-                    Estado factura: {factura.estadoPct}%
+                    Estado factura: {factura.estadoFacturaPct}%
+                  </div>
+                  {/* Badge estado mech */}
+                  <div style={{
+                    marginTop: 6, padding: '8px 12px',
+                    background: `${ESTADO_COLOR[factura.estadoMech]}15`,
+                    border: `1px solid ${ESTADO_COLOR[factura.estadoMech]}`,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  }}>
+                    <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 2 }}>
+                      ESTADO MECH
+                    </span>
+                    <span style={{
+                      fontFamily: '"Space Grotesk", sans-serif', fontSize: 14, fontWeight: 800,
+                      color: ESTADO_COLOR[factura.estadoMech], letterSpacing: 2,
+                    }}>
+                      {factura.estadoMech}
+                    </span>
                   </div>
                   <div style={{ borderTop: `2px solid ${T.gold}`, paddingTop: 10 }}>
                     <FacturaRow label="TOTAL" value={factura.total} color={T.bloodLight} bold />
