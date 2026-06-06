@@ -17,11 +17,13 @@ import {
 } from '@/lib/asset-prices';
 import { useMechCatalog, findMechByName, type CatalogMech } from '@/hooks/useMechCatalog';
 import {
-  calcRepairCost, configFromCatalog, emptyDamage,
+  calcRepairCost, configFromCatalog, emptyDamage, deriveDamageFromSession,
   ESTADO_FACTURA_PCT, ESTADO_COLOR,
   PRECIO_ACTUADOR,
   type MechRepairConfig, type MechRepairDamage, type RepairBreakdown,
 } from '@/lib/repair-engine';
+import { loadLocalSnapshot } from '@/lib/simulador-persistence';
+import type { MechSlot } from '@/lib/combat-types';
 import {
   loadLibroMayor, saveLibroMayorEntry, deleteLibroMayorEntry,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
@@ -1521,6 +1523,57 @@ function TallerModal({ onClose, onCommit }: {
   const [estadoPct, setEstadoPct] = useState(100);
   const [pctDañoTotal, setPctDañoTotal] = useState(0);
 
+  // Simulador import
+  const [showSimPicker, setShowSimPicker] = useState(false);
+  const simSlots: { slot: MechSlot; idx: number }[] = useMemo(() => {
+    const snap = loadLocalSnapshot();
+    if (!snap) return [];
+    return snap.mechSlots
+      .map((s, i) => ({ slot: s, idx: i }))
+      .filter(({ slot }) => slot?.state && slot?.session);
+  }, [showSimPicker]); // re-leer cuando se abre picker
+
+  const loadFromSimSlot = (mechSlot: MechSlot) => {
+    if (!mechSlot.state || !mechSlot.session) return;
+    const st = mechSlot.state;
+    // Derivar daños
+    const { damage: derivedDmg, pctDañoTotal: pct } = deriveDamageFromSession(st, mechSlot.session);
+    // Intentar match en catálogo para config correcta
+    const catMatch = catalog
+      ? findMechByName(catalog.mechs, `${st.chassis} ${st.model}`)
+      : null;
+    const derivedConfig = catMatch
+      ? configFromCatalog(catMatch)
+      : {
+          tons:           st.tonnage,
+          walkMP:         st.walkMP,
+          reactorType:    'Fusion',
+          gyroType:       'Estandar',
+          miomeroType:    'Estandar',
+          estructuraType: 'Estandar',
+          retroType:      'Estandar',
+          radType:        st.hsDouble ? 'Dobles' : 'Normales',
+          blindajeType:   (() => {
+            const a = (st.armorType || '').toLowerCase();
+            if (a.includes('stealth'))                                  return 'Stealth';
+            if (a.includes('ferro') && a.includes('lig'))               return 'Ferro Fibroso Ligero';
+            if (a.includes('ferro') && a.includes('pesado'))            return 'Ferro Fibroso Pesado';
+            if (a.includes('ferro'))                                    return 'Ferro Fibroso';
+            if (a.includes('industrial') && a.includes('pesado'))       return 'Industrial Pesado';
+            if (a.includes('industrial'))                               return 'Industrial';
+            if (a.includes('comercial') || a.includes('commerc'))      return 'Comercial';
+            return 'Estandar';
+          })(),
+        } satisfies MechRepairConfig;
+
+    setConfig(derivedConfig);
+    setDamage(derivedDmg);
+    setPctDañoTotal(pct);
+    setMechQuery(catMatch ? catMatch.fullName : `${st.chassis} ${st.model}`);
+    setSelected(catMatch ?? null);
+    setShowSimPicker(false);
+  };
+
   // Sugerencias
   const suggestions = useMemo(() => {
     if (!catalog || mechQuery.trim().length < 2) return [];
@@ -1616,6 +1669,86 @@ function TallerModal({ onClose, onCommit }: {
                   </span>
                 </button>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Importar desde Simulador */}
+        <div style={{ marginBottom: 16, position: 'relative' }}>
+          <button
+            onClick={() => setShowSimPicker(p => !p)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 14px',
+              background: showSimPicker ? `${T.gold}20` : T.void,
+              border: `1px solid ${T.gold}`,
+              color: T.gold, cursor: 'pointer',
+              fontFamily: '"Share Tech Mono", monospace', fontSize: 11, letterSpacing: 1,
+            }}
+          >
+            📡 CARGAR DESDE SIMULADOR
+            {simSlots.length > 0 && (
+              <span style={{
+                background: T.gold, color: T.void,
+                borderRadius: 2, padding: '1px 5px', fontSize: 10, fontWeight: 700,
+              }}>{simSlots.length}</span>
+            )}
+          </button>
+          {showSimPicker && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, zIndex: 20, marginTop: 4,
+              background: T.surface, border: `1px solid ${T.gold}`,
+              minWidth: 380,
+            }}>
+              {simSlots.length === 0 ? (
+                <div style={{
+                  padding: '12px 16px',
+                  fontFamily: '"Share Tech Mono", monospace', fontSize: 11, color: T.outline,
+                }}>
+                  No hay mechs en el simulador. Carga una ficha .ssw primero.
+                </div>
+              ) : (
+                simSlots.map(({ slot, idx }) => {
+                  const st = slot.state!;
+                  const se = slot.session!;
+                  const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'];
+                  const armorMax  = armorLocs.reduce((s,k) => s + ((st.armor  as Record<string,number>)[k] ?? 0), 0);
+                  const armorCur  = armorLocs.reduce((s,k) => s + ((se.armor as Record<string,number>)[k] ?? 0), 0);
+                  const isLocs    = ['HD','CT','LT','RT','LA','RA','LL','RL'];
+                  const isMax     = isLocs.reduce((s,k) => s + ((st.is   as Record<string,number>)[k] ?? 0), 0);
+                  const isCur     = isLocs.reduce((s,k) => s + ((se.is  as Record<string,number>)[k] ?? 0), 0);
+                  const totalMax  = armorMax + isMax;
+                  const totalLost = (armorMax - armorCur) + (isMax - isCur);
+                  const pct = totalMax > 0 ? Math.round((totalLost / totalMax) * 100) : 0;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => loadFromSimSlot(slot)}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'left',
+                        padding: '8px 14px',
+                        background: 'transparent', border: 'none',
+                        borderBottom: `1px solid ${T.outlineV}40`,
+                        color: T.cream, cursor: 'pointer',
+                        fontFamily: 'Inter, sans-serif', fontSize: 12,
+                      }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${T.gold}15`}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+                    >
+                      <span style={{ fontWeight: 700 }}>
+                        SLOT {idx + 1} — {st.chassis} {st.model}
+                      </span>
+                      <span style={{
+                        marginLeft: 10, fontFamily: '"Share Tech Mono", monospace',
+                        fontSize: 10, color: pct > 60 ? '#ef4444' : pct > 20 ? '#fbbf24' : '#4ade80',
+                      }}>
+                        {st.tonnage}t · {pct}% daño
+                        {se.destroyed ? ' · ⚠ DESTRUIDO' : ''}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
             </div>
           )}
         </div>
@@ -1753,7 +1886,7 @@ function TallerModal({ onClose, onCommit }: {
                   onClick={async () => {
                     if (!factura || !selected) return;
                     setCommitting(true);
-                    await onCommit(factura.total, `Reparación ${selected.fullName} (${factura.estadoPct}%)`, selected.fullName);
+                    await onCommit(factura.total, `Reparación ${selected.fullName} (${factura.estadoFacturaPct}%)`, selected.fullName);
                     setCommitting(false);
                   }}
                 >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>

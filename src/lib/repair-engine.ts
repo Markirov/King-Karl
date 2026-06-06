@@ -351,6 +351,96 @@ export function configFromCatalog(catalog: {
   };
 }
 
+// ── Derivar daños desde sesión simulador ──────────────────────
+
+import type { MechState, MechSession, CritSlot } from './combat-types';
+
+/** Mapea slot.name del simulador → componente de reparación.
+ *  Nombres literales de parsers.ts (SSW/MTF output). */
+function mapCritToRepair(
+  slotName: string,
+  out: {
+    reactor: number; gyro: number; cabinaDañada: boolean;
+    soporteVida: number; sensores: number; radiadores: number;
+    retros: number; actuadores: MechRepairDamage['actuadores'];
+  },
+) {
+  const n = slotName;
+  if (!n || n === '-') return;
+  if (n === 'Fusion Engine')                                       { out.reactor = Math.min(3, out.reactor + 1); }
+  else if (n === 'Gyro')                                           { out.gyro    = Math.min(2, out.gyro + 1); }
+  else if (n === 'Cockpit')                                        { out.cabinaDañada = true; }
+  else if (n === 'Life Support')                                   { out.soporteVida++; }
+  else if (n === 'Sensors')                                        { out.sensores++; }
+  else if (n === 'Heat Sink' || n === 'Double Heat Sink')         { out.radiadores++; }
+  else if (n === 'Jump Jet')                                       { out.retros++; }
+  else if (n === 'Shoulder')                                       { out.actuadores['Hombro'] = (out.actuadores['Hombro'] ?? 0) + 1; }
+  else if (n === 'Upper Arm Actuator' || n === 'Lower Arm Actuator') { out.actuadores['Codo'] = (out.actuadores['Codo'] ?? 0) + 1; }
+  else if (n === 'Hand Actuator')                                  { out.actuadores['Mano']   = (out.actuadores['Mano']   ?? 0) + 1; }
+  else if (n === 'Hip')                                            { out.actuadores['Cadera'] = (out.actuadores['Cadera'] ?? 0) + 1; }
+  else if (n === 'Upper Leg Actuator' || n === 'Lower Leg Actuator') { out.actuadores['Rodilla'] = (out.actuadores['Rodilla'] ?? 0) + 1; }
+  else if (n === 'Foot Actuator')                                  { out.actuadores['Tobillo'] = (out.actuadores['Tobillo'] ?? 0) + 1; }
+}
+
+/**
+ * Extrae MechRepairDamage desde el delta estado/sesión del simulador.
+ *
+ * - Blindaje perdido = Σ(state.armor[loc] − session.armor[loc])
+ * - Estructura perdida = Σ(state.is[loc] − session.is[loc])
+ * - Crits: recorre session.crits, mapea slots hit=true → componentes
+ * - pctDañoTotal = (pts perdidos) / (pts máximos) × 100
+ */
+export function deriveDamageFromSession(
+  state: MechState,
+  session: MechSession,
+): { damage: MechRepairDamage; pctDañoTotal: number } {
+  // Armor delta
+  const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'] as const;
+  let armorMax = 0, armorCur = 0;
+  for (const k of armorLocs) {
+    armorMax += (state.armor  as Record<string,number>)[k] ?? 0;
+    armorCur += (session.armor as Record<string,number>)[k] ?? 0;
+  }
+  const armorLost = Math.max(0, armorMax - armorCur);
+
+  // IS delta
+  const isLocs = ['HD','CT','LT','RT','LA','RA','LL','RL'] as const;
+  let isMax = 0, isCur = 0;
+  for (const k of isLocs) {
+    isMax += (state.is   as Record<string,number>)[k] ?? 0;
+    isCur += (session.is as Record<string,number>)[k] ?? 0;
+  }
+  const isLost = Math.max(0, isMax - isCur);
+
+  const totalMax  = armorMax + isMax;
+  const totalLost = armorLost + isLost;
+  const pctDañoTotal = totalMax > 0 ? Math.round((totalLost / totalMax) * 100) : 0;
+
+  // Crit scan
+  const critOut = {
+    reactor: 0, gyro: 0, cabinaDañada: false,
+    soporteVida: 0, sensores: 0, radiadores: 0,
+    retros: 0, actuadores: {} as MechRepairDamage['actuadores'],
+  };
+  for (const slots of Object.values(session.crits ?? {})) {
+    for (const slot of slots as CritSlot[]) {
+      if (slot?.hit) mapCritToRepair(slot.name, critOut);
+    }
+  }
+
+  return {
+    damage: {
+      ...critOut,
+      estructura: isLost,
+      blindaje:   armorLost,
+      miomero:    0,   // no hay slot nombrado en crits para miomero
+      armas:      [],
+      municion:   0,
+    },
+    pctDañoTotal,
+  };
+}
+
 export function emptyDamage(): MechRepairDamage {
   return {
     reactor: 0, gyro: 0, cabinaDañada: false, soporteVida: 0, sensores: 0,
