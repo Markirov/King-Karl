@@ -106,17 +106,23 @@ Refleja estado pre-reskin. Actualizar con:
 
 ---
 
-## StratOps Repair Rules — revisar contra Taller propio
+## Canon Repair Rules — RESUELTO (2026-06-07)
 
-Sistema actual `repair-engine.ts` reescrito para respetar Taller (Ayudas BW:BX + AA1:AA31 estado %).
+Reglas canon documentadas en `INFORME_DISCREPANCIAS_CANON.md`.
+Fuente real: **Campaign Operations** 3rd Print p.205-212 (NO StratOps;
+ese capítulo se movió a CamOps en imprentas modernas).
 
-Pendiente revisar:
-- StratOps p.179 usa `repair difficulty × tech rating × salvage rolls` (multiplicadores tabla)
-- Tu Taller usa: precio fijo per componente × peso × pts dañados × estado %
-- Decidir si añadir modo dual canon/propio (toggle como en MaintenanceModal)
-- Si te quedas con el tuyo, marcar como "house rule documentada"
+Implementado:
+- `repair-engine.ts`: `calcRepairCostCanon()` + `calcRepairCostBySystem()`
+  + tipo `RepairSystem = 'propio' | 'canon'`
+- `FinanzasPage.tsx` TallerModal: toggle 2 botones PROPIO/CANON, default propio
+- Concepto libro mayor etiqueta `[CamOps]` o `[propio · 100%]`
 
-Archivos a tocar si se integra StratOps: `lib/repair-engine.ts` + TallerModal toggle.
+Pendiente menor (no urgente):
+- Modelar **tiempo reparación** (minutos × Tech Team rating) → display informativo
+- Modelar **tirada Tech Team** con TN modificadores quality/tech rating
+- Modelar **partial repairs** (fail por poco margen)
+- Modelar **acquisition checks** (CamOps p.196) para piezas en mercado
 
 ---
 

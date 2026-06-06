@@ -127,6 +127,8 @@ export interface MechRepairConfig {
   retroType:      string;
   radType:        string;
   blindajeType:   string;
+  /** Engine rating (= walkMP × tons en mechs). Necesario para canon gyro tons. */
+  engineRating?:  number;
 }
 
 export interface MechRepairDamage {
@@ -306,7 +308,7 @@ export function configFromCatalog(catalog: {
   walkMP: number;
   structure?: string;
   armor?: { type: string };
-  engine?: { type: string };
+  engine?: { rating?: number; type: string };
   heatSinks?: { type: 'Single' | 'Double' };
   jumpMP?: number;
 }): MechRepairConfig {
@@ -341,6 +343,7 @@ export function configFromCatalog(catalog: {
   return {
     tons:           catalog.tons,
     walkMP:         catalog.walkMP,
+    engineRating:   catalog.engine?.rating ?? catalog.walkMP * catalog.tons,
     reactorType,
     gyroType:       'Estandar',
     miomeroType:    'Estandar',
@@ -507,6 +510,137 @@ export function emptyDamage(): MechRepairDamage {
     armas: [],
     municion: 0,
   };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CANON CAMOPS — Reglas canónicas Campaign Operations p.205-210
+//  Sólo reemplazo de pieza cuesta ₡; daño parcial = 0 ₡ (sólo labor)
+//  Precios componente desde TechManual (TM)
+// ══════════════════════════════════════════════════════════════
+
+export type RepairSystem = 'propio' | 'canon';
+
+/** Calcula gyro tons canon: ceil(engineRating/100), modificado por tipo gyro. */
+function canonGyroTons(engineRating: number, gyroType: string): number {
+  const base = Math.ceil(engineRating / 100);
+  switch (gyroType) {
+    case 'XL':       return Math.ceil(base / 2);  // XL gyro pesa la mitad
+    case 'Compacto': return Math.ceil(base * 1.5);
+    case 'Pesado':   return base * 2;
+    default:         return base; // Estandar
+  }
+}
+
+/** Internal structure tons: ceil(tons × 0.10). EndoAcero pesa la mitad. */
+function canonStructureTons(tons: number, structType: string): number {
+  const base = Math.ceil(tons / 10);
+  return structType === 'EndoAcero' ? Math.ceil(base / 2) : base;
+}
+
+/**
+ * Factura canon (CamOps): sólo se carga el precio total de la pieza
+ * cuando está destruida. Daño parcial (1-2 crits sin destrucción)
+ * cuesta 0 ₡ — sólo labor time (no se modela aquí).
+ */
+export function calcRepairCostCanon(
+  config: MechRepairConfig,
+  damage: MechRepairDamage,
+  pctDañoTotal = 0,
+): RepairBreakdown {
+  const peso   = config.tons;
+  const rating = config.engineRating ?? (config.walkMP * peso);
+
+  // === Reactor (TM) ===
+  // Precio = base × rating × tons / 75. Sólo si destruido (3 crits).
+  const reactorBase = PRECIO_REACTOR[config.reactorType] ?? PRECIO_REACTOR['Fusion'];
+  const destruido = damage.reactor >= 3;
+  const reactor = destruido ? Math.round((reactorBase * rating * peso) / 75) : 0;
+
+  // === Gyro (TM) === gyro_tons × precio_base. Sólo si gyro=2 (destruido)
+  const gyroBase  = PRECIO_GYRO_BASE[config.gyroType] ?? PRECIO_GYRO_BASE['Estandar'];
+  const gyroTons  = canonGyroTons(rating, config.gyroType);
+  const gyro = damage.gyro >= 2 ? gyroTons * gyroBase : 0;
+
+  // === Cabina === flat 200k binario
+  const cabina = damage.cabinaDañada ? PRECIO_CABINA : 0;
+
+  // === Soporte Vital === flat 50k (sólo hay 1 ud por mech en canon)
+  const soporteVida = damage.soporteVida > 0 ? PRECIO_SOPORTE_VIDA : 0;
+
+  // === Sensores === 2000 × tons (sólo 1 conjunto por mech)
+  const sensores = damage.sensores > 0 ? PRECIO_SENSORES_BASE * peso : 0;
+
+  // === Estructura === IS_tons × precio_base. Canon no escala por pts dañados;
+  // carga reemplazo completo de la localización afectada.
+  // Aproximación: si hay pts perdidos → cobrar fracción IS_tons proporcional.
+  const estructuraBase = PRECIO_ESTRUCTURA[config.estructuraType] ?? PRECIO_ESTRUCTURA['Estandar'];
+  const isTons = canonStructureTons(peso, config.estructuraType);
+  // Canon TM: ~400 × IS_tons para reemplazo total. Pts perdidos / IS_total × cost
+  const isTotalPts = peso * 2.5; // aprox: IS total ~ 2.5 pts/ton mech (Atlas 100t = 250 pts ≈)
+  const estructura = damage.estructura > 0
+    ? Math.round((estructuraBase * isTons * damage.estructura) / isTotalPts)
+    : 0;
+
+  // === Blindaje === ceil(pts/16) × precio_ton (idéntico a propio)
+  const blindajeBase = PRECIO_BLINDAJE[config.blindajeType] ?? PRECIO_BLINDAJE['Estandar'];
+  const blindaje = blindajeBase * Math.ceil(damage.blindaje / 16);
+
+  // === Miomero === En canon no se reemplaza por uds; sólo si triple-strength
+  // se considera componente premium. Tratamos como flat 0 si Estandar.
+  const miomero = config.miomeroType !== 'Estandar' && damage.miomero > 0
+    ? (PRECIO_MIOMERO[config.miomeroType] ?? 0) * peso
+    : 0;
+
+  // === Actuadores === Canon: actuadores son parte de la estructura; sólo se
+  // reemplazan junto con limb destroyed. Aproximación: precio flat × uds (sin peso)
+  const actuadores = Object.entries(damage.actuadores ?? {}).reduce((sum, [name, qty]) => {
+    const price = PRECIO_ACTUADOR[name as keyof typeof PRECIO_ACTUADOR] ?? 0;
+    return sum + price * (qty ?? 0);
+  }, 0);
+
+  // === Retros === Canon: precio × uds (sin peso)
+  const retroBase = PRECIO_RETROS[config.retroType] ?? PRECIO_RETROS['Estandar'];
+  const retros = retroBase * damage.retros;
+
+  // === Radiadores === Canon TM: 2000 single / 6000 double cada uno
+  const radBase = PRECIO_RADIADORES[config.radType] ?? PRECIO_RADIADORES['Normales'];
+  const radiadores = radBase * damage.radiadores;
+
+  const armas    = (damage.armas ?? []).reduce((s, w) => s + (w.cost || 0), 0);
+  const municion = damage.municion ?? 0;
+
+  const subtotal =
+    reactor + gyro + cabina + soporteVida + sensores +
+    estructura + blindaje + miomero +
+    actuadores + retros + radiadores +
+    armas + municion;
+
+  // Canon NO tiene estado factura %. Total = subtotal directo.
+  const total = subtotal;
+
+  const estadoMech: EstadoMech = destruido ? 'DESTRUIDO' : clasificarEstadoMech(pctDañoTotal);
+
+  return {
+    reactor, gyro, cabina, soporteVida, sensores,
+    estructura, blindaje, miomero,
+    actuadores, retros, radiadores,
+    armas, municion,
+    subtotal, estadoFacturaPct: 100, total,
+    estadoMech, destruido,
+  };
+}
+
+/** Dispatch: elige fórmula propia o canon según `system`. */
+export function calcRepairCostBySystem(
+  system: RepairSystem,
+  config: MechRepairConfig,
+  damage: MechRepairDamage,
+  estadoFactPct = 100,
+  pctDañoTotal = 0,
+): RepairBreakdown {
+  return system === 'canon'
+    ? calcRepairCostCanon(config, damage, pctDañoTotal)
+    : calcRepairCost(config, damage, estadoFactPct, pctDañoTotal);
 }
 
 /** Color etiqueta visual estado mech. */

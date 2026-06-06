@@ -17,10 +17,10 @@ import {
 } from '@/lib/asset-prices';
 import { useMechCatalog, findMechByName, type CatalogMech } from '@/hooks/useMechCatalog';
 import {
-  calcRepairCost, configFromCatalog, emptyDamage, deriveDamageFromSession,
+  calcRepairCostBySystem, configFromCatalog, emptyDamage, deriveDamageFromSession,
   ESTADO_FACTURA_PCT, ESTADO_COLOR,
   PRECIO_ACTUADOR,
-  type MechRepairConfig, type MechRepairDamage, type RepairBreakdown,
+  type MechRepairConfig, type MechRepairDamage, type RepairBreakdown, type RepairSystem,
 } from '@/lib/repair-engine';
 import { loadLocalSnapshot } from '@/lib/simulador-persistence';
 import type { MechSlot } from '@/lib/combat-types';
@@ -1522,6 +1522,7 @@ function TallerModal({ onClose, onCommit }: {
   const [damage, setDamage] = useState<MechRepairDamage>(emptyDamage);
   const [estadoPct, setEstadoPct] = useState(100);
   const [pctDañoTotal, setPctDañoTotal] = useState(0);
+  const [system, setSystem] = useState<RepairSystem>('propio');
 
   // Simulador import
   const [showSimPicker, setShowSimPicker] = useState(false);
@@ -1603,7 +1604,7 @@ function TallerModal({ onClose, onCommit }: {
   };
 
   // Factura
-  const factura: RepairBreakdown | null = config ? calcRepairCost(config, damage, estadoPct, pctDañoTotal) : null;
+  const factura: RepairBreakdown | null = config ? calcRepairCostBySystem(system, config, damage, estadoPct, pctDañoTotal) : null;
 
   // Helper actualizar damage
   const updDmg = <K extends keyof MechRepairDamage>(k: K, v: MechRepairDamage[K]) =>
@@ -1807,14 +1808,42 @@ function TallerModal({ onClose, onCommit }: {
                 ))}
               </div>
 
+              <SmallLabel>Sistema de cálculo</SmallLabel>
+              <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                {(['propio', 'canon'] as RepairSystem[]).map(s => (
+                  <button key={s} onClick={() => setSystem(s)}
+                    style={{
+                      flex: 1, padding: '8px 12px',
+                      background: system === s ? T.gold : T.void,
+                      border: `1px solid ${T.gold}`,
+                      color: system === s ? T.void : T.gold,
+                      cursor: 'pointer',
+                      fontFamily: '"Share Tech Mono", monospace', fontSize: 11, letterSpacing: 1.5,
+                      fontWeight: system === s ? 700 : 400,
+                    }}>
+                    {s === 'propio' ? 'PROPIO (HOUSE RULE)' : 'CANON (CamOps p.205)'}
+                  </button>
+                ))}
+              </div>
+              <div style={{
+                marginTop: 4, padding: '4px 8px',
+                fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline,
+                lineHeight: 1.5,
+              }}>
+                {system === 'propio'
+                  ? 'Tu Taller: precio × peso × pts/2 × estado%. Cubre daño parcial.'
+                  : 'CamOps: sólo reemplazo total. Engine/Gyro parcial = 0 ₡ (sólo labor). Sin estado factura.'}
+              </div>
+
               <SmallLabel>Otros</SmallLabel>
               <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                 <DmgNum label="Munición ₡" value={damage.municion ?? 0} onChange={v => updDmg('municion', v)} max={9999999} />
                 <div>
-                  <FieldLabel>Estado factura (%)</FieldLabel>
+                  <FieldLabel>Estado factura (%) {system === 'canon' && '⊘'}</FieldLabel>
                   <select value={estadoPct}
+                    disabled={system === 'canon'}
                     onChange={e => setEstadoPct(parseInt(e.target.value, 10) || 100)}
-                    style={inputStyle}>
+                    style={{ ...inputStyle, opacity: system === 'canon' ? 0.4 : 1 }}>
                     {[...ESTADO_FACTURA_PCT].map(p => (
                       <option key={p} value={p}>{p}% factura</option>
                     ))}
@@ -1904,7 +1933,7 @@ function TallerModal({ onClose, onCommit }: {
                   onClick={async () => {
                     if (!factura || !selected) return;
                     setCommitting(true);
-                    await onCommit(factura.total, `Reparación ${selected.fullName} (${factura.estadoFacturaPct}%)`, selected.fullName);
+                    await onCommit(factura.total, `Reparación ${selected.fullName} [${system === 'canon' ? 'CamOps' : 'propio'} ${system === 'propio' ? `· ${factura.estadoFacturaPct}%` : ''}]`, selected.fullName);
                     setCommitting(false);
                   }}
                 >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
