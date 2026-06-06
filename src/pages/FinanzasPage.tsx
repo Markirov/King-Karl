@@ -120,9 +120,18 @@ const catLabel = (k: LibroMayorCategoria) => CATEGORIAS.find(c => c.key === k)?.
 // ══════════════════════════════════════════════════════════
 
 export function FinanzasPage() {
-  const { activeSubTab, campaign, roster } = useAppStore();
-  const tab = (activeSubTab === 'personal' ? 'personal' : 'libro-mayor') as 'libro-mayor' | 'personal';
+  const { activeSubTab, setActiveSubTab, campaign, roster, setFinanzasPendingModal } = useAppStore();
+  // Defaults: si la sub-tab activa no es de Finanzas, mostramos 'home'
+  const view: 'home' | 'libro-mayor' | 'personal' =
+    activeSubTab === 'libro-mayor' ? 'libro-mayor'
+    : activeSubTab === 'personal'  ? 'personal'
+    : 'home';
   const campaignDate = getCampaignDateISO(campaign?.campaignYear, campaign?.campaignMonth);
+
+  const goToLibroWithModal = (modal: 'taller' | 'compras' | 'projector' | null) => {
+    if (modal) setFinanzasPendingModal(modal);
+    setActiveSubTab('libro-mayor');
+  };
 
   return (
     <div style={{
@@ -131,9 +140,97 @@ export function FinanzasPage() {
       fontFamily: 'Inter, sans-serif',
       padding: '24px 36px 36px',
     }}>
-      {tab === 'libro-mayor'
-        ? <LibroMayorTab campaignDate={campaignDate} campaignYear={campaign?.campaignYear ?? 3026} campaignMonth={campaign?.campaignMonth ?? 1} roster={roster} />
-        : <PersonalTab campaignDate={campaignDate} />}
+      {view === 'home' && (
+        <FinanzasHome
+          onLibro={() => { setFinanzasPendingModal(null); setActiveSubTab('libro-mayor'); }}
+          onCompras={() => goToLibroWithModal('compras')}
+          onTaller={() => goToLibroWithModal('taller')}
+          onPersonal={() => setActiveSubTab('personal')}
+          onProjector={() => goToLibroWithModal('projector')}
+        />
+      )}
+      {view === 'libro-mayor' && (
+        <LibroMayorTab campaignDate={campaignDate} campaignYear={campaign?.campaignYear ?? 3026} campaignMonth={campaign?.campaignMonth ?? 1} roster={roster} />
+      )}
+      {view === 'personal' && <PersonalTab campaignDate={campaignDate} />}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  PORTADA — 5 botones grandes
+// ══════════════════════════════════════════════════════════
+
+interface FinanzasHomeProps {
+  onLibro:     () => void;
+  onCompras:   () => void;
+  onTaller:    () => void;
+  onPersonal:  () => void;
+  onProjector: () => void;
+}
+
+function FinanzasHome({ onLibro, onCompras, onTaller, onPersonal, onProjector }: FinanzasHomeProps) {
+  const BTN: React.CSSProperties = {
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    gap: 12, padding: '40px 20px',
+    background: `linear-gradient(180deg, ${T.gold}10 0%, ${T.void} 100%)`,
+    border: `2px solid ${T.gold}`,
+    color: T.cream,
+    cursor: 'pointer',
+    fontFamily: '"Space Grotesk", sans-serif',
+    fontSize: 18, fontWeight: 700, letterSpacing: 2,
+    minHeight: 180,
+    clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
+    transition: 'all 0.15s ease',
+  };
+  const ICON: React.CSSProperties = { fontSize: 56, lineHeight: 1 };
+  const hover = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.background = `linear-gradient(180deg, ${T.gold}30 0%, ${T.surface} 100%)`;
+    e.currentTarget.style.transform = 'translateY(-2px)';
+  };
+  const leave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.background = `linear-gradient(180deg, ${T.gold}10 0%, ${T.void} 100%)`;
+    e.currentTarget.style.transform = 'none';
+  };
+
+  return (
+    <div style={{ maxWidth: 1200, margin: '0 auto', paddingTop: 20 }}>
+      <div style={{ marginBottom: 32 }}>
+        <SmallLabel>Finanzas · Centro de operaciones contable</SmallLabel>
+        <h1 style={{
+          fontFamily: '"Space Grotesk", sans-serif',
+          fontSize: 36, fontWeight: 800, color: T.creamHi,
+          margin: '8px 0 0', letterSpacing: -0.5,
+        }}>FINANZAS</h1>
+      </div>
+
+      {/* Fila 1 — 3 botones */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 16 }}>
+        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onLibro}>
+          <div style={ICON}>📒</div>
+          <div>LIBRO DE CUENTAS</div>
+        </button>
+        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onCompras}>
+          <div style={ICON}>🛒</div>
+          <div>COMPRAS</div>
+        </button>
+        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onTaller}>
+          <div style={ICON}>🔧</div>
+          <div>TALLER</div>
+        </button>
+      </div>
+
+      {/* Fila 2 — 2 botones */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onPersonal}>
+          <div style={ICON}>👥</div>
+          <div>PERSONAL</div>
+        </button>
+        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onProjector}>
+          <div style={ICON}>📊</div>
+          <div>PROYECTAR MES</div>
+        </button>
+      </div>
     </div>
   );
 }
@@ -150,6 +247,7 @@ interface LibroMayorTabProps {
 }
 
 function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: LibroMayorTabProps) {
+  const { finanzasPendingModal, setFinanzasPendingModal } = useAppStore();
   const [entries, setEntries] = useState<LibroMayorEntry[]>([]);
   const [personal, setPersonal] = useState<PersonalEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,6 +257,15 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
   const [projectorOpen, setProjectorOpen] = useState(false);
   const [acqOpen, setAcqOpen] = useState(false);
   const [tallerOpen, setTallerOpen] = useState(false);
+
+  // Consume señal de la portada — abre modal pedido al entrar
+  useEffect(() => {
+    if (!finanzasPendingModal) return;
+    if (finanzasPendingModal === 'taller')     setTallerOpen(true);
+    else if (finanzasPendingModal === 'compras')   setAcqOpen(true);
+    else if (finanzasPendingModal === 'projector') setProjectorOpen(true);
+    setFinanzasPendingModal(null);
+  }, [finanzasPendingModal, setFinanzasPendingModal]);
 
   const refresh = async () => {
     setLoading(true);
@@ -1835,21 +1942,66 @@ function TallerModal({ onClose, onCommit }: {
                   : 'CamOps: sólo reemplazo total. Engine/Gyro parcial = 0 ₡ (sólo labor). Sin estado factura.'}
               </div>
 
-              <SmallLabel>Otros</SmallLabel>
-              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-                <DmgNum label="Munición ₡" value={damage.municion ?? 0} onChange={v => updDmg('municion', v)} max={9999999} />
+              <SmallLabel>Estado factura · Datos sim</SmallLabel>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 10, alignItems: 'end' }}>
+                {/* Estado factura — IZQ */}
                 <div>
                   <FieldLabel>Estado factura (%) {system === 'canon' && '⊘'}</FieldLabel>
                   <select value={estadoPct}
                     disabled={system === 'canon'}
-                    onChange={e => setEstadoPct(parseInt(e.target.value, 10) || 100)}
+                    onChange={e => {
+                      const v = parseInt(e.target.value, 10);
+                      setEstadoPct(Number.isFinite(v) ? v : 100);
+                    }}
                     style={{ ...inputStyle, opacity: system === 'canon' ? 0.4 : 1 }}>
                     {[...ESTADO_FACTURA_PCT].map(p => (
                       <option key={p} value={p}>{p}% factura</option>
                     ))}
                   </select>
                 </div>
-                <DmgNum label="% daño total mech" value={pctDañoTotal} onChange={v => setPctDañoTotal(v)} max={100} />
+
+                {/* 5 botones quick % — CENTRO */}
+                <div>
+                  <FieldLabel>Quick %</FieldLabel>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {[0, 25, 50, 75, 100].map(p => (
+                      <button key={p}
+                        disabled={system === 'canon'}
+                        onClick={() => setEstadoPct(p)}
+                        style={{
+                          width: 36, padding: '6px 0',
+                          background: estadoPct === p ? T.gold : T.void,
+                          border: `1px solid ${T.gold}`,
+                          color: estadoPct === p ? T.void : T.gold,
+                          cursor: system === 'canon' ? 'not-allowed' : 'pointer',
+                          opacity: system === 'canon' ? 0.3 : 1,
+                          fontFamily: '"Share Tech Mono", monospace', fontSize: 10, fontWeight: 700,
+                        }}>{p}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Muni + % daño readonly — DCHA */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div>
+                    <FieldLabel>Munición (sim) 🔒</FieldLabel>
+                    <div style={{
+                      padding: '6px 10px',
+                      background: T.void, border: `1px solid ${T.outlineV}`,
+                      fontFamily: '"Share Tech Mono", monospace', fontSize: 11, textAlign: 'right',
+                      color: T.cream,
+                    }}>{fmtMoney(damage.municion ?? 0)}</div>
+                  </div>
+                  <div>
+                    <FieldLabel>% daño total (sim) 🔒</FieldLabel>
+                    <div style={{
+                      padding: '6px 10px',
+                      background: T.void, border: `1px solid ${T.outlineV}`,
+                      fontFamily: '"Share Tech Mono", monospace', fontSize: 11, textAlign: 'right',
+                      color: T.cream,
+                    }}>{pctDañoTotal}%</div>
+                  </div>
+                </div>
               </div>
 
               <SmallLabel>Config detectada (catálogo SSW)</SmallLabel>

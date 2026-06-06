@@ -19,6 +19,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { id: 'hoja',          label: 'Hoja de Servicio', icon: '📝', path: '/hoja-servicio', palette: 'amber' },
       { id: 'finanzas',      label: 'Finanzas',         icon: '💰', path: '/finanzas',      palette: 'amber',
         tabs: [
+          { id: 'home',        label: 'Inicio' },
           { id: 'libro-mayor', label: 'Libro Mayor' },
           { id: 'personal',    label: 'Personal' },
         ],

@@ -33,6 +33,10 @@ interface AppState {
   rosterLoading: boolean;
   setRoster: (r: RosterEntry[]) => void;
   setRosterLoading: (v: boolean) => void;
+
+  /** Acción pendiente para portada Finanzas → Libro Mayor (abre modal al entrar). */
+  finanzasPendingModal: 'taller' | 'compras' | 'projector' | null;
+  setFinanzasPendingModal: (v: 'taller' | 'compras' | 'projector' | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -81,4 +85,7 @@ export const useAppStore = create<AppState>((set) => ({
   rosterLoading: true,
   setRoster: (r) => set({ roster: r, rosterLoading: false }),
   setRosterLoading: (v) => set({ rosterLoading: v }),
+
+  finanzasPendingModal: null,
+  setFinanzasPendingModal: (v) => set({ finanzasPendingModal: v }),
 }));
