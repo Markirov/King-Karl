@@ -17,6 +17,11 @@ import {
 } from '@/lib/asset-prices';
 import { useMechCatalog, findMechByName, type CatalogMech } from '@/hooks/useMechCatalog';
 import {
+  calcRepairCost, configFromCatalog, emptyDamage, ESTADO_FACTURA,
+  PRECIO_ACTUADOR,
+  type MechRepairConfig, type MechRepairDamage, type RepairBreakdown,
+} from '@/lib/repair-engine';
+import {
   loadLibroMayor, saveLibroMayorEntry, deleteLibroMayorEntry,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
   type LibroMayorEntry, type LibroMayorCategoria, type LibroMayorTipo,
@@ -150,6 +155,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
   const [filterCat, setFilterCat] = useState<LibroMayorCategoria | 'all'>('all');
   const [projectorOpen, setProjectorOpen] = useState(false);
   const [acqOpen, setAcqOpen] = useState(false);
+  const [tallerOpen, setTallerOpen] = useState(false);
 
   const refresh = async () => {
     setLoading(true);
@@ -219,6 +225,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
         subtitle="Ingresos y gastos ad-hoc fuera de misión"
         action={!editorOpen ? (
           <div style={{ display: 'flex', gap: 10 }}>
+            <SecondaryBtn onClick={() => setTallerOpen(true)}>🔧 TALLER</SecondaryBtn>
             <SecondaryBtn onClick={() => setAcqOpen(true)}>🛒 COMPRAS</SecondaryBtn>
             <SecondaryBtn onClick={() => setProjectorOpen(true)}>📊 PROYECTAR MES</SecondaryBtn>
             <PrimaryBtn onClick={openNew}>+ NUEVA ENTRADA</PrimaryBtn>
@@ -244,6 +251,27 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
               jugador: '',
             });
             setAcqOpen(false);
+            refresh();
+          }}
+        />
+      )}
+
+      {tallerOpen && (
+        <TallerModal
+          campaignDate={campaignDate}
+          onClose={() => setTallerOpen(false)}
+          onCommit={async (total, concepto, mechName) => {
+            await saveLibroMayorEntry({
+              id: genId('lm'),
+              fecha: campaignDate,
+              concepto,
+              cantidad: Math.round(total),
+              tipo: 'gasto',
+              categoria: 'repuestos',
+              nota: `Reparación ${mechName} · Taller`,
+              jugador: '',
+            });
+            setTallerOpen(false);
             refresh();
           }}
         />
@@ -1467,6 +1495,277 @@ function BreakdownRow({ label, detail, value, color, bold }: {
         color: color ?? T.creamHi,
         textAlign: 'right', minWidth: 140,
       }}>{fmtMoney(value)}</div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  TALLER MODAL (A1) — factura reparación post-combate
+// ══════════════════════════════════════════════════════════
+
+function TallerModal({ onClose, onCommit }: {
+  campaignDate: string;
+  onClose: () => void;
+  onCommit: (total: number, concepto: string, mechName: string) => Promise<void>;
+}) {
+  const { catalog } = useMechCatalog();
+  const [mechQuery, setMechQuery] = useState('');
+  const [selected, setSelected] = useState<CatalogMech | null>(null);
+  const [showSugg, setShowSugg] = useState(false);
+  const [committing, setCommitting] = useState(false);
+
+  // Config + damage state
+  const [config, setConfig] = useState<MechRepairConfig | null>(null);
+  const [damage, setDamage] = useState<MechRepairDamage>(emptyDamage);
+  const [estadoPct, setEstadoPct] = useState(100);
+
+  // Sugerencias
+  const suggestions = useMemo(() => {
+    if (!catalog || mechQuery.trim().length < 2) return [];
+    const q = mechQuery.trim().toLowerCase();
+    return catalog.mechs
+      .filter(m => m.fullName.toLowerCase().includes(q))
+      .slice(0, 12);
+  }, [catalog, mechQuery]);
+
+  const handleSelectMech = (m: CatalogMech) => {
+    setSelected(m);
+    setMechQuery(m.fullName);
+    setShowSugg(false);
+    setConfig(configFromCatalog(m));
+    setDamage(emptyDamage());
+  };
+
+  const handleClear = () => {
+    setSelected(null);
+    setMechQuery('');
+    setConfig(null);
+    setDamage(emptyDamage());
+  };
+
+  // Factura
+  const factura: RepairBreakdown | null = config ? calcRepairCost(config, damage, estadoPct) : null;
+
+  // Helper actualizar damage
+  const updDmg = <K extends keyof MechRepairDamage>(k: K, v: MechRepairDamage[K]) =>
+    setDamage(d => ({ ...d, [k]: v }));
+
+  const updActuador = (name: keyof typeof PRECIO_ACTUADOR, qty: number) =>
+    setDamage(d => ({ ...d, actuadores: { ...d.actuadores, [name]: qty } }));
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(0,0,0,0.8)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 100,
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: T.surface, border: `1px solid ${T.gold}`,
+        padding: 26, width: 1100, maxWidth: '95vw',
+        maxHeight: '92vh', overflow: 'auto',
+        clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
+      }}>
+        <SmallLabel>Taller · Factura reparación Mech (Ayudas BW:BX)</SmallLabel>
+        <h2 style={{
+          margin: '6px 0 16px',
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 24, fontWeight: 800,
+          color: T.creamHi, letterSpacing: -0.4,
+        }}>TALLER · REPARACIÓN</h2>
+
+        {/* Mech search */}
+        <div style={{ marginBottom: 16, position: 'relative' }}>
+          <FieldLabel>Mech a reparar (catálogo SSW)</FieldLabel>
+          <input type="text"
+            value={mechQuery}
+            onChange={e => { setMechQuery(e.target.value); setSelected(null); setShowSugg(true); }}
+            onFocus={() => setShowSugg(true)}
+            onBlur={() => setTimeout(() => setShowSugg(false), 150)}
+            placeholder="Ej: Atlas AS7-D, Marauder MAD-3R..."
+            style={inputStyle} />
+          {selected && (
+            <button onClick={handleClear} style={{
+              position: 'absolute', right: 8, top: 26,
+              background: 'transparent', border: 'none', color: T.gold,
+              cursor: 'pointer', fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+            }}>× CLEAR</button>
+          )}
+          {showSugg && suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              background: T.surface, border: `1px solid ${T.gold}`,
+              maxHeight: 240, overflow: 'auto', zIndex: 10, marginTop: 2,
+            }}>
+              {suggestions.map((m, i) => (
+                <button key={i} onClick={() => handleSelectMech(m)}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '6px 10px', background: 'transparent',
+                    border: 'none', borderBottom: `1px solid ${T.outlineV}40`,
+                    color: T.cream, cursor: 'pointer',
+                    fontFamily: 'Inter, sans-serif', fontSize: 12,
+                  }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${T.gold}15`}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+                >
+                  <span style={{ fontWeight: 700 }}>{m.fullName}</span>
+                  <span style={{ color: T.outline, marginLeft: 8, fontFamily: '"Share Tech Mono", monospace', fontSize: 10 }}>
+                    {m.tons}t · {m.categoria} · {m.armor.type} · {m.heatSinks.type} HS
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {!config ? (
+          <EmptyState text="SELECCIONA UN MECH PARA EMPEZAR LA FACTURA" />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
+            {/* Daños — IZQUIERDA */}
+            <div>
+              <SmallLabel>Daños declarados</SmallLabel>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <DmgNum label="Reactor (0-3)"      value={damage.reactor}     onChange={v => updDmg('reactor', v)}     max={3} />
+                <DmgNum label="Gyro (0-2)"          value={damage.gyro}        onChange={v => updDmg('gyro', v)}        max={2} />
+                <DmgNum label="Cabina (0-1)"        value={damage.cabina}      onChange={v => updDmg('cabina', v)}      max={1} />
+                <DmgNum label="Soporte vida (0-1)"  value={damage.soporteVida} onChange={v => updDmg('soporteVida', v)} max={1} />
+                <DmgNum label="Sensores (0-2)"      value={damage.sensores}    onChange={v => updDmg('sensores', v)}    max={2} />
+                <DmgNum label="Miomero (0-2)"       value={damage.miomero}     onChange={v => updDmg('miomero', v)}     max={2} />
+                <DmgNum label="Estructura (pts)"    value={damage.estructura}  onChange={v => updDmg('estructura', v)}  max={999} />
+                <DmgNum label="Blindaje (pts)"      value={damage.blindaje}    onChange={v => updDmg('blindaje', v)}    max={999} />
+                <DmgNum label="Retros (% dañados)"  value={damage.retros}      onChange={v => updDmg('retros', v)}      max={100} />
+                <DmgNum label="Radiadores (uds)"    value={damage.radiadores}  onChange={v => updDmg('radiadores', v)}  max={config.tons} />
+              </div>
+
+              <SmallLabel>Actuadores</SmallLabel>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                {(Object.keys(PRECIO_ACTUADOR) as (keyof typeof PRECIO_ACTUADOR)[]).map(name => (
+                  <DmgNum key={name}
+                    label={`${name} (${fmtMoney(PRECIO_ACTUADOR[name])})`}
+                    value={damage.actuadores[name] ?? 0}
+                    onChange={v => updActuador(name, v)}
+                    max={4} small />
+                ))}
+              </div>
+
+              <SmallLabel>Otros</SmallLabel>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <DmgNum label="Munición consumida ₡" value={damage.municion ?? 0} onChange={v => updDmg('municion', v)} max={9999999} />
+                <div>
+                  <FieldLabel>Estado factura (%)</FieldLabel>
+                  <select value={estadoPct}
+                    onChange={e => setEstadoPct(parseInt(e.target.value, 10) || 100)}
+                    style={inputStyle}>
+                    {[...ESTADO_FACTURA].map(p => (
+                      <option key={p} value={p}>{p}% factura</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <SmallLabel>Config detectada (catálogo SSW)</SmallLabel>
+              <div style={{
+                marginTop: 8, padding: '8px 12px',
+                background: T.void, border: `1px solid ${T.outlineV}`,
+                fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+                color: T.outline, lineHeight: 1.7,
+              }}>
+                <div>Reactor: <span style={{ color: T.bone }}>{config.reactorType}</span> · Estructura: <span style={{ color: T.bone }}>{config.estructuraType}</span></div>
+                <div>Blindaje: <span style={{ color: T.bone }}>{config.blindajeType}</span> · Radiadores: <span style={{ color: T.bone }}>{config.radType}</span></div>
+                <div>Peso: <span style={{ color: T.bone }}>{config.tons}t</span> · Walk: <span style={{ color: T.bone }}>{config.walkMP}</span></div>
+              </div>
+            </div>
+
+            {/* Factura — DERECHA */}
+            <div>
+              <SmallLabel>Factura desglosada</SmallLabel>
+              {factura && (
+                <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <FacturaRow label="Reactor"        value={factura.reactor} />
+                  <FacturaRow label="Gyro"           value={factura.gyro} />
+                  <FacturaRow label="Cabina"         value={factura.cabina} />
+                  <FacturaRow label="Soporte vida"   value={factura.soporteVida} />
+                  <FacturaRow label="Sensores"       value={factura.sensores} />
+                  <FacturaRow label="Estructura"     value={factura.estructura} />
+                  <FacturaRow label="Blindaje"       value={factura.blindaje} />
+                  <FacturaRow label="Miomero"        value={factura.miomero} />
+                  <FacturaRow label="Actuadores"     value={factura.actuadores} />
+                  <FacturaRow label="Retros"         value={factura.retros} />
+                  <FacturaRow label="Radiadores"     value={factura.radiadores} />
+                  <FacturaRow label="Armas"          value={factura.armas} />
+                  <FacturaRow label="Munición"       value={factura.municion} />
+                  <div style={{ borderTop: `1px solid ${T.outlineV}`, paddingTop: 8, marginTop: 6 }}>
+                    <FacturaRow label="Subtotal" value={factura.subtotal} color={T.gold} bold />
+                  </div>
+                  <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: T.outline, padding: '4px 0' }}>
+                    Estado factura: {factura.estadoPct}%
+                  </div>
+                  <div style={{ borderTop: `2px solid ${T.gold}`, paddingTop: 10 }}>
+                    <FacturaRow label="TOTAL" value={factura.total} color={T.bloodLight} bold />
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
+                <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
+                <PrimaryBtn
+                  disabled={!factura || factura.total === 0 || committing}
+                  onClick={async () => {
+                    if (!factura || !selected) return;
+                    setCommitting(true);
+                    await onCommit(factura.total, `Reparación ${selected.fullName} (${factura.estadoPct}%)`, selected.fullName);
+                    setCommitting(false);
+                  }}
+                >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DmgNum({ label, value, onChange, max, small }: {
+  label: string; value: number; onChange: (v: number) => void; max: number; small?: boolean;
+}) {
+  return (
+    <div>
+      <div style={{
+        fontFamily: '"Share Tech Mono", monospace',
+        fontSize: small ? 8 : 9,
+        color: T.outline, letterSpacing: 1.5, marginBottom: 3,
+      }}>{label}</div>
+      <input type="number" min={0} max={max} value={value}
+        onChange={e => onChange(Math.max(0, Math.min(max, parseInt(e.target.value, 10) || 0)))}
+        style={{
+          ...inputStyle,
+          padding: small ? '4px 6px' : '6px 10px',
+          fontSize: small ? 11 : 13,
+          fontFamily: '"Share Tech Mono", monospace', textAlign: 'right',
+        }} />
+    </div>
+  );
+}
+
+function FacturaRow({ label, value, color, bold }: {
+  label: string; value: number; color?: string; bold?: boolean;
+}) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+      <span style={{
+        fontFamily: bold ? '"Space Grotesk", sans-serif' : 'Inter, sans-serif',
+        fontSize: bold ? 14 : 12,
+        fontWeight: bold ? 800 : 500,
+        color: color ?? T.cream,
+      }}>{label}</span>
+      <span style={{
+        fontFamily: '"Share Tech Mono", monospace',
+        fontSize: bold ? 16 : 12,
+        fontWeight: bold ? 800 : 700,
+        color: color ?? (value > 0 ? T.creamHi : T.outline),
+      }}>{value > 0 ? fmtMoney(value) : '—'}</span>
     </div>
   );
 }
