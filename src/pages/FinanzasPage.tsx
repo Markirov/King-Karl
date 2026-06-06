@@ -1525,6 +1525,7 @@ function TallerModal({ onClose, onCommit }: {
 
   // Simulador import
   const [showSimPicker, setShowSimPicker] = useState(false);
+  const [municionDetalle, setMunicionDetalle] = useState<{ family: string; spent: number; tons: number; cost: number }[]>([]);
   const simSlots: { slot: MechSlot; idx: number }[] = useMemo(() => {
     const snap = loadLocalSnapshot();
     if (!snap) return [];
@@ -1537,7 +1538,8 @@ function TallerModal({ onClose, onCommit }: {
     if (!mechSlot.state || !mechSlot.session) return;
     const st = mechSlot.state;
     // Derivar daños
-    const { damage: derivedDmg, pctDañoTotal: pct } = deriveDamageFromSession(st, mechSlot.session);
+    const { damage: derivedDmg, pctDañoTotal: pct, municionDetalle: detalle } = deriveDamageFromSession(st, mechSlot.session);
+    setMunicionDetalle(detalle);
     // Intentar match en catálogo para config correcta
     const catMatch = catalog
       ? findMechByName(catalog.mechs, `${st.chassis} ${st.model}`)
@@ -1589,6 +1591,7 @@ function TallerModal({ onClose, onCommit }: {
     setShowSugg(false);
     setConfig(configFromCatalog(m));
     setDamage(emptyDamage());
+    setMunicionDetalle([]);
   };
 
   const handleClear = () => {
@@ -1596,6 +1599,7 @@ function TallerModal({ onClose, onCommit }: {
     setMechQuery('');
     setConfig(null);
     setDamage(emptyDamage());
+    setMunicionDetalle([]);
   };
 
   // Factura
@@ -1850,6 +1854,20 @@ function TallerModal({ onClose, onCommit }: {
                   <FacturaRow label="Radiadores"     value={factura.radiadores} />
                   <FacturaRow label="Armas"          value={factura.armas} />
                   <FacturaRow label="Munición"       value={factura.municion} />
+                  {municionDetalle.length > 0 && (
+                    <div style={{
+                      marginLeft: 12, padding: '4px 8px',
+                      borderLeft: `2px solid ${T.outlineV}`,
+                      fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline,
+                    }}>
+                      {municionDetalle.map((d, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}>
+                          <span>{d.family} ({d.spent} disp · {d.tons}t)</span>
+                          <span style={{ color: T.bone }}>{fmtMoney(d.cost)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div style={{ borderTop: `1px solid ${T.outlineV}`, paddingTop: 8, marginTop: 6 }}>
                     <FacturaRow label="Subtotal" value={factura.subtotal} color={T.gold} bold />
                   </div>

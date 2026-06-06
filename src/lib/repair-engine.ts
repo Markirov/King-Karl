@@ -351,9 +351,47 @@ export function configFromCatalog(catalog: {
   };
 }
 
+// ── Precios munición canon (Tech Manual ₡/ton) ────────────────
+// Lookup por substring del campo family de AmmoBin.
+// Si no encuentra match, devuelve 5000 (fallback genérico).
+
+export const PRECIO_MUNICION_PER_TON: { match: RegExp; price: number }[] = [
+  // Gauss family
+  { match: /Heavy\s*Gauss/i,         price: 20_000 },
+  { match: /Light\s*Gauss/i,         price: 20_000 },
+  { match: /Gauss/i,                 price: 20_000 },
+  // AC variants
+  { match: /AC\s*\/?\s*2\b/i,        price:  1_000 },
+  { match: /AC\s*\/?\s*5\b/i,        price:  4_500 },
+  { match: /AC\s*\/?\s*10\b/i,       price:  6_000 },
+  { match: /AC\s*\/?\s*20\b/i,       price: 10_000 },
+  // LRM (todas mismo precio/ton)
+  { match: /LRM/i,                   price: 30_000 },
+  // Streak SRM (más caro que SRM estándar)
+  { match: /Streak\s*SRM/i,          price: 54_000 },
+  { match: /SRM/i,                   price: 27_000 },
+  // MG family
+  { match: /Heavy\s*Machine\s*Gun|HMG/i, price: 1_000 },
+  { match: /Light\s*Machine\s*Gun|LMG/i, price: 500 },
+  { match: /Machine\s*Gun|MG/i,      price:  1_000 },
+  // Misiles long range etc.
+  { match: /MRM/i,                   price: 30_000 },
+  { match: /ATM/i,                   price: 75_000 },
+  // Flamer (vehicle flamer ammo)
+  { match: /Flamer/i,                price:  6_000 },
+];
+
+/** Precio ₡/ton lookup por nombre familia. Fallback 5000. */
+export function ammoPricePerTon(family: string): number {
+  for (const { match, price } of PRECIO_MUNICION_PER_TON) {
+    if (match.test(family)) return price;
+  }
+  return 5_000;
+}
+
 // ── Derivar daños desde sesión simulador ──────────────────────
 
-import type { MechState, MechSession, CritSlot } from './combat-types';
+import type { MechState, MechSession, CritSlot, AmmoBin } from './combat-types';
 
 /** Mapea slot.name del simulador → componente de reparación.
  *  Nombres literales de parsers.ts (SSW/MTF output). */
@@ -393,7 +431,11 @@ function mapCritToRepair(
 export function deriveDamageFromSession(
   state: MechState,
   session: MechSession,
-): { damage: MechRepairDamage; pctDañoTotal: number } {
+): {
+  damage: MechRepairDamage;
+  pctDañoTotal: number;
+  municionDetalle: { family: string; spent: number; tons: number; cost: number }[];
+} {
   // Armor delta
   const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'] as const;
   let armorMax = 0, armorCur = 0;
@@ -428,6 +470,20 @@ export function deriveDamageFromSession(
     }
   }
 
+  // Munición consumida: por cada bin, spent = max - current,
+  // coste = ceil(spent / perTon) × precio/ton (compras por tonelada)
+  let municionCost = 0;
+  const municionDetalle: { family: string; spent: number; tons: number; cost: number }[] = [];
+  for (const bin of (session.ammoBins ?? []) as AmmoBin[]) {
+    const spent = Math.max(0, (bin.max ?? 0) - (bin.current ?? 0));
+    if (spent <= 0 || !bin.perTon) continue;
+    const tons   = Math.ceil(spent / bin.perTon);
+    const price  = ammoPricePerTon(bin.family || '');
+    const cost   = tons * price;
+    municionCost += cost;
+    municionDetalle.push({ family: bin.family, spent, tons, cost });
+  }
+
   return {
     damage: {
       ...critOut,
@@ -435,9 +491,10 @@ export function deriveDamageFromSession(
       blindaje:   armorLost,
       miomero:    0,   // no hay slot nombrado en crits para miomero
       armas:      [],
-      municion:   0,
+      municion:   municionCost,
     },
     pctDañoTotal,
+    municionDetalle,
   };
 }
 
