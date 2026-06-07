@@ -19,7 +19,7 @@ import {
   vehicleApplyCritEffect,
 } from '@/lib/combat-data';
 
-const MECH_SLOTS = 6;
+const MECH_SLOTS = 8;
 const VEHICLE_SLOTS = 5;
 const INF_SLOTS = 4;
 const BA_SLOTS = 4;
@@ -33,17 +33,24 @@ export function useSimulador() {
   // ── Lazy hydration from localStorage ──
   const initial = (() => loadLocalSnapshot())();
 
+  // Pad helper: si snapshot viejo tiene menos slots, completa con vacíos
+  const padSlots = <T,>(arr: T[] | undefined, target: number, factory: () => T): T[] => {
+    const out = arr ? [...arr] : [];
+    while (out.length < target) out.push(factory());
+    return out;
+  };
+
   const [mechSlots, setMechSlots] = useState<MechSlot[]>(
-    () => initial?.mechSlots ?? Array(MECH_SLOTS).fill(null).map(emptyMechSlot)
+    () => padSlots(initial?.mechSlots, MECH_SLOTS, emptyMechSlot)
   );
   const [vehicleSlots, setVehicleSlots] = useState<VehicleSlot[]>(
-    () => initial?.vehicleSlots ?? Array(VEHICLE_SLOTS).fill(null).map(emptyVehicleSlot)
+    () => padSlots(initial?.vehicleSlots, VEHICLE_SLOTS, emptyVehicleSlot)
   );
   const [infantrySlots, setInfantrySlots] = useState<InfantrySlot[]>(
-    () => initial?.infantrySlots ?? Array(INF_SLOTS).fill(null).map(emptyInfSlot)
+    () => padSlots(initial?.infantrySlots, INF_SLOTS, emptyInfSlot)
   );
   const [baSlots, setBASlots] = useState<BASlot[]>(
-    () => initial?.baSlots ?? Array(BA_SLOTS).fill(null).map(emptyBASlot)
+    () => padSlots(initial?.baSlots, BA_SLOTS, emptyBASlot)
   );
   const [activeInfantryIdx, setActiveInfantryIdx] = useState(() => initial?.activeInfantryIdx ?? 0);
   const [activeBAIdx, setActiveBAIdx] = useState(() => initial?.activeBAIdx ?? 0);
@@ -97,10 +104,20 @@ const [damageAmount, setDamageAmount] = useState(0);
 
   /** Hidrata desde un snapshot remoto (sustituye estado completo). */
   const hydrateFromSnapshot = useCallback((snap: SimuladorSnapshot) => {
-    setMechSlots(snap.mechSlots);
-    setVehicleSlots(snap.vehicleSlots);
-    setInfantrySlots(snap.infantrySlots);
-    setBASlots(snap.baSlots);
+    // Pad arrays si snapshot viejo tenía menos slots (ej. de 6 → 8)
+    const padMech = [...snap.mechSlots];
+    while (padMech.length < MECH_SLOTS) padMech.push(emptyMechSlot());
+    const padVeh = [...snap.vehicleSlots];
+    while (padVeh.length < VEHICLE_SLOTS) padVeh.push(emptyVehicleSlot());
+    const padInf = [...snap.infantrySlots];
+    while (padInf.length < INF_SLOTS) padInf.push(emptyInfSlot());
+    const padBA = [...snap.baSlots];
+    while (padBA.length < BA_SLOTS) padBA.push(emptyBASlot());
+
+    setMechSlots(padMech);
+    setVehicleSlots(padVeh);
+    setInfantrySlots(padInf);
+    setBASlots(padBA);
     setActiveTab(snap.activeTab);
     setCurrentMechIdx(snap.currentMechIdx);
     setCurrentVehicleIdx(snap.currentVehicleIdx);
