@@ -22,7 +22,7 @@ import {
   PRECIO_ACTUADOR,
   type MechRepairConfig, type MechRepairDamage, type RepairBreakdown, type RepairSystem,
 } from '@/lib/repair-engine';
-import { loadLocalSnapshot } from '@/lib/simulador-persistence';
+import { loadLocalSnapshot, restoreMechSlotFull } from '@/lib/simulador-persistence';
 import type { MechSlot } from '@/lib/combat-types';
 import {
   loadLibroMayor, saveLibroMayorEntry, deleteLibroMayorEntry,
@@ -1634,6 +1634,7 @@ function TallerModal({ onClose, onCommit }: {
   // Simulador import
   const [showSimPicker, setShowSimPicker] = useState(false);
   const [municionDetalle, setMunicionDetalle] = useState<{ family: string; spent: number; tons: number; cost: number }[]>([]);
+  const [simSlotIdx, setSimSlotIdx] = useState<number | null>(null); // null = no cargado desde sim
   const simSlots: { slot: MechSlot; idx: number }[] = useMemo(() => {
     const snap = loadLocalSnapshot();
     if (!snap) return [];
@@ -1642,7 +1643,7 @@ function TallerModal({ onClose, onCommit }: {
       .filter(({ slot }) => slot?.state && slot?.session);
   }, [showSimPicker]); // re-leer cuando se abre picker
 
-  const loadFromSimSlot = (mechSlot: MechSlot) => {
+  const loadFromSimSlot = (mechSlot: MechSlot, slotIdx: number) => {
     if (!mechSlot.state || !mechSlot.session) return;
     const st = mechSlot.state;
     // Derivar daños
@@ -1682,6 +1683,7 @@ function TallerModal({ onClose, onCommit }: {
     setMechQuery(catMatch ? catMatch.fullName : `${st.chassis} ${st.model}`);
     setSelected(catMatch ?? null);
     setShowSimPicker(false);
+    setSimSlotIdx(slotIdx);
   };
 
   // Sugerencias
@@ -1700,6 +1702,7 @@ function TallerModal({ onClose, onCommit }: {
     setConfig(configFromCatalog(m));
     setDamage(emptyDamage());
     setMunicionDetalle([]);
+    setSimSlotIdx(null);
   };
 
   const handleClear = () => {
@@ -1708,6 +1711,7 @@ function TallerModal({ onClose, onCommit }: {
     setConfig(null);
     setDamage(emptyDamage());
     setMunicionDetalle([]);
+    setSimSlotIdx(null);
   };
 
   // Factura
@@ -1835,7 +1839,7 @@ function TallerModal({ onClose, onCommit }: {
                   return (
                     <button
                       key={idx}
-                      onClick={() => loadFromSimSlot(slot)}
+                      onClick={() => loadFromSimSlot(slot, idx)}
                       style={{
                         display: 'block', width: '100%', textAlign: 'left',
                         padding: '8px 14px',
@@ -2083,12 +2087,26 @@ function TallerModal({ onClose, onCommit }: {
                 <PrimaryBtn
                   disabled={!factura || committing}
                   onClick={async () => {
-                    if (!factura || !selected) return;
+                    if (!factura) return;
+                    const mechName = selected?.fullName || mechQuery.trim() || 'Mech';
+                    const sysTag   = system === 'canon' ? 'CamOps' : `propio · ${factura.estadoFacturaPct}%`;
+                    const restoreTag = simSlotIdx !== null ? ' · sim restaurado' : '';
                     setCommitting(true);
-                    await onCommit(factura.total, `Reparación ${selected.fullName} [${system === 'canon' ? 'CamOps' : 'propio'} ${system === 'propio' ? `· ${factura.estadoFacturaPct}%` : ''}]`, selected.fullName);
+                    await onCommit(
+                      factura.total,
+                      `Reparación ${mechName} [${sysTag}]${restoreTag}`,
+                      mechName,
+                    );
+                    // Si vino del simulador → restaurar slot a estado nuevo
+                    if (simSlotIdx !== null) {
+                      const ok = restoreMechSlotFull(simSlotIdx);
+                      if (ok) {
+                        console.log(`[Taller] Slot ${simSlotIdx + 1} restaurado en simulador (armor/IS/crits/ammo).`);
+                      }
+                    }
                     setCommitting(false);
                   }}
-                >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+                >{committing ? 'Cargando…' : (simSlotIdx !== null ? 'CARGAR + RESTAURAR SIM' : 'CARGAR AL LIBRO MAYOR')}</PrimaryBtn>
               </div>
             </div>
           </div>

@@ -56,6 +56,60 @@ export function clearLocalSnapshot(): void {
   localStorage.removeItem(SNAPSHOT_KEY);
 }
 
+/**
+ * Restaura totalmente un mech slot del simulador a estado nuevo:
+ *  - armor → state.armor (máximo)
+ *  - is    → state.is (máximo)
+ *  - crits hit=false
+ *  - ammoBins[].current = max
+ *  - heat=0, wounds=0, destroyed=false
+ *
+ * Usado tras pagar reparación completa en TallerModal.
+ * Si slotIdx fuera de rango o slot sin state/session → no-op.
+ * Devuelve true si se aplicó cambio.
+ */
+export function restoreMechSlotFull(slotIdx: number): boolean {
+  const snap = loadLocalSnapshot();
+  if (!snap) return false;
+  const slot = snap.mechSlots[slotIdx];
+  if (!slot?.state || !slot?.session) return false;
+
+  const st = slot.state;
+  const se = slot.session;
+
+  // Armor + IS al máximo desde state
+  se.armor = { ...(st.armor as Record<string, number>) };
+  se.is    = { ...(st.is    as Record<string, number>) };
+
+  // Crits limpios
+  for (const loc of Object.keys(se.crits || {})) {
+    se.crits[loc] = se.crits[loc].map(c => ({ ...c, hit: false }));
+  }
+
+  // Ammo refill
+  se.ammoBins = (se.ammoBins || []).map(b => ({ ...b, current: b.max }));
+
+  // Reset combat
+  se.heat = 0;
+  se.wounds = 0;
+  se.destroyed = false;
+  se.destroyedReason = '';
+  se.logs = ['> RESTAURADO TRAS REPARACIÓN COMPLETA (Taller)', ...(se.logs || [])].slice(0, 50);
+
+  saveLocalSnapshot({
+    activeTab:         snap.activeTab,
+    currentMechIdx:    snap.currentMechIdx,
+    currentVehicleIdx: snap.currentVehicleIdx,
+    activeInfantryIdx: snap.activeInfantryIdx,
+    activeBAIdx:       snap.activeBAIdx,
+    mechSlots:         snap.mechSlots,
+    vehicleSlots:      snap.vehicleSlots,
+    infantrySlots:     snap.infantrySlots,
+    baSlots:           snap.baSlots,
+  });
+  return true;
+}
+
 /** True si el snapshot tiene al menos una unidad cargada (state!=null en algún slot). */
 export function snapshotHasUnits(snap: SimuladorSnapshot): boolean {
   return (

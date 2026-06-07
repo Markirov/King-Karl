@@ -106,6 +106,34 @@ Refleja estado pre-reskin. Actualizar con:
 
 ---
 
+## Reparaciones localizadas / Field Repair
+
+Pendiente: tipos de reparación específicos por situación, no factura total.
+
+**Ejemplo: Reparación de campo (mitad de campaña)**
+- Tirada 1d6 → repara solo UNA localización (ej. brazo)
+- Coste 0 ₡
+- Se hace en el simulador sin pasar por Libro Mayor
+- Restaura armor/IS/crits SOLO en la localización elegida/tirada
+
+**Otros tipos posibles** (a definir):
+- Reparación parcial por componente (ej. solo cabina)
+- Reparación de munición sólo (rearm sin tocar armor)
+- Reparación de cabin/sensors sin tocar limbs
+- Triaje rápido entre escenarios (parcial, 1d6 hits restaurados)
+
+**Implementación sugerida:**
+- Modal `FieldRepairModal` en simulador (no en finanzas)
+- Selector tipo: campo / triaje / rearm / parcial
+- UI: lista localizaciones, checkbox "reparar esta"
+- Aplica a MechSession sin cobrar al Libro Mayor
+- Log en CombatLog del simulador
+
+Archivos a tocar: nuevo `src/components/simulador/FieldRepairModal.tsx`,
+hook `useSimulador.ts` para exponer función de reparación localizada.
+
+---
+
 ## Canon Repair Rules — RESUELTO (2026-06-07)
 
 Reglas canon documentadas en `INFORME_DISCREPANCIAS_CANON.md`.
