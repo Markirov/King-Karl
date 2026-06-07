@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useViewport } from '@/hooks/useViewport';
 import { useAppStore } from '@/lib/store';
 import type { Pilot } from '@/lib/barracones-types';
 import { calcHp } from '@/lib/barracones-data';
@@ -728,6 +729,7 @@ export function ComisionPage() {
   const { campaign, roster } = useAppStore();
   const navigate = useNavigate();
   const BASE = import.meta.env.BASE_URL;
+  const { isTabletDown, isMobile } = useViewport();
 
   const mesNombre = MESES[(campaign.campaignMonth ?? 1) - 1] ?? 'Enero';
   const mesAbrev  = mesNombre.slice(0, 3).toUpperCase();
@@ -841,38 +843,54 @@ export function ComisionPage() {
 
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: '1fr 380px',
-      height: '100%', overflow: 'hidden',
+      display: 'grid',
+      gridTemplateColumns: isTabletDown ? '1fr' : '1fr 380px',
+      minHeight: '100%',
+      overflow: isTabletDown ? 'auto' : 'hidden',
       background: T.void, color: T.cream,
       fontFamily: 'Inter, sans-serif',
     }}>
 
       {/* ════ LEFT COLUMN — hero + activos 2×2 ════ */}
-      <div style={{ display: 'grid', gridTemplateRows: '300px 1fr', overflow: 'hidden' }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateRows: isTabletDown ? 'auto auto' : '300px 1fr',
+        overflow: isTabletDown ? 'visible' : 'hidden',
+      }}>
 
         {/* Hero */}
         <div style={{
           position: 'relative', overflow: 'hidden',
           background: `linear-gradient(180deg, ${T.surface} 0%, ${T.void} 100%)`,
-          padding: '28px 36px',
+          padding: isMobile ? '20px 16px' : isTabletDown ? '24px 24px' : '28px 36px',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
           borderBottom: `1px solid ${T.outlineV}`,
+          minHeight: isTabletDown ? 'auto' : 300,
         }}>
-          {/* Banner art */}
-          <div style={{
-            position: 'absolute', right: -40, top: -20, bottom: -20,
-            width: 340, opacity: 0.72,
-            backgroundImage: `url(${BASE}banner-kkk.png)`,
-            backgroundSize: 'contain', backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right center',
-            filter: 'saturate(0.85) contrast(1.08)',
-            maskImage: 'linear-gradient(90deg, transparent 0%, #000 35%, #000 85%, rgba(0,0,0,0.7) 100%)',
-            WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, #000 35%, #000 85%, rgba(0,0,0,0.7) 100%)',
-          }} />
+          {/* Banner art — oculto en mobile/tablet */}
+          {!isTabletDown && (
+            <div style={{
+              position: 'absolute', right: -40, top: -20, bottom: -20,
+              width: 340, opacity: 0.72,
+              backgroundImage: `url(${BASE}banner-kkk.png)`,
+              backgroundSize: 'contain', backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right center',
+              filter: 'saturate(0.85) contrast(1.08)',
+              maskImage: 'linear-gradient(90deg, transparent 0%, #000 35%, #000 85%, rgba(0,0,0,0.7) 100%)',
+              WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, #000 35%, #000 85%, rgba(0,0,0,0.7) 100%)',
+            }} />
+          )}
           {/* Vignette */}
           <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, rgba(10,14,20,0.85) 0%, rgba(10,14,20,0.5) 55%, transparent 100%)` }} />
 
-          <div style={{ position: 'relative', zIndex: 2, display: 'flex', height: '100%', gap: 24, alignItems: 'stretch' }}>
+          <div style={{
+            position: 'relative', zIndex: 2,
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            height: isTabletDown ? 'auto' : '100%',
+            gap: isMobile ? 16 : 24,
+            alignItems: isMobile ? 'flex-start' : 'stretch',
+          }}>
 
             {/* Emblem — full height */}
             <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
@@ -880,7 +898,8 @@ export function ComisionPage() {
                 src={`${BASE}KIngKarlKRifle.png`}
                 alt="King Karl's Kürassiers"
                 style={{
-                  height: 220, width: 'auto',
+                  height: isMobile ? 140 : isTabletDown ? 180 : 220,
+                  width: 'auto',
                   filter: 'brightness(1.15) saturate(1.5) contrast(1.1) drop-shadow(0 0 12px rgba(255,215,155,0.5))',
                   mixBlendMode: 'normal',
                   opacity: 1,
@@ -900,7 +919,8 @@ export function ComisionPage() {
                 </div>
                 <h1 style={{
                   fontFamily: '"Space Grotesk", sans-serif',
-                  fontSize: 44, fontWeight: 800,
+                  fontSize: isMobile ? 26 : isTabletDown ? 32 : 44,
+                  fontWeight: 800,
                   color: T.creamHi, letterSpacing: -1.2,
                   lineHeight: 0.95, margin: '14px 0 0',
                   textTransform: 'uppercase',
@@ -923,9 +943,12 @@ export function ComisionPage() {
                 onClick={() => navigate('/finanzas')}
                 title="Ir a Finanzas"
                 style={{
-                  display: 'grid', gridTemplateColumns: 'repeat(3, auto)',
-                  columnGap: 32, rowGap: 14,
-                  padding: '14px 22px',
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr 1fr' : isTabletDown ? 'repeat(3, minmax(120px, 1fr))' : 'repeat(3, auto)',
+                  columnGap: isMobile ? 14 : isTabletDown ? 20 : 32,
+                  rowGap: isMobile ? 10 : 14,
+                  padding: isMobile ? '12px 14px' : '14px 22px',
+                  marginTop: isMobile ? 16 : 0,
                   background: 'rgba(199,151,100,0.05)',
                   border: '1px solid #c79764',
                   borderLeft: '2px solid #c79764',
@@ -935,6 +958,7 @@ export function ComisionPage() {
                   textAlign: 'left',
                   fontFamily: 'inherit', color: 'inherit',
                   transition: 'background 0.15s, border-color 0.15s',
+                  width: isMobile ? '100%' : 'auto',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.12)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.05)'; }}
@@ -953,9 +977,14 @@ export function ComisionPage() {
                   ['Lanza',              String(campaign.totalMechs || '—')],
                   ['Personal',           personalFmt],
                 ] as [string, string][]).map(([k, v], i) => (
-                  <div key={i}>
-                    <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: '#c79764', letterSpacing: 2 }}>{k.toUpperCase()}</div>
-                    <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 20, fontWeight: 700, color: T.creamHi, marginTop: 2 }}>{v}</div>
+                  <div key={i} style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: '#c79764', letterSpacing: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.toUpperCase()}</div>
+                    <div style={{
+                      fontFamily: '"Space Grotesk", sans-serif',
+                      fontSize: isMobile ? 15 : isTabletDown ? 17 : 20,
+                      fontWeight: 700, color: T.creamHi, marginTop: 2,
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}>{v}</div>
                   </div>
                 ))}
 
@@ -971,7 +1000,11 @@ export function ComisionPage() {
         </div>
 
         {/* Activos 2×2 */}
-        <div style={{ padding: '18px 32px 24px', display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
+        <div style={{
+          padding: isMobile ? '14px 16px 20px' : isTabletDown ? '16px 24px 20px' : '18px 32px 24px',
+          display: 'flex', flexDirection: 'column', gap: 12,
+          overflow: isTabletDown ? 'visible' : 'hidden',
+        }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <SmallLabel>Lanza Prime</SmallLabel>
             <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: T.outline, letterSpacing: 2 }}>
@@ -980,9 +1013,11 @@ export function ComisionPage() {
           </div>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gridTemplateRows: 'repeat(2, 1fr)',
-            gap: 14, flex: 1,
+            gridTemplateColumns: isMobile ? '1fr' : isTabletDown ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+            gridTemplateRows: isMobile ? 'repeat(6, auto)' : isTabletDown ? 'repeat(3, auto)' : 'repeat(2, 1fr)',
+            gap: isMobile ? 10 : 14,
+            flex: isTabletDown ? 'none' : 1,
+            minHeight: isTabletDown ? 'auto' : 200,
           }}>
             {mechCards.map((c, i) => c ? (
               <MechAsset key={i}
@@ -1006,8 +1041,9 @@ export function ComisionPage() {
       {/* ════ RIGHT COLUMN — ops panel ════ */}
       <div style={{
         background: T.surface,
-        borderLeft: `1px solid ${T.outlineV}`,
-        padding: '22px 26px 24px',
+        borderLeft: isTabletDown ? 'none' : `1px solid ${T.outlineV}`,
+        borderTop:  isTabletDown ? `1px solid ${T.outlineV}` : 'none',
+        padding: isMobile ? '18px 16px 20px' : isTabletDown ? '20px 24px 24px' : '22px 26px 24px',
         display: 'flex', flexDirection: 'column', gap: 22,
         overflow: 'hidden',
       }}>

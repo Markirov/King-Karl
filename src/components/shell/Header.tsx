@@ -13,16 +13,16 @@ export function Header() {
     <>
       <header
         className="
-          fixed top-0 left-0 lg:left-[220px] right-0 h-12
+          fixed top-0 left-0 md:left-[220px] right-0 h-12
           bg-surface-dim border-b border-surface-container-highest
-          flex items-center justify-between px-4 lg:px-6 z-[99]
+          flex items-center justify-between px-4 md:px-6 z-[99]
           backdrop-blur-xl
         "
       >
         {/* Mobile hamburger */}
         <button
           onClick={toggleSidebar}
-          className="lg:hidden w-9 h-9 flex items-center justify-center bg-surface-container border border-outline-variant text-primary-container"
+          className="md:hidden w-9 h-9 flex items-center justify-center bg-surface-container border border-outline-variant text-primary-container"
         >
           <Menu size={18} />
         </button>

@@ -89,20 +89,7 @@ Definir:
 - ¿Solo notificaciones salientes o bidireccional?
 - ¿Grupo único o broadcast a varios?
 - ¿Qué eventos disparan mensaje?
-- ¿Texto solo o media (fotos pilotos / mechs)?CLAUDE.md desactualizado
-
-Refleja estado pre-reskin. Actualizar con:
-
-- Hoja Servicio P3 Two-Tone (vs Legacy)
-- Barracones P2 Medallón (vs Legacy)
-- USE_LEGACY_DESIGNS toggle
-- Roster dinámico desde Personajes sheet
-- Lanzas PRIMUS/SECUNDUS/TERTIUS pagination
-- Crónicas + Parte Diario (hoja dedicada v2.4/v2.5)
-- C3 Calculator
-- Logros (UI + dynamic endpoint)
-- FuerzaSyncBar simulador
-- Launcher Tauri app
+- ¿Texto solo o media (fotos pilotos / mechs)?
 
 ---
 
@@ -208,6 +195,3 @@ Pendiente menor (no urgente):
 
 ---
 
-## Tema sugerido por usuario para próxima sesión
-
-- **Mercenarios** (a discutir, sin definir todavía)
