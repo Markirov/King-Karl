@@ -106,6 +106,31 @@ Refleja estado pre-reskin. Actualizar con:
 
 ---
 
+## Comisión — reorganizar + responsive tablet
+
+Pendiente: rediseño ComisionPage para que funcione en tablet (768-1280px).
+
+**Estado actual (roto en tablet):**
+- Layout `gridTemplateColumns: '1fr 380px'` fijo → no cabe en <1100px
+- Hero 300px alto fijo + banner art `width: 340` absolute negativo
+- KPI bronce `gridTemplateColumns: 'repeat(3, auto)'` → desborda
+- `overflow: hidden` en root → contenido cortado, no se ve
+- Sidebar `lg:ml-[220px]` solo aplica >1024px → posibles solapes
+- Cero media queries — desktop-first sin fallbacks
+
+**Plan reorg:**
+- Media query `<1100px`: layout 1 columna (panel derecho debajo)
+- Hero: alto auto en lugar de 300px fijo
+- Banner art: oculto en <900px o reducido
+- KPI bronce: `repeat(auto-fit, minmax(140px, 1fr))` para wrap
+- Root `overflow: auto` con `min-height: 100%`
+- Padding y font sizes responsive (clamp())
+- Considerar tabs/acordeón si vertical scroll demasiado largo
+
+Archivos a tocar: `src/pages/ComisionPage.tsx` solamente.
+
+---
+
 ## Recuperación de Mechs (salvage post-combate)
 
 Pendiente: sistema para registrar mechs recuperados después de misión.
