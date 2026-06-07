@@ -2081,7 +2081,7 @@ function TallerModal({ onClose, onCommit }: {
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
                 <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
                 <PrimaryBtn
-                  disabled={!factura || factura.total === 0 || committing}
+                  disabled={!factura || committing}
                   onClick={async () => {
                     if (!factura || !selected) return;
                     setCommitting(true);
