@@ -72,24 +72,46 @@ Mayoría completada (`SHEETS_REORG.md`). Pendientes menores:
 
 ---
 
-#### Integración con Telegram
+#### Integración con Telegram — preparado, falta deploy backend
 
-Status: pendiente. Sin detalles definidos aún.
+Status: cliente listo, falta setup manual del bot + deploy Apps Script.
 
-Ideas iniciales (a confirmar):
+Decisiones tomadas (16 preguntas, ver TELEGRAM_SPEC.md):
+- Bidireccional (out + in)
+- Apps Script directo
+- Token+config en sheet Configuracion
+- 1 grupo único
+- Eventos out: misión cerrada · compras/taller · crónicas
+- Comandos in: /roster, /tesoreria, /cronica, /parte, /help
+- Admin-only: /backup, /anuncio, /resetcampana
+- Templates hardcoded
+- Umbral tesorería: 100k ₡
 
-- Bot Telegram recibe notificaciones eventos web (misión registrada, alta personal, alerta tesorería negativa)
-- Comandos rápidos `/roster`, `/tesoreria`, `/cronica X` desde móvil
-- Webhook bidireccional: web → bot → grupo jugadores; grupo → bot → Sheets (parte del día por chat)
-- Auth: `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` en Configuracion
-- Stack: Apps Script via `UrlFetchApp.fetch` directo a Telegram Bot API (sin server intermedio)
+Implementado en código:
+- `src/lib/telegram-service.ts` — wrapper cliente, toggle persistence
+- `src/components/ui/TelegramToggle.tsx` — checkbox reusable
+- `scripts/apps-script/telegram.gs` — backend completo (pegar en editor)
+- Hooks UI: TallerModal, AcquisitionModal, MaintenanceModal,
+  HojaServicioPage, CronicasPage
 
-Definir:
+Pendiente setup MANUAL (usuario):
+1. Crear bot @BotFather, copiar token
+2. Añadir bot al grupo + dar permisos admin
+3. Obtener CHAT_ID (getUpdates) y tu USER_ID (@userinfobot)
+4. Rellenar Configuracion: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID,
+   TELEGRAM_ADMIN_ID, TELEGRAM_ENABLED=1, TELEGRAM_UMBRAL=100000,
+   PJ_TG_CASTIGADOR, PJ_TG_BOLA_DEMOLICION, PJ_TG_VISTA_PALOMA
+5. Pegar `scripts/apps-script/telegram.gs` en editor Apps Script
+6. Integrar `doPost_telegram` con doPost existente (case-merge)
+7. Deploy → New deployment → Web app, anonymous
+8. Ejecutar `tgSetWebhook()` desde editor una vez
+9. Probar /roster, /tesoreria, etc
 
-- ¿Solo notificaciones salientes o bidireccional?
-- ¿Grupo único o broadcast a varios?
-- ¿Qué eventos disparan mensaje?
-- ¿Texto solo o media (fotos pilotos / mechs)?
+Pendiente extras (no urgente):
+- ParteDiario: hook toggle al guardar parte (similar a crónica)
+- Más comandos: /historia, /pj <nombre>, /mech <nombre>
+- Inline keyboards para confirmar acciones destructivas
+- Templates de imagen (banner unidad, foto mech) en notif misión
 
 ---
 

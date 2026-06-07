@@ -23,6 +23,8 @@ import {
   type MechRepairConfig, type MechRepairDamage, type RepairBreakdown, type RepairSystem,
 } from '@/lib/repair-engine';
 import { loadLocalSnapshot, restoreMechSlotFull } from '@/lib/simulador-persistence';
+import { sendTelegramNotif, getTelegramToggle, exceedsTesoreriaUmbral } from '@/lib/telegram-service';
+import { TelegramToggle } from '@/components/ui/TelegramToggle';
 import type { MechSlot } from '@/lib/combat-types';
 import {
   loadLibroMayor, commitLibroEntryAndTreasury, deleteLibroEntryAndTreasury,
@@ -1359,16 +1361,26 @@ function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClo
           </details>
         )}
 
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18 }}>
-          <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
-          <PrimaryBtn
-            disabled={committing || total === 0}
-            onClick={async () => {
-              setCommitting(true);
-              await onCommit(total, detallesText);
-              setCommitting(false);
-            }}
-          >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', alignItems: 'center', marginTop: 18, flexWrap: 'wrap' }}>
+          <TelegramToggle context="proyectar" />
+          <div style={{ display: 'flex', gap: 10 }}>
+            <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
+            <PrimaryBtn
+              disabled={committing || total === 0}
+              onClick={async () => {
+                setCommitting(true);
+                await onCommit(total, detallesText);
+                if (getTelegramToggle('proyectar')) {
+                  const event = exceedsTesoreriaUmbral(total) ? 'tesoreria_grande' : 'libro_mayor_relevante';
+                  sendTelegramNotif(event, {
+                    concepto: 'Mantenimiento mensual',
+                    cantidad: total, tipo: 'gasto', categoria: 'mantenimiento_mensual',
+                  });
+                }
+                setCommitting(false);
+              }}
+            >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+          </div>
         </div>
       </div>
     </div>
@@ -1573,16 +1585,28 @@ function AcquisitionModal({ campaignDate, onClose, onCommit }: {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18 }}>
-          <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
-          <PrimaryBtn
-            disabled={committing || total === 0}
-            onClick={async () => {
-              setCommitting(true);
-              await onCommit(total, `${label} ×${qty}`, level);
-              setCommitting(false);
-            }}
-          >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', alignItems: 'center', marginTop: 18, flexWrap: 'wrap' }}>
+          <TelegramToggle context="compras" />
+          <div style={{ display: 'flex', gap: 10 }}>
+            <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
+            <PrimaryBtn
+              disabled={committing || total === 0}
+              onClick={async () => {
+                const concepto = `${label} ×${qty}`;
+                setCommitting(true);
+                await onCommit(total, concepto, level);
+                if (getTelegramToggle('compras')) {
+                  const event = exceedsTesoreriaUmbral(total) ? 'tesoreria_grande' : 'libro_mayor_relevante';
+                  sendTelegramNotif(event, {
+                    concepto, cantidad: total,
+                    tipo: 'gasto',
+                    categoria: label.toLowerCase().includes('mech') ? 'compra_mech' : 'repuestos',
+                  });
+                }
+                setCommitting(false);
+              }}
+            >{committing ? 'Cargando…' : 'CARGAR AL LIBRO MAYOR'}</PrimaryBtn>
+          </div>
         </div>
       </div>
     </div>
@@ -2087,31 +2111,39 @@ function TallerModal({ onClose, onCommit }: {
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
-                <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
-                <PrimaryBtn
-                  disabled={!factura || committing}
-                  onClick={async () => {
-                    if (!factura) return;
-                    const mechName = selected?.fullName || mechQuery.trim() || 'Mech';
-                    const sysTag   = system === 'canon' ? 'CamOps' : `propio · ${factura.estadoFacturaPct}%`;
-                    const restoreTag = simSlotIdx !== null ? ' · sim restaurado' : '';
-                    setCommitting(true);
-                    await onCommit(
-                      factura.total,
-                      `Reparación ${mechName} [${sysTag}]${restoreTag}`,
-                      mechName,
-                    );
-                    // Si vino del simulador → restaurar slot a estado nuevo
-                    if (simSlotIdx !== null) {
-                      const ok = restoreMechSlotFull(simSlotIdx);
-                      if (ok) {
-                        console.log(`[Taller] Slot ${simSlotIdx + 1} restaurado en simulador (armor/IS/crits/ammo).`);
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', alignItems: 'center', marginTop: 20, flexWrap: 'wrap' }}>
+                <TelegramToggle context="taller" />
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <SecondaryBtn onClick={onClose}>Cancelar</SecondaryBtn>
+                  <PrimaryBtn
+                    disabled={!factura || committing}
+                    onClick={async () => {
+                      if (!factura) return;
+                      const mechName = selected?.fullName || mechQuery.trim() || 'Mech';
+                      const sysTag   = system === 'canon' ? 'CamOps' : `propio · ${factura.estadoFacturaPct}%`;
+                      const restoreTag = simSlotIdx !== null ? ' · sim restaurado' : '';
+                      const concepto = `Reparación ${mechName} [${sysTag}]${restoreTag}`;
+                      setCommitting(true);
+                      await onCommit(factura.total, concepto, mechName);
+                      // Si vino del simulador → restaurar slot a estado nuevo
+                      if (simSlotIdx !== null) {
+                        const ok = restoreMechSlotFull(simSlotIdx);
+                        if (ok) {
+                          console.log(`[Taller] Slot ${simSlotIdx + 1} restaurado en simulador (armor/IS/crits/ammo).`);
+                        }
                       }
-                    }
-                    setCommitting(false);
-                  }}
-                >{committing ? 'Cargando…' : (simSlotIdx !== null ? 'CARGAR + RESTAURAR SIM' : 'CARGAR AL LIBRO MAYOR')}</PrimaryBtn>
+                      // Telegram notif (drop silencioso, post-commit)
+                      if (getTelegramToggle('taller') && factura.total > 0) {
+                        const event = exceedsTesoreriaUmbral(factura.total) ? 'tesoreria_grande' : 'libro_mayor_relevante';
+                        sendTelegramNotif(event, {
+                          concepto, cantidad: factura.total,
+                          tipo: 'gasto', categoria: 'repuestos',
+                        });
+                      }
+                      setCommitting(false);
+                    }}
+                  >{committing ? 'Cargando…' : (simSlotIdx !== null ? 'CARGAR + RESTAURAR SIM' : 'CARGAR AL LIBRO MAYOR')}</PrimaryBtn>
+                </div>
               </div>
             </div>
           </div>

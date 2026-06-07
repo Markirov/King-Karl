@@ -8,6 +8,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { getVeterancy } from '@/lib/barracones-data';
 import { useAppStore } from '@/lib/store';
 import { registerMissionFull, registerXPExpense } from '@/lib/sheets-service';
+import { sendTelegramNotif, getTelegramToggle } from '@/lib/telegram-service';
+import { TelegramToggle } from '@/components/ui/TelegramToggle';
 import { isActivo } from '@/lib/roster';
 
 // ── Constants ──────────────────────────────────────────────
@@ -604,6 +606,20 @@ export function HojaServicioPage() {
 
       setStatus('ok');
       setStatusMsg('Misión visada y archivada');
+
+      // Telegram notif (drop silencioso)
+      if (getTelegramToggle('mision_cerrada')) {
+        // Calcula PJ top XP
+        const topPj = [...players].sort((a, b) => b.xpGanado - a.xpGanado)[0];
+        sendTelegramNotif('mision_cerrada', {
+          fecha: meta.fecha,
+          missionType,
+          balance,
+          pjTopXP: topPj?.name || '',
+          xp: topPj?.xpGanado || 0,
+        });
+      }
+
       setPlayers(prev => prev.map(p => ({ ...p, xpGanado: 0, chequeos: 0, rerolls: 0 })));
       setPago(0); setSalvamento(0); setExtrasHaber(0);
       setReparacion(0); setMunicion(0); setBlindaje(0); setExtrasDebe(0);
@@ -767,7 +783,8 @@ export function HojaServicioPage() {
                   ▣ {status === 'loading' ? 'Registrando…' : 'Visar y Archivar'}
                 </div>
               </button>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <TelegramToggle context="mision_cerrada" accent={C.gold} />
                 <button onClick={handleReset} style={{
                   background: 'transparent', border: 'none', color: C.goldDim,
                   fontFamily: '"Special Elite", monospace', fontSize: 11, fontStyle: 'italic',

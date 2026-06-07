@@ -11,6 +11,8 @@ import {
   type CronicaEntry, type CronicaAutor, type CronicaTag,
 } from '@/lib/cronicas-store';
 import { renderMarkdownLite } from '@/lib/markdown-lite';
+import { sendTelegramNotif, getTelegramToggle } from '@/lib/telegram-service';
+import { TelegramToggle } from '@/components/ui/TelegramToggle';
 import {
   readPartes, addParte, updateParte, deleteParte,
   loadPartesFromSheets, type ParteEntry, type ParteTone,
@@ -199,11 +201,15 @@ function Editor({ form, setForm, onSave, onCancel, isEdit }: EditorProps) {
       </div>
 
       {/* Botones */}
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-        <button onClick={onCancel} style={btnStyle(T.outline, false)}>Cancelar</button>
-        <button onClick={onSave} disabled={!valid} style={btnStyle(T.gold, valid)}>
-          {isEdit ? 'Guardar cambios' : 'Crear entrada'}
-        </button>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+        {!isEdit && <TelegramToggle context="cronica" />}
+        {isEdit && <span />}
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={onCancel} style={btnStyle(T.outline, false)}>Cancelar</button>
+          <button onClick={onSave} disabled={!valid} style={btnStyle(T.gold, valid)}>
+            {isEdit ? 'Guardar cambios' : 'Crear entrada'}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -538,6 +544,16 @@ export function CronicasPage() {
     }
     setEntries(readCronicas());
     setEditorOpen(false);
+
+    // Telegram notif (drop silencioso, sólo en nueva entrada)
+    if (!form.id && getTelegramToggle('cronica')) {
+      sendTelegramNotif('cronica_nueva', {
+        fechaCampaign: `${form.campaignDay}/${form.campaignMonth}/${form.campaignYear}`,
+        titulo:        payload.titulo,
+        autorNombre:   payload.autorNombre || payload.autor,
+        cuerpo:        payload.cuerpo,
+      });
+    }
   }
 
   function handleDelete(id: string) {
