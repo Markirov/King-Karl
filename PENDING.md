@@ -106,9 +106,10 @@ Refleja estado pre-reskin. Actualizar con:
 
 ---
 
-## Comisión — reorganizar + responsive tablet
+## Comisión — reorganizar + responsive tablet 10" (luego móvil)
 
-Pendiente: rediseño ComisionPage para que funcione en tablet (768-1280px).
+Target prioritario: **tablet 10" (1280×800 landscape, 800×1280 portrait)**.
+Móvil (375-414px) en fase posterior.
 
 **Estado actual (roto en tablet):**
 - Layout `gridTemplateColumns: '1fr 380px'` fijo → no cabe en <1100px
