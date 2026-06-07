@@ -25,7 +25,7 @@ import {
 import { loadLocalSnapshot, restoreMechSlotFull } from '@/lib/simulador-persistence';
 import type { MechSlot } from '@/lib/combat-types';
 import {
-  loadLibroMayor, saveLibroMayorEntry, deleteLibroMayorEntry,
+  loadLibroMayor, commitLibroEntryAndTreasury, deleteLibroEntryAndTreasury,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
   type LibroMayorEntry, type LibroMayorCategoria, type LibroMayorTipo,
   type PersonalEntry, type PersonalRol, type PersonalNivel, type PersonalEstado,
@@ -316,15 +316,20 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
   const handleSave = async () => {
     if (!editing) return;
     const payload = { ...editing, id: editing.id || genId('lm') };
+    // Si era edit (id pre-existente), busca prev para calcular delta correcto
+    const prevEntry = editing.id ? entries.find(e => e.id === editing.id) ?? null : null;
     setEditorOpen(false);
     setEditing(null);
-    await saveLibroMayorEntry(payload);
+    await commitLibroEntryAndTreasury(payload, prevEntry);
     refresh();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Borrar entrada del Libro Mayor?')) return;
-    await deleteLibroMayorEntry(id);
+    const entry = entries.find(e => e.id === id);
+    if (entry) {
+      await deleteLibroEntryAndTreasury(entry);
+    }
     refresh();
   };
 
@@ -348,7 +353,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
           campaignDate={campaignDate}
           onClose={() => setAcqOpen(false)}
           onCommit={async (price, label, level) => {
-            await saveLibroMayorEntry({
+            await commitLibroEntryAndTreasury({
               id: genId('lm'),
               fecha: campaignDate,
               concepto: `${label} (${level})`,
@@ -371,7 +376,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
           campaignDate={campaignDate}
           onClose={() => setTallerOpen(false)}
           onCommit={async (total, concepto, mechName) => {
-            await saveLibroMayorEntry({
+            await commitLibroEntryAndTreasury({
               id: genId('lm'),
               fecha: campaignDate,
               concepto,
@@ -399,7 +404,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
               campaignMonth === 12 ? campaignYear + 1 : campaignYear,
               campaignMonth === 12 ? 1 : campaignMonth + 1,
             );
-            await saveLibroMayorEntry({
+            await commitLibroEntryAndTreasury({
               id: genId('lm'),
               fecha: fechaProyectada,
               concepto: `Mantenimiento mensual (sueldos + personal + mechs)`,

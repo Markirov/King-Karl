@@ -279,6 +279,57 @@ export const saveLibroMayorEntry = (e: LibroMayorEntry) =>
 export const deleteLibroMayorEntry = (id: string) =>
   sheetsPost({ action: 'deleteLibroMayor', id });
 
+/**
+ * Wrapper: guarda entry + actualiza CONTRATO_VALOR (tesorería) en Configuracion.
+ * delta = +cantidad si ingreso, -cantidad si gasto.
+ *
+ * Lee valor actual del store, aplica delta, persiste vía saveConfigBatch,
+ * actualiza store.campaign.contratoValor.
+ *
+ * Usar SIEMPRE para entradas que afecten al balance real.
+ */
+export async function commitLibroEntryAndTreasury(
+  entry: LibroMayorEntry,
+  prevEntry?: LibroMayorEntry | null,
+): Promise<void> {
+  // Import dinámico para evitar ciclo
+  const { useAppStore } = await import('./store');
+  const { parseCurrencyValue, formatCzar } = await import('./currency-utils');
+  const state = useAppStore.getState();
+
+  await saveLibroMayorEntry(entry);
+
+  // Delta neto: si reemplaza una entry previa, restaurar primero
+  const cur = parseCurrencyValue(state.campaign.contratoValor) ?? 0;
+  let delta = entry.tipo === 'ingreso' ? entry.cantidad : -entry.cantidad;
+  if (prevEntry) {
+    delta -= prevEntry.tipo === 'ingreso' ? prevEntry.cantidad : -prevEntry.cantidad;
+  }
+  const newVal = cur + delta;
+
+  // String formato sin "₡" final para Sheets (sólo número con separador)
+  const formatted = formatCzar(newVal).replace(' ₡', '');
+  state.setCampaign({ contratoValor: formatted });
+  saveConfigBatch({ CONTRATO_VALOR: formatted }).catch(() => {});
+}
+
+/** Wrapper delete: revierte delta sobre tesorería. */
+export async function deleteLibroEntryAndTreasury(entry: LibroMayorEntry): Promise<void> {
+  const { useAppStore } = await import('./store');
+  const { parseCurrencyValue, formatCzar } = await import('./currency-utils');
+  const state = useAppStore.getState();
+
+  await deleteLibroMayorEntry(entry.id);
+
+  const cur = parseCurrencyValue(state.campaign.contratoValor) ?? 0;
+  // Revertir: si era ingreso ahora resta; si era gasto suma
+  const delta = entry.tipo === 'ingreso' ? -entry.cantidad : entry.cantidad;
+  const newVal = cur + delta;
+  const formatted = formatCzar(newVal).replace(' ₡', '');
+  state.setCampaign({ contratoValor: formatted });
+  saveConfigBatch({ CONTRATO_VALOR: formatted }).catch(() => {});
+}
+
 // ── Personal (sheet dedicado v2.7) ─────────────────────────────
 export type PersonalRol =
   | 'mech_tech' | 'astech' | 'medico' | 'representante' | 'seguridad'

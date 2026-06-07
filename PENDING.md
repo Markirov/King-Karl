@@ -106,6 +106,34 @@ Refleja estado pre-reskin. Actualizar con:
 
 ---
 
+## Recuperación de Mechs (salvage post-combate)
+
+Pendiente: sistema para registrar mechs recuperados después de misión.
+
+**Concepto:**
+- Tras misión, jugador puede "recuperar" un mech enemigo derribado
+- Registro: chassis, model, estado (operativo/dañado/destruido),
+  valor BV, % daño aproximado
+- Resultado contable: ingreso a Libro Mayor (valor venta) o asset
+  (añadir a roster/inventario, valor unidad ↑)
+- Categoría LibroMayor `venta_mech` o nueva `recuperacion_mech`
+
+**Flujo sugerido:**
+- Modal `RecoveryModal` en Finanzas / Libro Mayor
+- Selector tipo: vender salvage (ingreso ₡) / añadir al hangar (asset)
+- Si vende: precio = BV × tabla salvage CamOps (50% si dañado, 30% destruido)
+- Si añade al hangar: actualizar `VALOR_UNIDAD` y opcionalmente `TOTAL_MECHS`
+
+**Integración tesorería:**
+- Ya implementado `commitLibroEntryAndTreasury` que suma/resta CONTRATO_VALOR
+  en Sheets al guardar/borrar entradas
+- Mech recovery debería usar este wrapper
+
+Archivos a tocar: nuevo `RecoveryModal`, posible nueva categoria en
+`LibroMayorCategoria`, FinanzasPage portada con botón 🪖 RECUPERACIÓN.
+
+---
+
 ## Reparaciones localizadas / Field Repair
 
 Pendiente: tipos de reparación específicos por situación, no factura total.
