@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import type { MechState, MechSession } from '@/lib/combat-types';
 import { mechIsAmmoCrit } from '@/lib/weapons';
+import { ammoExplosionDmgPerRound } from '@/lib/combat-data';
 
 interface Props {
   state: MechState;
@@ -22,6 +24,34 @@ const MECH_LAYOUT_QUAD = [
 
 export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props) {
   const MECH_LAYOUT = state.isQuad ? MECH_LAYOUT_QUAD : MECH_LAYOUT_BIPED;
+
+  // Seguro anti explosión accidental: modal de confirmación
+  const [confirmAmmo, setConfirmAmmo] = useState<{
+    loc: string; idx: number; name: string; bin: any; dmg: number;
+  } | null>(null);
+
+  const handleSlotClick = (loc: string, idx: number, name: string, alreadyHit: boolean) => {
+    // Si ya está hit → reparar sin preguntar
+    if (alreadyHit) {
+      onToggleCrit(loc, idx);
+      return;
+    }
+    // Si es ammo y tiene rondas → confirmar
+    if (mechIsAmmoCrit(name)) {
+      const bin = session.ammoBins.find(b => b.loc === loc && b.slotIdx === idx);
+      if (bin && bin.current > 0) {
+        const dmg = bin.current * ammoExplosionDmgPerRound(bin.family);
+        // Solo confirmar si hay daño real (Gauss = 0 → no explota, no preguntar)
+        if (dmg > 0) {
+          setConfirmAmmo({ loc, idx, name, bin, dmg });
+          return;
+        }
+      }
+    }
+    // Resto → toggle directo
+    onToggleCrit(loc, idx);
+  };
+
   return (
     <section className="bg-surface-container-low p-3 md:p-6 clip-chamfer border-t-2 border-secondary/20">
       <h2 className="font-headline text-sm font-bold text-[var(--p,theme(colors.primary-container))] tracking-[2px] uppercase mb-3 md:mb-4">Slots Críticos</h2>
@@ -47,7 +77,7 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
                         ? session.ammoBins.find(b => b.loc === col.key && b.slotIdx === idx)
                         : null;
                       return (
-                        <div key={idx} onClick={() => !isEmpty && onToggleCrit(col.key, idx)}
+                        <div key={idx} onClick={() => !isEmpty && handleSlotClick(col.key, idx, s.name, s.hit)}
                           className={`flex items-center gap-1 md:gap-2 px-1.5 md:px-3 py-1 md:py-1.5 text-[9px] md:text-[11px] font-mono transition-colors ${
                             isEmpty ? 'text-secondary/20 cursor-default'
                             : s.hit ? 'bg-error/15 text-error cursor-pointer'
@@ -75,6 +105,67 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
           </div>
         ))}
       </div>
+
+      {/* Modal confirmación explosión munición */}
+      {confirmAmmo && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setConfirmAmmo(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="bg-surface-container-high border-2 border-error max-w-md w-full p-5 clip-chamfer shadow-[0_0_40px_rgba(255,80,80,0.4)]"
+          >
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-error/40">
+              <span className="text-3xl">⚠️</span>
+              <h3 className="font-headline text-lg font-black text-error uppercase tracking-widest">
+                Explosión de munición
+              </h3>
+            </div>
+
+            <div className="space-y-2 font-mono text-xs text-on-surface mb-5">
+              <div className="flex justify-between">
+                <span className="text-secondary/60">Slot:</span>
+                <span className="font-bold">{confirmAmmo.loc} / {confirmAmmo.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-secondary/60">Familia:</span>
+                <span>{confirmAmmo.bin.family}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-secondary/60">Rondas restantes:</span>
+                <span className="font-bold">{confirmAmmo.bin.current}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-outline-variant">
+                <span className="text-error/80">DAÑO INTERNO:</span>
+                <span className="font-black text-error text-base">{confirmAmmo.dmg}</span>
+              </div>
+              <div className="text-[10px] text-secondary/50 pt-1">
+                IS-first desde {confirmAmmo.loc} → puede destruir torso CT y reventar el mech.
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmAmmo(null)}
+                className="flex-1 py-3 bg-surface-container hover:bg-surface-container-highest border border-outline text-on-surface uppercase tracking-widest text-sm clip-chamfer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  const c = confirmAmmo;
+                  setConfirmAmmo(null);
+                  onToggleCrit(c.loc, c.idx);
+                }}
+                className="flex-1 py-3 bg-error/30 hover:bg-error/50 border-2 border-error text-error font-bold uppercase tracking-widest text-sm clip-chamfer"
+              >
+                ⚠ EXPLOTAR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

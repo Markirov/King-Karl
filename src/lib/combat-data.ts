@@ -276,7 +276,7 @@ export interface DamageResult {
 }
 
 /** Damage per round for ammo explosion. Gauss ammo returns 0 (it doesn't explode). */
-function ammoExplosionDmgPerRound(family: string | null): number {
+export function ammoExplosionDmgPerRound(family: string | null): number {
   if (!family) return 1;
   if (/Gauss/i.test(family)) return 0; // Gauss ammo: no explosion
   const acM = family.match(/(?:Ultra\s*|LBX\s*|Light\s*)?AC\s*\/\s*(\d+)/i);
