@@ -112,7 +112,7 @@ export function CatalogSearch({ onLoad, onSwitchTab, allowClan = true, limitToYe
           onFocus={() => setOpen(true)}
           placeholder={catalog.length === 0 ? 'Cargando catálogo…' : 'Buscar mech o vehículo…'}
           disabled={isBusy}
-          className="w-48 bg-transparent font-mono text-[10px] text-on-surface placeholder:text-secondary/25 focus:outline-none disabled:opacity-40"
+          className="w-24 sm:w-36 md:w-48 bg-transparent font-mono text-[10px] text-on-surface placeholder:text-secondary/25 focus:outline-none disabled:opacity-40"
         />
         {catalog.length > 0 && (
           <span className="text-[8px] text-secondary/25 font-mono shrink-0">{catalog.length}</span>
