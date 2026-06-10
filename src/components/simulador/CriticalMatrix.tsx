@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { MechState, MechSession } from '@/lib/combat-types';
 import { mechIsAmmoCrit } from '@/lib/weapons';
-import { ammoExplosionDmgPerRound } from '@/lib/combat-data';
+import { ammoExplosionDmgPerRound, countSystemCritHits } from '@/lib/combat-data';
 
 interface Props {
   state: MechState;
@@ -25,9 +25,13 @@ const MECH_LAYOUT_QUAD = [
 export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props) {
   const MECH_LAYOUT = state.isQuad ? MECH_LAYOUT_QUAD : MECH_LAYOUT_BIPED;
 
-  // Seguro anti explosión accidental: modal de confirmación
+  // Seguro anti accidente: modales de confirmación
   const [confirmAmmo, setConfirmAmmo] = useState<{
     loc: string; idx: number; name: string; bin: any; dmg: number;
+  } | null>(null);
+
+  const [confirmFatal, setConfirmFatal] = useState<{
+    loc: string; idx: number; type: 'engine' | 'gyro'; hitsAfter: number;
   } | null>(null);
 
   const handleSlotClick = (loc: string, idx: number, name: string, alreadyHit: boolean) => {
@@ -36,18 +40,35 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
       onToggleCrit(loc, idx);
       return;
     }
+
     // Si es ammo y tiene rondas → confirmar
     if (mechIsAmmoCrit(name)) {
       const bin = session.ammoBins.find(b => b.loc === loc && b.slotIdx === idx);
       if (bin && bin.current > 0) {
         const dmg = bin.current * ammoExplosionDmgPerRound(bin.family);
-        // Solo confirmar si hay daño real (Gauss = 0 → no explota, no preguntar)
         if (dmg > 0) {
           setConfirmAmmo({ loc, idx, name, bin, dmg });
           return;
         }
       }
     }
+
+    // Crítico fatal: 3er engine o 2do gyro → confirmar
+    const nLower = name.toLowerCase();
+    const isEngineCrit = nLower.includes('engine') || nLower.includes('fusion');
+    const isGyroCrit   = nLower.includes('gyro');
+    if (isEngineCrit || isGyroCrit) {
+      const hits = countSystemCritHits(session.crits);
+      if (isEngineCrit && hits.engine === 2) {
+        setConfirmFatal({ loc, idx, type: 'engine', hitsAfter: 3 });
+        return;
+      }
+      if (isGyroCrit && hits.gyro === 1) {
+        setConfirmFatal({ loc, idx, type: 'gyro', hitsAfter: 2 });
+        return;
+      }
+    }
+
     // Resto → toggle directo
     onToggleCrit(loc, idx);
   };
@@ -105,6 +126,71 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
           </div>
         ))}
       </div>
+
+      {/* Modal confirmación crítico fatal: 3er engine o 2do gyro */}
+      {confirmFatal && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setConfirmFatal(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="bg-surface-container-high border-2 border-error max-w-md w-full p-5 clip-chamfer shadow-[0_0_40px_rgba(255,80,80,0.4)]"
+          >
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-error/40">
+              <span className="text-3xl">💀</span>
+              <h3 className="font-headline text-lg font-black text-error uppercase tracking-widest">
+                Crítico fatal
+              </h3>
+            </div>
+
+            <div className="space-y-2 font-mono text-xs text-on-surface mb-5">
+              <div className="flex justify-between">
+                <span className="text-secondary/60">Slot:</span>
+                <span className="font-bold">{confirmFatal.loc} / {confirmFatal.type === 'engine' ? 'Fusion Engine' : 'Gyro'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-secondary/60">Componente:</span>
+                <span>{confirmFatal.type === 'engine' ? 'REACTOR' : 'GIRÓSCOPO'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-secondary/60">Hits actuales:</span>
+                <span className="font-bold">{confirmFatal.hitsAfter - 1}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-outline-variant">
+                <span className="text-error/80">TRAS ESTE GOLPE:</span>
+                <span className="font-black text-error text-base">
+                  {confirmFatal.hitsAfter} / {confirmFatal.type === 'engine' ? 3 : 2}
+                </span>
+              </div>
+              <div className="text-[10px] text-error/80 pt-1 font-bold">
+                {confirmFatal.type === 'engine'
+                  ? '⚠ 3er hit reactor → MECH DESTRUIDO'
+                  : '⚠ 2do hit gyro → MECH DESTRUIDO'}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmFatal(null)}
+                className="flex-1 py-3 bg-surface-container hover:bg-surface-container-highest border border-outline text-on-surface uppercase tracking-widest text-sm clip-chamfer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  const c = confirmFatal;
+                  setConfirmFatal(null);
+                  onToggleCrit(c.loc, c.idx);
+                }}
+                className="flex-1 py-3 bg-error/30 hover:bg-error/50 border-2 border-error text-error font-bold uppercase tracking-widest text-sm clip-chamfer"
+              >
+                💀 DESTRUIR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal confirmación explosión munición */}
       {confirmAmmo && (
