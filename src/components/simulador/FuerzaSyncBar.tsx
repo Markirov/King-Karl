@@ -1,7 +1,11 @@
 // FuerzaSyncBar — indicador estado + Save/Load/Reset fuerza
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Cloud, CloudUpload, AlertCircle, FolderOpen, Save, Trash2 } from 'lucide-react';
-import { loadFuerzas, saveFuerza, type FuerzaEntry } from '@/lib/sheets-service';
+import { CheckCircle2, Cloud, CloudUpload, AlertCircle, FolderOpen, Save, Trash2, Archive } from 'lucide-react';
+import {
+  loadFuerzas, saveFuerza, type FuerzaEntry,
+  loadAllFuerzaConfigSlots, saveFuerzaConfigSlot, clearFuerzaConfigSlot,
+  type FuerzaSlot, type FuerzaConfigEntry,
+} from '@/lib/sheets-service';
 import type { SimuladorSnapshot } from '@/lib/simulador-persistence';
 import { useDismissable } from '@/hooks/useDismissable';
 
@@ -27,15 +31,23 @@ export function FuerzaSyncBar({
 
   const [savePanelOpen, setSavePanelOpen] = useState(false);
   const [loadPanelOpen, setLoadPanelOpen] = useState(false);
+  const [slotsPanelOpen, setSlotsPanelOpen] = useState(false);
   const [fuerzaNombre, setFuerzaNombre] = useState('');
 
   const [fuerzas, setFuerzas] = useState<FuerzaEntry[]>([]);
   const [loadingList, setLoadingList] = useState(false);
 
+  // Slots fijos en Configuracion (FUERZA1..FUERZA5)
+  const [slots, setSlots] = useState<Record<FuerzaSlot, FuerzaConfigEntry | null>>({ 1: null, 2: null, 3: null, 4: null, 5: null });
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotNombre, setSlotNombre] = useState('');
+
   const savePanelRef = useRef<HTMLDivElement>(null);
   const loadPanelRef = useRef<HTMLDivElement>(null);
+  const slotsPanelRef = useRef<HTMLDivElement>(null);
   useDismissable(savePanelRef, savePanelOpen, () => setSavePanelOpen(false));
   useDismissable(loadPanelRef, loadPanelOpen, () => setLoadPanelOpen(false));
+  useDismissable(slotsPanelRef, slotsPanelOpen, () => setSlotsPanelOpen(false));
 
   // Auto-OK indicator después de 2s
   useEffect(() => {
@@ -93,6 +105,55 @@ export function FuerzaSyncBar({
     }
   };
 
+  // ── Slots fijos en Configuracion ──
+
+  const openSlotsPanel = async () => {
+    setSlotsPanelOpen(true);
+    setLoadingSlots(true);
+    const all = await loadAllFuerzaConfigSlots();
+    setSlots(all);
+    setLoadingSlots(false);
+  };
+
+  const handleSaveSlot = async (slot: FuerzaSlot) => {
+    setPushState('pushing');
+    setPushError(null);
+    const snap: SimuladorSnapshot = {
+      schemaVersion: 1,
+      updatedAt: new Date().toISOString(),
+      ...getSnapshot(),
+    };
+    const nombre = slotNombre.trim() || `Fuerza ${slot}`;
+    const res = await saveFuerzaConfigSlot(slot, { nombre, bv: bvTotal, snapshot: snap });
+    if (res?.success) {
+      setPushState('ok');
+      setLastSyncIso(new Date().toISOString());
+      markSynced();
+      // refresca slots
+      const all = await loadAllFuerzaConfigSlots();
+      setSlots(all);
+      setSlotNombre('');
+    } else {
+      setPushState('error');
+      setPushError(String((res as any)?.error || 'no_save'));
+    }
+  };
+
+  const handleLoadSlot = (slot: FuerzaSlot) => {
+    const entry = slots[slot];
+    if (!entry?.snapshot?.schemaVersion) return;
+    hydrateFromSnapshot(entry.snapshot);
+    setSlotsPanelOpen(false);
+    markSynced();
+  };
+
+  const handleClearSlot = async (slot: FuerzaSlot) => {
+    if (!confirm(`Borrar slot FUERZA${slot}?`)) return;
+    await clearFuerzaConfigSlot(slot);
+    const all = await loadAllFuerzaConfigSlots();
+    setSlots(all);
+  };
+
   // ── Status pill ──
   let statusIcon = <Cloud size={12} />;
   let statusTone = 'text-secondary/50 border-outline-variant/40';
@@ -148,6 +209,14 @@ export function FuerzaSyncBar({
       </button>
 
       <button
+        onClick={openSlotsPanel}
+        title="Slots fijos FUERZA1-5 (Configuracion)"
+        className="flex items-center gap-1 border border-outline-variant/40 hover:border-amber-400/60 text-secondary/70 hover:text-amber-400 px-2 py-1 clip-chamfer font-mono text-[9px] uppercase tracking-widest transition-colors"
+      >
+        <Archive size={12} /> <span className="hidden sm:inline">Slots</span>
+      </button>
+
+      <button
         onClick={() => {
           if (confirm('Vaciar simulador y borrar sesión local. ¿Continuar?')) resetSession();
         }}
@@ -183,6 +252,84 @@ export function FuerzaSyncBar({
               className="flex-1 bg-primary-container/20 hover:bg-primary-container/40 disabled:opacity-30 border border-primary-container text-primary-container py-1 font-mono text-[9px] uppercase tracking-widest"
             >Guardar</button>
           </div>
+        </div>
+      )}
+
+      {/* Slots panel — FUERZA1..5 en Configuracion */}
+      {slotsPanelOpen && (
+        <div ref={slotsPanelRef} className="absolute right-0 top-full mt-2 z-40 w-[360px] max-w-[95vw] bg-surface-container-high border border-amber-400/40 p-3 clip-chamfer shadow-lg max-h-[500px] overflow-y-auto custom-scrollbar">
+          <h3 className="font-headline text-xs font-bold text-amber-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <Archive size={12} /> Slots fijos
+          </h3>
+          <div className="font-mono text-[9px] text-secondary/50 mb-3">
+            5 espacios en celdas FUERZA1..5 de Configuracion. Guardar sobrescribe.
+          </div>
+
+          {/* Nombre opcional al guardar */}
+          <input
+            type="text"
+            value={slotNombre}
+            onChange={e => setSlotNombre(e.target.value)}
+            placeholder="Nombre (opcional, default: Fuerza N)"
+            className="w-full bg-surface-container border border-outline-variant/40 px-2 py-1 font-mono text-[10px] text-secondary placeholder:text-outline-variant/50 focus:border-amber-400/60 focus:outline-none mb-3"
+          />
+
+          {loadingSlots && <p className="font-mono text-[10px] text-secondary/50 italic">Cargando slots…</p>}
+
+          {!loadingSlots && (
+            <ul className="space-y-1.5">
+              {([1, 2, 3, 4, 5] as FuerzaSlot[]).map(s => {
+                const entry = slots[s];
+                const occupied = !!entry?.snapshot;
+                return (
+                  <li key={s} className="border border-outline-variant/30 bg-surface-container p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-headline text-[10px] font-bold text-amber-400 tracking-widest">
+                        FUERZA{s}
+                      </span>
+                      {occupied ? (
+                        <span className="font-mono text-[9px] text-secondary/70">
+                          {entry!.nombre} · {entry!.bv} BV
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[9px] text-outline-variant/60 italic">— vacío —</span>
+                      )}
+                    </div>
+                    {occupied && (
+                      <div className="font-mono text-[8px] text-secondary/40 mb-1.5">
+                        {entry!.updatedAt ? new Date(entry!.updatedAt).toLocaleString('es-ES') : ''}
+                      </div>
+                    )}
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleSaveSlot(s)}
+                        disabled={pushState === 'pushing'}
+                        className="flex-1 bg-amber-400/15 hover:bg-amber-400/30 disabled:opacity-30 border border-amber-400/50 text-amber-400 py-1 font-mono text-[9px] uppercase tracking-widest"
+                        title={occupied ? 'Sobrescribir slot' : 'Guardar en slot vacío'}
+                      >
+                        {occupied ? 'Sobreescribir' : 'Guardar'}
+                      </button>
+                      <button
+                        onClick={() => handleLoadSlot(s)}
+                        disabled={!occupied}
+                        className="flex-1 bg-primary-container/15 hover:bg-primary-container/30 disabled:opacity-20 border border-primary-container/50 text-primary-container py-1 font-mono text-[9px] uppercase tracking-widest"
+                      >
+                        Cargar
+                      </button>
+                      <button
+                        onClick={() => handleClearSlot(s)}
+                        disabled={!occupied}
+                        className="px-2 bg-error/15 hover:bg-error/30 disabled:opacity-20 border border-error/50 text-error py-1 font-mono text-[9px] uppercase tracking-widest"
+                        title="Vaciar slot"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       )}
 

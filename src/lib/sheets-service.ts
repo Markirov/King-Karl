@@ -153,6 +153,66 @@ export interface FuerzaEntry {
 
 export const loadFuerzas = () => sheetsGet({ action: 'getFuerzas' });
 
+// ── Fuerzas — slots fijos en Configuracion (FUERZA1..FUERZA5) ────
+
+export type FuerzaSlot = 1 | 2 | 3 | 4 | 5;
+
+export interface FuerzaConfigEntry {
+  nombre:    string;
+  bv:        number;
+  updatedAt: string;
+  snapshot:  SimuladorSnapshot;
+}
+
+const fuerzaKey = (slot: FuerzaSlot) => `FUERZA${slot}` as const;
+
+/** Guarda fuerza en slot fijo FUERZA1-5 de Configuracion. */
+export async function saveFuerzaConfigSlot(
+  slot: FuerzaSlot,
+  payload: { nombre: string; bv: number; snapshot: SimuladorSnapshot },
+) {
+  const entry: FuerzaConfigEntry = {
+    nombre:    payload.nombre,
+    bv:        payload.bv,
+    updatedAt: new Date().toISOString(),
+    snapshot:  payload.snapshot,
+  };
+  return saveConfigBatch({ [fuerzaKey(slot)]: JSON.stringify(entry) });
+}
+
+/** Lee un slot. null si vacío o malformado. */
+export async function loadFuerzaConfigSlot(slot: FuerzaSlot): Promise<FuerzaConfigEntry | null> {
+  const res = await loadConfig();
+  if (!res?.success) return null;
+  const cfg = (res.data as any)?.config ?? res.data;
+  const raw = cfg?.[fuerzaKey(slot)];
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as FuerzaConfigEntry;
+  } catch {
+    return null;
+  }
+}
+
+/** Lee los 5 slots a la vez con 1 sola request. */
+export async function loadAllFuerzaConfigSlots(): Promise<Record<FuerzaSlot, FuerzaConfigEntry | null>> {
+  const res = await loadConfig();
+  const out: Record<FuerzaSlot, FuerzaConfigEntry | null> = { 1: null, 2: null, 3: null, 4: null, 5: null };
+  if (!res?.success) return out;
+  const cfg = (res.data as any)?.config ?? res.data;
+  ([1, 2, 3, 4, 5] as FuerzaSlot[]).forEach(s => {
+    const raw = cfg?.[fuerzaKey(s)];
+    if (!raw) return;
+    try { out[s] = JSON.parse(raw) as FuerzaConfigEntry; } catch {}
+  });
+  return out;
+}
+
+/** Borra un slot (escribe '' en la celda). */
+export async function clearFuerzaConfigSlot(slot: FuerzaSlot) {
+  return saveConfigBatch({ [fuerzaKey(slot)]: '' });
+}
+
 export const saveFuerza = (data: {
   id?: string;
   nombre: string;
