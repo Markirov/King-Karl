@@ -232,6 +232,8 @@ export function SimuladorPage() {
               onSectionClick={s => sim.setSelectedSection(s === sim.selectedSection ? null : s)}
               onApplyDamage={sim.applyDamageToSelected}
               setSelectedSection={sim.setSelectedSection}
+              onForceRevive={sim.forceReviveMech}
+              onAdjustAmmo={sim.adjustAmmo}
             />
           </div>
 

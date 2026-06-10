@@ -13,6 +13,8 @@ interface Props {
   onSectionClick: (s: string) => void;
   onApplyDamage: () => void;
   setSelectedSection: (s: string | null) => void;
+  onForceRevive?: () => void;
+  onAdjustAmmo?: (binId: number, delta: number) => void;
 }
 
 interface ZoneDef { top: number; left: number; cols: number; label: string; armorKey: string; isKey: string }
@@ -48,7 +50,7 @@ const MECH_ZONES_QUAD: ZoneDef[] = [
 const DOT = 5;
 const GAP = 1;
 
-export function ArmorDiagram({ state, session, selectedSection, damageAmount, setDamageAmount, onSectionClick, onApplyDamage, setSelectedSection }: Props) {
+export function ArmorDiagram({ state, session, selectedSection, damageAmount, setDamageAmount, onSectionClick, onApplyDamage, setSelectedSection, onForceRevive, onAdjustAmmo }: Props) {
   const MECH_ZONES = state.isQuad ? MECH_ZONES_QUAD : MECH_ZONES_BIPED;
   const detailRef = useRef<HTMLDivElement>(null);
   useDismissable(detailRef, !!selectedSection, () => setSelectedSection(null));
@@ -163,7 +165,7 @@ export function ArmorDiagram({ state, session, selectedSection, damageAmount, se
                       {damageAmount > 0 ? `+${damageAmount}` : damageAmount}
                     </span>
                   </div>
-                  <input type="range" min="-15" max="30" value={damageAmount} onChange={e => setDamageAmount(parseInt(e.target.value))}
+                  <input type="range" min="-30" max="30" value={damageAmount} onChange={e => setDamageAmount(parseInt(e.target.value))}
                     className="w-full h-1 appearance-none cursor-pointer"
                     style={{ accentColor: damageAmount < 0 ? 'var(--p)' : 'var(--error)' }} />
                   <button onClick={onApplyDamage} disabled={damageAmount === 0}
@@ -174,6 +176,58 @@ export function ArmorDiagram({ state, session, selectedSection, damageAmount, se
                     }`}
                   >{damageAmount < 0 ? 'Curar' : 'Aplicar'}</button>
                 </div>
+
+                {/* Forzar revivir si mech destruido */}
+                {session.destroyed && onForceRevive && (
+                  <div className="pt-2 border-t border-outline-variant">
+                    <div className="text-error text-[8px] mb-1 uppercase tracking-widest">{session.destroyedReason || 'DESTRUIDO'}</div>
+                    <button
+                      onClick={onForceRevive}
+                      className="w-full py-1 uppercase tracking-widest text-[9px] border border-amber-500 bg-amber-500/15 hover:bg-amber-500/30 text-amber-400 transition-colors"
+                    >🔄 REVIVIR (override)</button>
+                  </div>
+                )}
+
+                {/* Ammo bins de esta localización — ajuste manual */}
+                {onAdjustAmmo && (() => {
+                  const slotDef = ARMOR_SLOTS.find(a => a.k === selectedSection);
+                  const isLoc = slotDef?.ik || selectedSection;
+                  const bins = session.ammoBins.filter(b => b.loc === isLoc);
+                  if (bins.length === 0) return null;
+                  return (
+                    <div className="pt-2 border-t border-outline-variant space-y-1.5">
+                      <div className="text-secondary/60 text-[8px] uppercase tracking-widest mb-1">Munición</div>
+                      {bins.map(bin => (
+                        <div key={bin.id} className="flex items-center gap-1 text-[9px]">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-bold truncate text-secondary">{bin.family}</div>
+                            <div className={`font-mono ${bin.current === 0 ? 'text-error' : 'text-secondary/70'}`}>
+                              {bin.current} / {bin.max}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => onAdjustAmmo(bin.id, -1)}
+                            disabled={bin.current === 0}
+                            className="w-5 h-5 flex items-center justify-center bg-error/20 hover:bg-error/40 disabled:opacity-30 border border-error/50 text-error text-[10px] leading-none"
+                            title="Restar 1"
+                          >−</button>
+                          <button
+                            onClick={() => onAdjustAmmo(bin.id, +1)}
+                            disabled={bin.current >= bin.max}
+                            className="w-5 h-5 flex items-center justify-center bg-primary/20 hover:bg-primary/40 disabled:opacity-30 border border-primary/50 text-primary text-[10px] leading-none"
+                            title="Sumar 1"
+                          >+</button>
+                          <button
+                            onClick={() => onAdjustAmmo(bin.id, bin.max - bin.current)}
+                            disabled={bin.current >= bin.max}
+                            className="w-7 h-5 flex items-center justify-center bg-secondary/20 hover:bg-secondary/40 disabled:opacity-30 border border-secondary/50 text-secondary text-[8px]"
+                            title="Rellenar al máximo"
+                          >MAX</button>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}

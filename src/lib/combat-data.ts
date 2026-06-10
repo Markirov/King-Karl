@@ -519,7 +519,45 @@ export function mechApplyHeal(
     if (heal > 0) logs.push(`> ARMOR ${slotDef.l}: +${heal} (${s.armor[armorKey]}/${maxArmor})`);
   }
 
+  // 3. Revert destruction si las condiciones ya no aplican
+  if (s.destroyed) {
+    const ctOk = (s.is.CT ?? 0) > 0;
+    const hdOk = (s.is.HD ?? 0) > 0;
+    const engineCrits = (s.crits.CT ?? []).filter(c => c.hit && c.name === 'Fusion Engine').length
+                     + (s.crits.LT ?? []).filter(c => c.hit && c.name === 'Fusion Engine').length
+                     + (s.crits.RT ?? []).filter(c => c.hit && c.name === 'Fusion Engine').length;
+    const gyroCrits = (s.crits.CT ?? []).filter(c => c.hit && c.name === 'Gyro').length;
+
+    if (ctOk && hdOk && engineCrits < 3 && gyroCrits < 2) {
+      s.destroyed = false;
+      s.destroyedReason = '';
+      logs.push('> RESUCITADO — condiciones de destrucción revertidas');
+    }
+  }
+
   return { session: s, logs };
+}
+
+/** Force unmark destroyed (revert manual sin condicionar). */
+export function mechForceRevive(session: MechSession): MechSession {
+  if (!session.destroyed) return session;
+  const s = structuredClone(session);
+  s.destroyed = false;
+  s.destroyedReason = '';
+  s.logs.unshift('> REVIVIDO MANUALMENTE (override)');
+  return s;
+}
+
+/** Ajusta munición de un bin específico (+ o -) clamp [0, max]. */
+export function mechAdjustAmmoBin(session: MechSession, binId: number, delta: number): MechSession {
+  const s = structuredClone(session);
+  const bin = s.ammoBins.find(b => b.id === binId);
+  if (!bin) return session;
+  const before = bin.current;
+  bin.current = Math.max(0, Math.min(bin.max, bin.current + delta));
+  if (bin.current === before) return session;
+  s.logs.unshift(`> AMMO ${bin.family} ${bin.loc}: ${before} → ${bin.current} (${delta > 0 ? '+' : ''}${delta})`);
+  return s;
 }
 
 // ── Heat Calculation ──
