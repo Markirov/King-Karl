@@ -166,7 +166,8 @@ export interface FuerzaConfigEntry {
 
 const fuerzaKey = (slot: FuerzaSlot) => `FUERZA${slot}` as const;
 
-/** Guarda fuerza en slot fijo FUERZA1-5 de Configuracion. */
+/** Guarda fuerza en slot fijo FUERZA1-5 de Configuracion.
+ *  USA POST porque el snapshot es grande y reventaría el límite de URL en GET. */
 export async function saveFuerzaConfigSlot(
   slot: FuerzaSlot,
   payload: { nombre: string; bv: number; snapshot: SimuladorSnapshot },
@@ -177,7 +178,10 @@ export async function saveFuerzaConfigSlot(
     updatedAt: new Date().toISOString(),
     snapshot:  payload.snapshot,
   };
-  return saveConfigBatch({ [fuerzaKey(slot)]: JSON.stringify(entry) });
+  return sheetsPost({
+    action: 'saveConfiguracionBatch',
+    config: JSON.stringify({ [fuerzaKey(slot)]: JSON.stringify(entry) }),
+  });
 }
 
 /** Lee un slot. null si vacío o malformado. */
@@ -210,7 +214,10 @@ export async function loadAllFuerzaConfigSlots(): Promise<Record<FuerzaSlot, Fue
 
 /** Borra un slot (escribe '' en la celda). */
 export async function clearFuerzaConfigSlot(slot: FuerzaSlot) {
-  return saveConfigBatch({ [fuerzaKey(slot)]: '' });
+  return sheetsPost({
+    action: 'saveConfiguracionBatch',
+    config: JSON.stringify({ [fuerzaKey(slot)]: '' }),
+  });
 }
 
 export const saveFuerza = (data: {
