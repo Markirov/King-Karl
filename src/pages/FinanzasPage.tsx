@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { useViewport } from '@/hooks/useViewport';
 import { isActivo } from '@/lib/roster';
 import { calcSalary, RANK_LABELS, type Quality } from '@/lib/salary-calc';
 import { calcHangarMonthlyMaintenance, mechWeightClass, type HangarUnit, type UnitClass } from '@/lib/maintenance-calc';
@@ -1116,6 +1117,7 @@ interface MaintenanceModalProps {
 const MESES_NOMBRE = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClose, onCommit }: MaintenanceModalProps) {
+  const { isTabletDown, isMobile } = useViewport();
   // Editables in-place — defaults StratOps / FM Mercs
   const [useCanonMaintenance, setUseCanonMaintenance] = useState(true);     // A4: toggle canon vs flat
   const [mantenimientoMechMes, setMantenimientoMechMes] = useState(30000); // ₡/mes/mech (legacy flat)
@@ -1205,7 +1207,8 @@ function MaintenanceModal({ roster, personal, campaignYear, campaignMonth, onClo
       <div onClick={e => e.stopPropagation()} style={{
         background: T.surface,
         border: `1px solid ${T.gold}`,
-        padding: 28, minWidth: 720, maxWidth: 900,
+        padding: 'clamp(16px, 3vw, 28px)',
+        width: 'min(900px, 95vw)',
         maxHeight: '90vh', overflow: 'auto',
         clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
       }}>
@@ -1396,6 +1399,7 @@ function AcquisitionModal({ campaignDate, onClose, onCommit }: {
   onClose: () => void;
   onCommit: (price: number, label: string, level: ExperienceLevel) => Promise<void>;
 }) {
+  const { isMobile } = useViewport();
   const [kind, setKind] = useState<AcquisitionKind>('mech_new');
   const [weight, setWeight] = useState<MechWeightClass>('medium');
   const [level, setLevel] = useState<ExperienceLevel>('regular');
@@ -1449,7 +1453,8 @@ function AcquisitionModal({ campaignDate, onClose, onCommit }: {
     }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
         background: T.surface, border: `1px solid ${T.gold}`,
-        padding: 28, minWidth: 720, maxWidth: 900,
+        padding: 'clamp(16px, 3vw, 28px)',
+        width: 'min(900px, 95vw)',
         maxHeight: '90vh', overflow: 'auto',
         clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
       }}>
@@ -1527,7 +1532,7 @@ function AcquisitionModal({ campaignDate, onClose, onCommit }: {
         )}
 
         {/* Form */}
-        <div style={{ display: 'grid', gridTemplateColumns: needsWeight ? '1.4fr 1fr 1fr 80px 100px' : '1.6fr 1fr 100px 110px', gap: 12, marginBottom: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : (needsWeight ? '1.4fr 1fr 1fr 80px 100px' : '1.6fr 1fr 100px 110px'), gap: 12, marginBottom: 18 }}>
           <div>
             <FieldLabel>Tipo activo</FieldLabel>
             <select value={kind}
@@ -1647,6 +1652,7 @@ function TallerModal({ onClose, onCommit }: {
   onClose: () => void;
   onCommit: (total: number, concepto: string, mechName: string) => Promise<void>;
 }) {
+  const { isTabletDown, isMobile } = useViewport();
   const { catalog } = useMechCatalog();
   const [mechQuery, setMechQuery] = useState('');
   const [selected, setSelected] = useState<CatalogMech | null>(null);
@@ -1762,7 +1768,8 @@ function TallerModal({ onClose, onCommit }: {
     }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{
         background: T.surface, border: `1px solid ${T.gold}`,
-        padding: 26, width: 1100, maxWidth: '95vw',
+        padding: 'clamp(14px, 2.5vw, 26px)',
+        width: 'min(1100px, 95vw)',
         maxHeight: '92vh', overflow: 'auto',
         clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
       }}>
@@ -1901,11 +1908,11 @@ function TallerModal({ onClose, onCommit }: {
         {!config ? (
           <EmptyState text="SELECCIONA UN MECH PARA EMPEZAR LA FACTURA" />
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isTabletDown ? '1fr' : '1.4fr 1fr', gap: isTabletDown ? 14 : 18 }}>
             {/* Daños — IZQUIERDA */}
             <div>
               <SmallLabel>Daños declarados (Taller G5-G17)</SmallLabel>
-              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
                 <DmgNum label="Reactor (0-3 · 3=DESTRUIDO)" value={damage.reactor}     onChange={v => updDmg('reactor', v)}     max={3} />
                 <DmgNum label="Gyro (0-2)"                  value={damage.gyro}        onChange={v => updDmg('gyro', v)}        max={2} />
                 {/* Cabina booleana */}
@@ -1938,7 +1945,7 @@ function TallerModal({ onClose, onCommit }: {
               </div>
 
               <SmallLabel>Actuadores</SmallLabel>
-              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: 8 }}>
                 {(Object.keys(PRECIO_ACTUADOR) as (keyof typeof PRECIO_ACTUADOR)[]).map(name => (
                   <DmgNum key={name}
                     label={`${name} (${fmtMoney(PRECIO_ACTUADOR[name])})`}
