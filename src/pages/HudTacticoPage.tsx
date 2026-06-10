@@ -248,18 +248,18 @@ export function HudTacticoPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 animate-[fadeInUp_0.3s_ease]">
+    <div className="p-2 sm:p-4 md:p-6 animate-[fadeInUp_0.3s_ease]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="font-headline text-xl font-black text-primary-container tracking-tighter uppercase">
+      <div className="flex items-center justify-between mb-3 sm:mb-6 flex-wrap gap-2 sm:gap-3">
+        <h1 className="font-headline text-base sm:text-xl font-black text-primary-container tracking-tighter uppercase">
           HUD TACTICO
         </h1>
-        <div className="flex items-center gap-2 font-mono text-[10px] text-outline uppercase tracking-widest">
+        <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-[9px] sm:text-[10px] text-outline uppercase tracking-widest">
           {(['setup','combat','results'] as Step[]).map((step, i) => (
-            <span key={step} className="flex items-center gap-2">
+            <span key={step} className="flex items-center gap-1.5 sm:gap-2">
               {i > 0 && <span className="text-outline">›</span>}
               <span className={state.step === step ? 'text-green-400 font-bold' : ''}>
-                {step === 'setup' ? 'Preparación' : step === 'combat' ? 'Combate' : 'Resultados'}
+                {step === 'setup' ? 'Prep' : step === 'combat' ? 'Combate' : 'XP'}
               </span>
             </span>
           ))}
@@ -268,10 +268,10 @@ export function HudTacticoPage() {
 
       {/* ── SETUP VIEW ── */}
       {state.step === 'setup' && (
-        <div className="max-w-2xl space-y-5">
+        <div className="max-w-2xl space-y-3 sm:space-y-5">
 
           {/* Jugadores */}
-          <section className="bg-surface-container p-4 border-t-2 border-primary-container">
+          <section className="bg-surface-container p-3 sm:p-4 border-t-2 border-primary-container">
             <h2 className="font-headline text-[10px] font-bold text-primary-container tracking-[3px] uppercase mb-3">
               Combatientes activos
             </h2>
@@ -299,7 +299,7 @@ export function HudTacticoPage() {
           </section>
 
           {/* Añadir hostiles */}
-          <section className="bg-surface-container p-4 border-t-2 border-error">
+          <section className="bg-surface-container p-3 sm:p-4 border-t-2 border-error">
             <h2 className="font-headline text-[10px] font-bold text-error tracking-[3px] uppercase mb-3">
               Hostiles
             </h2>
@@ -376,7 +376,7 @@ export function HudTacticoPage() {
           </section>
 
           {/* Fuerzas guardadas */}
-          <section className="bg-surface-container p-4 border-t-2 border-secondary">
+          <section className="bg-surface-container p-3 sm:p-4 border-t-2 border-secondary">
             <h2 className="font-headline text-[10px] font-bold text-secondary tracking-[3px] uppercase mb-3">
               Fuerzas guardadas
             </h2>
@@ -436,12 +436,12 @@ export function HudTacticoPage() {
 
       {/* ── COMBAT VIEW ── */}
       {state.step === 'combat' && (
-        <div className="max-w-3xl space-y-4">
+        <div className="max-w-3xl space-y-3 sm:space-y-4">
 
           {/* Player panel: bonus XP + rerolls + initiative */}
-          <div className="bg-surface-container p-3 border-t-2 border-amber-400">
-            <div className="text-[8px] font-mono text-outline uppercase tracking-[3px] mb-3">Gastos de sesión por jugador</div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-surface-container p-2 sm:p-3 border-t-2 border-amber-400">
+            <div className="text-[8px] font-mono text-outline uppercase tracking-[3px] mb-2 sm:mb-3">Gastos de sesión por jugador</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
               {Array.from({ length: Math.min(state.numPlayers, 4) }).map((_, i) => {
                 const bonus = state.bonus[i] ?? 0;
                 const pi = playerInfo[i];
@@ -522,28 +522,28 @@ export function HudTacticoPage() {
                   style={{ borderLeftColor: enemy.color, borderLeftWidth: 4 }}>
 
                   {/* Enemy header */}
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-outline-variant/20">
-                    <div>
-                      <div className="font-headline text-sm font-bold uppercase tracking-widest" style={{ color: enemy.color }}>
+                  <div className="flex items-center justify-between gap-2 px-2 sm:px-4 py-2 sm:py-2.5 border-b border-outline-variant/20">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-headline text-xs sm:text-sm font-bold uppercase tracking-widest truncate" style={{ color: enemy.color }}>
                         {enemy.name}
                       </div>
-                      <div className="font-mono text-[9px] text-outline mt-0.5">
-                        Valor: <span className="text-green-400 font-bold">{enemy.xp} XP</span>
-                        {totalH > 0 && <span className="ml-3">· {totalH} impactos · {Math.round(enemy.xp / totalH)} XP/golpe</span>}
+                      <div className="font-mono text-[8px] sm:text-[9px] text-outline mt-0.5">
+                        <span className="text-green-400 font-bold">{enemy.xp} XP</span>
+                        {totalH > 0 && <span className="ml-2"> · {totalH} hits · {Math.round(enemy.xp / totalH)}/h</span>}
                       </div>
                     </div>
                     <button onClick={() => dispatch({ type: 'TOGGLE_DEAD', id: enemy.id })}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 border font-mono text-[9px] font-bold uppercase tracking-widest transition-all ${
+                      className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 border font-mono text-[9px] font-bold uppercase tracking-widest transition-all shrink-0 ${
                         isDead
                           ? 'border-error/50 bg-error/10 text-error hover:bg-error/20'
                           : 'border-outline-variant/30 text-outline hover:border-green-400 hover:text-green-400'
                       }`}>
-                      {isDead ? <><Skull size={10} /> Abatido</> : <><Shield size={10} /> Vivo</>}
+                      {isDead ? <><Skull size={10} /> <span className="hidden sm:inline">Abatido</span></> : <><Shield size={10} /> <span className="hidden sm:inline">Vivo</span></>}
                     </button>
                   </div>
 
                   {/* Hit counters */}
-                  <div className={`grid p-3 gap-2 ${state.numPlayers <= 3 ? 'grid-cols-3' : state.numPlayers === 4 ? 'grid-cols-4' : 'grid-cols-5'}`}>
+                  <div className={`grid p-2 sm:p-3 gap-1.5 sm:gap-2 ${state.numPlayers <= 3 ? 'grid-cols-3' : state.numPlayers === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-5'}`}>
                     {Array.from({ length: state.numPlayers }).map((_, i) => (
                       <div key={i} className="flex flex-col gap-1">
                         {/* Hit button */}
