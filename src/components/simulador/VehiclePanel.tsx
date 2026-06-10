@@ -294,10 +294,10 @@ export function VehiclePanel({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20 max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 pb-20 max-w-7xl mx-auto px-2 md:px-0">
 
       {/* ── LEFT COL ── */}
-      <div className="col-span-1 lg:col-span-3 space-y-4">
+      <div className="col-span-1 md:col-span-3 space-y-4">
 
         {/* Vehicle info */}
         <section className="bg-surface-container-low p-4 clip-chamfer border-l-2 border-primary-container/30 space-y-2">
@@ -405,7 +405,7 @@ export function VehiclePanel({
       </div>
 
       {/* ── CENTER: Armor diagram ── */}
-      <div className="col-span-1 lg:col-span-6 space-y-4">
+      <div className="col-span-1 md:col-span-6 space-y-4">
         <div className="bg-surface-container p-4 clip-chamfer border-t-2 border-primary-container/40 flex flex-col relative overflow-hidden">
           <img src={`${import.meta.env.BASE_URL}${isVTOL ? 'VTOL' : 'vehicle-blueprint'}.png`} alt=""
             className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-60 mix-blend-screen"
@@ -531,7 +531,7 @@ export function VehiclePanel({
       </div>
 
       {/* ── RIGHT COL ── */}
-      <div className="col-span-1 lg:col-span-3 space-y-4">
+      <div className="col-span-1 md:col-span-3 space-y-4">
 
         {/* Weapons */}
         <section className="bg-surface-container-low p-4 clip-chamfer border-l-2 border-primary-container/30">

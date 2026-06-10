@@ -23,11 +23,11 @@ const MECH_LAYOUT_QUAD = [
 export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props) {
   const MECH_LAYOUT = state.isQuad ? MECH_LAYOUT_QUAD : MECH_LAYOUT_BIPED;
   return (
-    <section className="bg-surface-container-low p-6 clip-chamfer border-t-2 border-secondary/20">
-      <h2 className="font-headline text-sm font-bold text-[var(--p,theme(colors.primary-container))] tracking-[2px] uppercase mb-4">Slots Críticos</h2>
-      <div className="space-y-4">
+    <section className="bg-surface-container-low p-3 md:p-6 clip-chamfer border-t-2 border-secondary/20">
+      <h2 className="font-headline text-sm font-bold text-[var(--p,theme(colors.primary-container))] tracking-[2px] uppercase mb-3 md:mb-4">Slots Críticos</h2>
+      <div className="space-y-2 md:space-y-4">
         {MECH_LAYOUT.map((row, ri) => (
-          <div key={ri} className="grid grid-cols-3 gap-4">
+          <div key={ri} className="grid grid-cols-3 gap-1.5 md:gap-4">
             {row.map(col => {
               if (col.key === '_DMG') return <DamageControl key={col.key} state={state} session={session} sysHits={sysHits} />;
               const crits = session.crits[col.key] || [];
@@ -37,7 +37,7 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
 
               return (
                 <div key={col.key} className={`border border-outline-variant/30 bg-surface-container/50 ${isDestroyed ? 'opacity-40' : ''}`}>
-                  <div className={`text-[10px] font-headline font-bold tracking-[2px] uppercase px-3 py-2 border-b border-outline-variant/30 ${isDestroyed ? 'text-error' : 'text-[var(--p,theme(colors.primary-container))]'}`}>
+                  <div className={`text-[8px] md:text-[10px] font-headline font-bold tracking-[1.5px] md:tracking-[2px] uppercase px-1.5 md:px-3 py-1 md:py-2 border-b border-outline-variant/30 truncate ${isDestroyed ? 'text-error' : 'text-[var(--p,theme(colors.primary-container))]'}`}>
                     {col.label} {isDestroyed && '— DESTRUIDO'}
                   </div>
                   <div className="divide-y divide-outline-variant/15">
@@ -48,13 +48,13 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
                         : null;
                       return (
                         <div key={idx} onClick={() => !isEmpty && onToggleCrit(col.key, idx)}
-                          className={`flex items-center gap-2 px-3 py-1.5 text-[11px] font-mono transition-colors ${
+                          className={`flex items-center gap-1 md:gap-2 px-1.5 md:px-3 py-1 md:py-1.5 text-[9px] md:text-[11px] font-mono transition-colors ${
                             isEmpty ? 'text-secondary/20 cursor-default'
                             : s.hit ? 'bg-error/15 text-error cursor-pointer'
                             : 'text-on-surface hover:bg-secondary/10 cursor-pointer'
                           }`}
                         >
-                          <span className="text-[9px] text-secondary/30 w-4 shrink-0">{idx + 1}.</span>
+                          <span className="text-[8px] md:text-[9px] text-secondary/30 w-3 md:w-4 shrink-0">{idx + 1}.</span>
                           {isEmpty
                             ? <span className="text-secondary/20">-</span>
                             : <span className={`flex-1 ${s.hit ? 'line-through' : ''}`}>

@@ -1,0 +1,603 @@
+// ── Handler entrante (Telegram webhook → bot) ─────────────────────
+
+function handleTelegramUpdate(update) {
+  if (!update || !update.message || !update.message.text) return;
+
+  // Idempotencia por update_id (10 min cache)
+  const cache = CacheService.getScriptCache();
+  const key = 'tg_upd_' + update.update_id;
+  if (cache.get(key)) return;
+  cache.put(key, '1', 600);
+
+  const msg = update.message;
+
+  // ★ NUEVO: descartar mensajes viejos (> 60s) — son retries zombie
+  const nowSec = Math.floor(Date.now() / 1000);
+  const msgAge = nowSec - (msg.date || 0);
+  if (msgAge > 60) {
+    console.log('Mensaje viejo descartado: age=' + msgAge + 's update_id=' + update.update_id);
+    return;
+  }
+
+  if (msg.from && msg.from.is_bot) return;
+
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+  const text = String(msg.text).trim();
+
+  // === DEBUG ===
+  console.log('IN userId=' + userId + ' text="' + text + '"');
+  const stateNow = tgGetState(userId);
+  console.log('STATE=' + (stateNow ? JSON.stringify(stateNow) : 'null'));
+
+  if (stateNow) {
+    const handled = handleFlowMessage(chatId, userId, text);
+    console.log('FLOW handled=' + handled);
+    if (handled) return;
+  }
+
+  if (!text.startsWith('/')) {
+    console.log('NO CMD, ignorando');
+    return;
+  }
+
+  const parts = text.split(/\s+/);
+  const cmd = parts[0].toLowerCase().replace(/@\w+$/, '');
+  const args = parts.slice(1).join(' ');
+
+  console.log('CMD=' + cmd);
+
+  if (!tgIsAuthorized(userId)) {
+    tgSendMessage(chatId, '🚫 No autorizado. user_id: `' + userId + '`');
+    return;
+  }
+
+  switch (cmd) {
+    case '/help':         return cmdHelp(chatId, userId);
+    case '/roster':       return cmdRoster(chatId);
+    case '/tesoreria':    return cmdTesoreria(chatId);
+    case '/cronica':      return cmdCronica(chatId);
+    case '/parte':        return cmdParte(chatId, userId, args);
+    case '/subirxp':      return cmdSubirXP(chatId, userId, args);
+    case '/cancelar':     return cmdCancelar(chatId, userId);
+    case '/backup':       if (tgIsAdmin(userId)) return cmdBackup(chatId); break;
+    case '/anuncio':      if (tgIsAdmin(userId)) return cmdAnuncio(chatId, args); break;
+    case '/resetcampana': if (tgIsAdmin(userId)) return cmdResetConfirm(chatId, args); break;
+    default:
+      tgSendMessage(chatId, 'Comando desconocido. /help para lista.');
+      return;
+  }
+  tgSendMessage(chatId, '🚫 No tienes permisos.');
+  switch (cmd) {
+    case '/help':         cmdHelp(chatId, userId); break;
+    case '/roster':       cmdRoster(chatId); break;
+    case '/tesoreria':    cmdTesoreria(chatId); break;
+    case '/cronica':      cmdCronica(chatId); break;
+    case '/parte':        cmdParte(chatId, userId, args); break;
+    case '/subirxp':      cmdSubirXP(chatId, userId, args); break;
+    case '/backup':       if (tgIsAdmin(userId)) cmdBackup(chatId); break;
+    case '/anuncio':      if (tgIsAdmin(userId)) cmdAnuncio(chatId, args); break;
+    case '/resetcampana': if (tgIsAdmin(userId)) cmdResetConfirm(chatId, args); break;
+    default:
+      tgSendMessage(chatId, 'Comando desconocido. /help para lista.');
+  }
+
+  // ★ Programa nuke 30s después de responder
+  maybeScheduleNuke();
+}
+
+// ── Comandos ──────────────────────────────────────────────────────
+
+function cmdHelp(chatId, userId) {
+  let txt =
+    '*Comandos disponibles:*\n' +
+    '/roster — estado pilotos\n' +
+    '/tesoreria — saldo + últimos movimientos\n' +
+    '/cronica — últimas crónicas\n' +
+    '/parte <texto> — registrar parte diario\n' +
+    '/cancelar — abortar flujo activo\n' +
+    '/help — esta ayuda';
+  if (tgIsXPAuthorized(userId)) {
+    txt += '\n/subirxp — subir XP jugador a jugador';
+  }
+  if (tgIsAdmin(userId)) {
+    txt += '\n\n*Admin:*\n/backup · /anuncio <texto> · /resetcampana CONFIRMAR';
+  }
+  tgSendMessage(chatId, txt);
+}
+
+function cmdRoster(chatId) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_PERSONAJES);
+    if (!sheet) { tgSendMessage(chatId, '❌ Hoja Personajes no encontrada'); return; }
+    const data = sheet.getDataRange().getValues();
+    const lines = ['🪖 *ROSTER*'];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const nombre = (row[COL_PERSONAJES.NOMBRE] || '').toString().trim();
+      if (!nombre) continue;
+      const estado = (row[COL_PERSONAJES.ESTADO] || 'activo').toString().toLowerCase();
+      if (estado && estado !== 'activo') continue;
+      const apodo = (row[COL_PERSONAJES.APODO] || '').toString().trim();
+      const mech = (row[COL_PERSONAJES.MECH] || '').toString().trim();
+      const xp = Number(row[COL_PERSONAJES.XP_TOTAL]) || 0;
+      lines.push(`• ${nombre}${apodo ? ' "' + apodo + '"' : ''} — ${mech || '—'} · XP ${xp}`);
+    }
+    tgSendMessage(chatId, lines.join('\n'));
+  } catch (e) {
+    tgSendMessage(chatId, '❌ Error: ' + e.message);
+  }
+}
+
+function cmdTesoreria(chatId) {
+  try {
+    const saldo = String(getConfig('CONTRATO_VALOR') || '—');
+    let lines = ['💰 *TESORERÍA*', `Saldo: ${saldo} ₡`, '', '*Últimos movimientos:*'];
+
+    try {
+      const sheet = getLibroMayorSheet();
+      const data = sheet.getDataRange().getValues();
+      const rows = data.slice(1).sort((a, b) => String(b[1]).localeCompare(String(a[1]))).slice(0, 5);
+      if (rows.length === 0) {
+        lines.push('— sin movimientos —');
+      } else {
+        rows.forEach(r => {
+          const sign = String(r[4]) === 'ingreso' ? '+' : '−';
+          lines.push(`• ${r[1]} ${sign}${fmtMoney(r[3])} ${r[2]}`);
+        });
+      }
+    } catch (e) {
+      lines.push('— error leyendo libro mayor —');
+    }
+
+    tgSendMessage(chatId, lines.join('\n'));
+  } catch (e) {
+    tgSendMessage(chatId, '❌ Error: ' + e.message);
+  }
+}
+
+function cmdCronica(chatId) {
+  try {
+    const sheet = getCronicasSheet();
+    const data = sheet.getDataRange().getValues();
+    const rows = data.slice(1)
+      .filter(r => r[0])
+      .sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0))
+      .slice(0, 3);
+    const lines = ['📖 *ÚLTIMAS CRÓNICAS*'];
+    if (rows.length === 0) lines.push('— sin entradas —');
+    rows.forEach(r => {
+      lines.push(`• *${r[8] || '—'}* — ${r[6] || r[5] || '—'}`);
+    });
+    tgSendMessage(chatId, lines.join('\n'));
+  } catch (e) {
+    tgSendMessage(chatId, '❌ Error: ' + e.message);
+  }
+}
+
+function cmdParte(chatId, userId, texto) {
+  if (!texto || texto.length < 3) {
+    tgSendMessage(chatId, 'Uso: `/parte <texto del parte>`');
+    return;
+  }
+  const autor = tgPJNameFromUserId(userId) || 'Desconocido';
+  try {
+    handleSaveParteDiario({
+      id: '',
+      ts: Date.now(),
+      text: `[${autor} via Telegram] ${texto}`,
+      tone: 'info',
+    });
+    tgSendMessage(chatId, `✅ Parte registrado para *${autor}*`);
+  } catch (e) {
+    tgSendMessage(chatId, '❌ Error guardando: ' + e.message);
+  }
+}
+
+function cmdBackup(chatId) {
+  tgSendMessage(chatId, '💾 Backup ejecutado (placeholder — hookear con sistema snapshot).');
+}
+
+function cmdAnuncio(chatId, texto) {
+  if (!texto) { tgSendMessage(chatId, 'Uso: `/anuncio <texto>`'); return; }
+  tgSendMessage(tgChatId(), `📣 *ANUNCIO*\n${texto}`);
+}
+
+function cmdResetConfirm(chatId, args) {
+  if (String(args).trim() === 'CONFIRMAR') {
+    tgSendMessage(chatId, '⚠️ Reset NO ejecutado (función no implementada por seguridad).');
+  } else {
+    tgSendMessage(chatId,
+      '⚠️ Reset campaña requiere confirmación.\n' +
+      'Envía: `/resetcampana CONFIRMAR`');
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  STATE MACHINE — flujos conversacionales por usuario (v2.9)
+//  Usa PropertiesService.scriptProperties como storage (compartido).
+//  Clave: tg_state_<userId>. Valor: JSON con flow/step/collected.
+// ════════════════════════════════════════════════════════════════
+
+function tgGetState(userId) {
+  const raw = PropertiesService.getScriptProperties().getProperty('tg_state_' + userId);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (e) { return null; }
+}
+function tgSetState(userId, state) {
+  PropertiesService.getScriptProperties().setProperty('tg_state_' + userId, JSON.stringify(state));
+}
+function tgClearState(userId) {
+  PropertiesService.getScriptProperties().deleteProperty('tg_state_' + userId);
+}
+
+/** Dispatcher: procesa msg si user está en flow. Devuelve true si consumió el msg. */
+function handleFlowMessage(chatId, userId, text) {
+  const state = tgGetState(userId);
+  if (!state) return false;
+
+  // CUALQUIER comando que empiece por / cancela el flow Y deja que el switch lo procese
+  if (text.startsWith('/')) {
+    tgClearState(userId);
+    return false; // false = handler principal procesa el comando
+  }
+
+  switch (state.flow) {
+    case 'subirxp': return flowSubirXP(chatId, userId, text, state);
+    default:
+      tgClearState(userId);
+      return false;
+  }
+}
+
+// ── /subirxp — flujo conversacional (RESTRINGIDO a TG_XP_USERS) ──
+
+function cmdSubirXP(chatId, userId, args) {
+  if (!tgIsXPAuthorized(userId)) {
+    tgSendMessage(chatId, '🚫 Solo el DM puede subir XP.\nuser_id: `' + userId + '`');
+    return;
+  }
+
+  const tokens = String(args || '').trim().split(/\s+/).filter(Boolean);
+
+  if (tokens.length === 0) {
+    tgSendMessage(chatId,
+      '*Uso:* `/subirxp <Marcos> <Jaime> <Joan>`\n' +
+      'Ejemplo: `/subirxp 5 3 2`\n\n' +
+      'Pasa un 0 si alguno no gana XP esta sesión.');
+    return;
+  }
+
+  if (tokens.length !== TG_PLAYERS.length) {
+    tgSendMessage(chatId,
+      '⚠️ Necesito *' + TG_PLAYERS.length + '* números (' + TG_PLAYERS.join(', ') + ').\n' +
+      'Recibí ' + tokens.length + ': `' + tokens.join(' ') + '`');
+    return;
+  }
+
+  const nums = tokens.map(function (t) { return parseInt(t, 10); });
+  const malformed = nums.findIndex(function (n) { return !Number.isFinite(n); });
+  if (malformed >= 0) {
+    tgSendMessage(chatId,
+      '⚠️ El valor `' + tokens[malformed] + '` no es un número entero.');
+    return;
+  }
+
+  const xpMap = {};
+  TG_PLAYERS.forEach(function (p, i) { xpMap[p] = nums[i]; });
+
+  const report = applyXPSubida(xpMap);
+  tgSendMessage(chatId, report);
+}
+
+function cmdCancelar(chatId, userId) {
+  if (tgGetState(userId)) {
+    tgClearState(userId);
+    tgSendMessage(chatId, '❌ Flujo cancelado.');
+  } else {
+    tgSendMessage(chatId, 'No hay flujo activo.');
+  }
+}
+
+function flowSubirXP(chatId, userId, text, state) {
+  const n = parseInt(text, 10);
+  if (!Number.isFinite(n)) {
+    tgSendMessage(chatId, '⚠️ Envía solo un número entero. /cancelar para abortar.');
+    return true;
+  }
+
+  const currentPlayer = state.players[state.step];
+  state.collected[currentPlayer] = n;
+  state.step++;
+
+  if (state.step < state.players.length) {
+    tgSetState(userId, state);
+    const next = state.players[state.step];
+    tgSendMessage(chatId,
+      `✅ *${currentPlayer}*: +${n} XP\n\n¿Cuánto XP gana *${next}*?`);
+    return true;
+  }
+
+  // Finalizado: aplicar y reportar
+  tgClearState(userId);
+  const report = applyXPSubida(state.collected);
+  tgSendMessage(chatId, report);
+  return true;
+}
+
+/** Escribe XP en Respuestas de formulario 1 y lee Personajes para reporte. */
+function applyXPSubida(xpMap) {
+  try {
+    appendRegistroRow({
+      xpMap: xpMap,
+      tipo: 'Telegram',
+      descripcion: 'Subida XP vía Telegram'
+    });
+  } catch (e) {
+    return '❌ Error escribiendo XP: ' + e.message;
+  }
+
+  // Esperar un instante para que recalculen fórmulas si las hay
+  SpreadsheetApp.flush();
+  Utilities.sleep(500);
+
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_PERSONAJES);
+  const data = sheet.getDataRange().getValues();
+  const lines = ['✅ *XP REGISTRADO*'];
+
+  Object.entries(xpMap).forEach(function (entry) {
+    const jugador = entry[0];
+    const ganado = entry[1];
+
+    let pj = null;
+    let pjNombre = '';
+    for (let i = 1; i < data.length; i++) {
+      const j = String(data[i][COL_PERSONAJES.JUGADOR] || '').trim();
+      const estado = String(data[i][COL_PERSONAJES.ESTADO] || 'activo').toLowerCase();
+      if (j.toLowerCase() === String(jugador).toLowerCase() && (estado === '' || estado === 'activo')) {
+        pj = data[i];
+        pjNombre = String(data[i][COL_PERSONAJES.NOMBRE] || jugador).trim();
+        break;
+      }
+    }
+
+    if (pj) {
+      const total = Number(pj[COL_PERSONAJES.XP_TOTAL]) || 0;
+      const disp  = Number(pj[COL_PERSONAJES.XP_DISPONIBLE]) || 0;
+      lines.push(`\n*${jugador}* (${pjNombre})`);
+      lines.push(`  Ganado: +${ganado} XP`);
+      lines.push(`  Total:     ${total}`);
+      lines.push(`  Disponible: ${disp}`);
+    } else {
+      lines.push(`\n*${jugador}*: +${ganado} XP _(no encontrado en Personajes)_`);
+    }
+  });
+
+  return lines.join('\n');
+}
+  
+  // Pega esta función al final del Code.gs y ejecútala UNA vez
+function nukearTodo() {
+  const token = tgToken();
+  // 3 deletes seguidos por si Telegram retiene
+  for (let i = 0; i < 3; i++) {
+    const r = UrlFetchApp.fetch(
+      `https://api.telegram.org/bot${token}/deleteWebhook?drop_pending_updates=true`,
+      { muteHttpExceptions: true }
+    );
+    console.log(`delete ${i}:`, r.getContentText());
+    Utilities.sleep(1500);
+  }
+  Utilities.sleep(3000);
+  // Set fresh
+  const set = UrlFetchApp.fetch(
+    `https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(TELEGRAM_WEBAPP_URL)}`,
+    { muteHttpExceptions: true }
+  );
+  console.log('set:', set.getContentText());
+  // Verify
+  const info = UrlFetchApp.fetch(
+    `https://api.telegram.org/bot${token}/getWebhookInfo`,
+    { muteHttpExceptions: true }
+  );
+  console.log('info:', info.getContentText());
+}
+function tgNukearComandosTodosScopes() {
+  const token = tgToken();
+  if (!token) { console.error('No token'); return; }
+
+  const scopes = [
+    null, // default (sin scope)
+    { type: 'default' },
+    { type: 'all_private_chats' },
+    { type: 'all_group_chats' },
+    { type: 'all_chat_administrators' },
+  ];
+
+  const languages = ['', 'es', 'en']; // idiomas comunes
+
+  scopes.forEach(function (scope) {
+    languages.forEach(function (lang) {
+      const params = [];
+      if (scope) params.push('scope=' + encodeURIComponent(JSON.stringify(scope)));
+      if (lang)  params.push('language_code=' + lang);
+      const qs = params.length ? '?' + params.join('&') : '';
+      const url = 'https://api.telegram.org/bot' + token + '/deleteMyCommands' + qs;
+      try {
+        const r = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+        console.log(
+          'delete',
+          scope ? scope.type : 'no_scope',
+          lang || 'no_lang',
+          '→',
+          r.getContentText().substring(0, 100)
+        );
+      } catch (e) {
+        console.error('err:', e);
+      }
+      Utilities.sleep(300);
+    });
+  });
+
+  // Verifica
+  Utilities.sleep(1000);
+  const info = UrlFetchApp.fetch(
+    'https://api.telegram.org/bot' + token + '/getMyCommands',
+    { muteHttpExceptions: true }
+  );
+  console.log('estado final default:', info.getContentText());
+}
+function tgSetMisComandos() {
+  const token = tgToken();
+  const commands = [
+    { command: 'help',      description: 'Lista de comandos' },
+    { command: 'roster',    description: 'Estado pilotos activos' },
+    { command: 'tesoreria', description: 'Saldo y movimientos' },
+    { command: 'cronica',   description: 'Últimas crónicas' },
+    { command: 'parte',     description: 'Registrar parte diario' },
+    { command: 'subirxp',   description: 'Subir XP (solo DM)' },
+    { command: 'cancelar',  description: 'Abortar flujo activo' },
+  ];
+  const r = UrlFetchApp.fetch(
+    'https://api.telegram.org/bot' + token + '/setMyCommands',
+    {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({ commands: commands }),
+      muteHttpExceptions: true,
+    }
+  );
+  console.log(r.getContentText());
+}
+function tgLimpiarTodosLosStates() {
+  const props = PropertiesService.getScriptProperties();
+  const all = props.getProperties();
+  let count = 0;
+  Object.keys(all).forEach(function (k) {
+    if (k.indexOf('tg_state_') === 0) {
+      props.deleteProperty(k);
+      count++;
+    }
+  });
+  console.log('Borrados ' + count + ' states');
+}
+function tgResetTotal() {
+  // 1. Borra todos los states pendientes
+  const props = PropertiesService.getScriptProperties();
+  const all = props.getProperties();
+  let count = 0;
+  Object.keys(all).forEach(function (k) {
+    if (k.indexOf('tg_state_') === 0) {
+      props.deleteProperty(k);
+      count++;
+    }
+  });
+  console.log('States borrados: ' + count);
+
+  // 2. Borra cache de idempotencia
+  try { CacheService.getScriptCache().removeAll(['*']); } catch (e) {}
+  console.log('Cache limpio');
+
+  // 3. Limpia cola Telegram
+  const token = tgToken();
+  for (let i = 0; i < 2; i++) {
+    UrlFetchApp.fetch(
+      `https://api.telegram.org/bot${token}/deleteWebhook?drop_pending_updates=true`,
+      { muteHttpExceptions: true }
+    );
+    Utilities.sleep(1000);
+  }
+  Utilities.sleep(2000);
+  const r = UrlFetchApp.fetch(
+    `https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(TELEGRAM_WEBAPP_URL)}`,
+    { muteHttpExceptions: true }
+  );
+  console.log('Webhook reset:', r.getContentText());
+}
+function tgQueueNuke() {
+  const token = tgToken();
+  // 5 deletes para estar seguro
+  for (let i = 0; i < 5; i++) {
+    UrlFetchApp.fetch(
+      `https://api.telegram.org/bot${token}/deleteWebhook?drop_pending_updates=true`,
+      { muteHttpExceptions: true }
+    );
+    Utilities.sleep(2000);
+  }
+  Utilities.sleep(3000);
+  // Reset webhook
+  const r = UrlFetchApp.fetch(
+    `https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(TELEGRAM_WEBAPP_URL)}`,
+    { muteHttpExceptions: true }
+  );
+  console.log('webhook reset:', r.getContentText());
+  // Verifica
+  Utilities.sleep(2000);
+  const info = UrlFetchApp.fetch(
+    `https://api.telegram.org/bot${token}/getWebhookInfo`,
+    { muteHttpExceptions: true }
+  );
+  console.log('info:', info.getContentText());
+}
+// ════════════════════════════════════════════════════════════════
+//  AUTO-NUKE WEBHOOK — workaround para cola persistente Telegram
+//  Después de cada respuesta del bot, programa un nuke 30s después.
+//  Solo 1 trigger activo a la vez (anti quota).
+// ════════════════════════════════════════════════════════════════
+
+function maybeScheduleNuke() {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const last = parseInt(props.getProperty('nuke_scheduled_at') || '0', 10);
+    const now = Date.now();
+    // Si hay uno programado en los últimos 60s, no crear otro
+    if (now - last < 60 * 1000) return;
+    props.setProperty('nuke_scheduled_at', String(now));
+
+    // Limpia triggers viejos por si quedaron huérfanos
+    const triggers = ScriptApp.getProjectTriggers();
+    triggers.forEach(function (t) {
+      if (t.getHandlerFunction() === 'autoNukeCallback') {
+        ScriptApp.deleteTrigger(t);
+      }
+    });
+
+    // Crea trigger único 30s en el futuro
+    ScriptApp.newTrigger('autoNukeCallback').timeBased().after(30 * 1000).create();
+    console.log('Nuke programado en 30s');
+  } catch (e) {
+    console.error('No se pudo programar nuke:', e);
+  }
+}
+
+function autoNukeCallback() {
+  // Limpia el trigger que nos llamó
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(function (t) {
+    if (t.getHandlerFunction() === 'autoNukeCallback') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+
+  // Borra la marca
+  PropertiesService.getScriptProperties().deleteProperty('nuke_scheduled_at');
+
+  // Nuke webhook
+  const token = tgToken();
+  if (!token) return;
+  try {
+    UrlFetchApp.fetch(
+      `https://api.telegram.org/bot${token}/deleteWebhook?drop_pending_updates=true`,
+      { muteHttpExceptions: true }
+    );
+    Utilities.sleep(2000);
+    UrlFetchApp.fetch(
+      `https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(TELEGRAM_WEBAPP_URL)}`,
+      { muteHttpExceptions: true }
+    );
+    console.log('Auto-nuke ejecutado OK');
+  } catch (e) {
+    console.error('Auto-nuke falló:', e);
+  }
+}

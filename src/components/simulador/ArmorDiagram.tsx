@@ -134,7 +134,7 @@ export function ArmorDiagram({ state, session, selectedSection, damageAmount, se
 
           {/* Detail panel - dismiss con click fuera o ESC via useDismissable */}
           {selectedSection && (
-            <div ref={detailRef} className="absolute top-0 right-0 w-52 bg-surface-container-high border-l-2 border-primary-container/50 p-3 clip-chamfer z-30 shadow-[0_0_20px_rgba(0,0,0,0.6)] backdrop-blur-md max-h-full overflow-y-auto custom-scrollbar">
+            <div ref={detailRef} className="absolute top-0 right-0 w-40 sm:w-44 md:w-52 bg-surface-container-high border-l-2 border-primary-container/50 p-2 md:p-3 clip-chamfer z-30 shadow-[0_0_20px_rgba(0,0,0,0.6)] backdrop-blur-md max-h-full overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-start mb-2 border-b border-outline-variant pb-1">
                 <h3 className="font-headline text-xs font-bold text-primary-container uppercase">{selectedSection}</h3>
                 <button onClick={() => setSelectedSection(null)} className="text-secondary hover:text-primary"><X size={14} /></button>

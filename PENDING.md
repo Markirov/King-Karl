@@ -197,6 +197,44 @@ hook `useSimulador.ts` para exponer función de reparación localizada.
 
 ---
 
+## Telegram backend: 3 tiers admin/DM/PJ — IMPLEMENTADO directo en editor
+
+Sistema implementado (no en repo, solo en Apps Script editor):
+
+**Estructura jerárquica:**
+- `TELEGRAM_ADMIN_ID` — admin del bot (uno solo, técnico). Acceso total.
+- `TELEGRAM_DM_USERS` — CSV user_ids, DMs de la campaña. Hereda PJ.
+- `PJ_TG_<NOMBRE>` — jugadores. Solo lectura + ediciones inocuas.
+
+**Asignación comandos:**
+- PJ: /help, /roster, /tesoreria, /cronica, /cronicar, /parte, /danos
+- DM: /subirxp (5 3 2), /anuncio
+- Admin: /nuke, /backup, /resetcampana
+
+**Helpers Apps Script:**
+- `tgIsAdmin(userId)`, `tgIsDM(userId)`, `tgIsPJ(userId)`, `tgIsAuthorized(userId)`
+- Admin hereda DM. DM hereda PJ.
+
+**Workaround retries Telegram:**
+- `runWebhookNukeNow()` inline al final de cada comando (deleteWebhook×3
+  + setWebhook). Mata cola persistente. Añade ~3-5s por respuesta pero
+  rompe loops.
+- Solo fix que funcionó tras múltiples intentos con CacheService,
+  PropertiesService, drop_pending_updates aislado, etc.
+
+**Comandos nuevos en producción:**
+- `/cronicar Título | Cuerpo` — escribir crónica desde Telegram
+- `/danos` — lee última snapshot Fuerzas, muestra % daño + armor/IS + heat/wounds
+- `/nuke` — reset webhook emergencia (admin)
+- `/subirxp 5 3 2` — inline, sin state machine (la conversacional con
+  PropertiesService nunca llegó a funcionar bien)
+
+**Sin sincronizar al repo:**
+El Code.gs editado en directo. Próxima vez que lo toque: pull a
+`scripts/apps-script/BACKEND_v3.0_FINAL.gs` para versionar.
+
+---
+
 ## Canon Repair Rules — RESUELTO (2026-06-07)
 
 Reglas canon documentadas en `INFORME_DISCREPANCIAS_CANON.md`.
