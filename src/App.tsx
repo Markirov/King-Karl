@@ -97,7 +97,7 @@ export function App() {
       {/* Content area */}
       <main
         className={`
-          xl:ml-[220px] overflow-y-auto overflow-x-hidden custom-scrollbar
+          2xl:ml-[220px] overflow-y-auto overflow-x-hidden custom-scrollbar
           ${hasTabs ? 'mt-[88px] h-[calc(100vh-88px)]' : 'mt-12 h-[calc(100vh-48px)]'}
         `}
       >

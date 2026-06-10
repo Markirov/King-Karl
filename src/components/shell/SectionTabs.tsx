@@ -12,7 +12,7 @@ export function SectionTabs({ tabs }: SectionTabsProps) {
   return (
     <div
       className="
-        fixed top-12 left-0 xl:left-[220px] right-0 h-10
+        fixed top-12 left-0 2xl:left-[220px] right-0 h-10
         bg-background/[0.98] border-b border-primary-container/10
         flex items-stretch gap-0 pl-2 sm:pl-5 pr-2 sm:pr-3 z-[98]
         backdrop-blur-lg
