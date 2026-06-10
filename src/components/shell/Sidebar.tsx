@@ -12,7 +12,7 @@ export function Sidebar() {
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-[149] md:hidden"
+          className="fixed inset-0 bg-black/60 z-[149] xl:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -24,7 +24,7 @@ export function Sidebar() {
           flex flex-col gap-0.5 p-3 overflow-y-auto z-[150]
           transition-transform duration-300
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0
+          xl:translate-x-0
         `}
       >
         {/* Brand */}
