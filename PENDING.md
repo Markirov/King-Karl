@@ -115,6 +115,24 @@ Pendiente extras (no urgente):
 
 ---
 
+## HUD Táctico — responsive móvil
+
+Pendiente: rediseño `HudTacticoPage` para que funcione en pantalla móvil
+(<768px). Es el único caso de uso "campo de batalla" donde el jugador
+necesita info rápida en su propio teléfono mientras el GM lleva la tablet.
+
+Target prioritario: **móvil portrait (375-414px)**.
+
+Plan:
+- Layout 1 columna obligatorio
+- Tarjetas compactas por unidad con resumen daños
+- Sin gráficos pesados, texto + emoji status
+- Quick actions touch-friendly (botones ≥44px alto)
+
+Archivo: `src/pages/HudTacticoPage.tsx` (actualmente placeholder).
+
+---
+
 ## Comisión — reorganizar + responsive tablet 10" (luego móvil)
 
 Target prioritario: **tablet 10" (1280×800 landscape, 800×1280 portrait)**.
