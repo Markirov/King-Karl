@@ -183,21 +183,22 @@ export function FuerzaSyncBar({
   }
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative flex items-center gap-1 sm:gap-2">
+      {/* Status pill: solo desktop (2xl+) para no comer espacio en tablet */}
       <div
         title={statusLabel}
-        className={`flex items-center gap-1.5 border px-2 py-1 clip-chamfer ${statusTone} font-mono text-[9px] uppercase tracking-widest select-none`}
+        className={`hidden 2xl:flex items-center gap-1.5 border px-2 py-1 clip-chamfer ${statusTone} font-mono text-[9px] uppercase tracking-widest select-none`}
       >
         {statusIcon}
-        <span className="hidden sm:inline">{statusLabel}</span>
+        <span>{statusLabel}</span>
       </div>
 
       <button
         onClick={() => setSavePanelOpen(o => !o)}
-        title="Guardar fuerza"
+        title={`Guardar fuerza · ${statusLabel}`}
         className="flex items-center gap-1 border border-outline-variant/40 hover:border-primary-container/60 text-secondary/70 hover:text-primary-container px-2 py-1 clip-chamfer font-mono text-[9px] uppercase tracking-widest transition-colors"
       >
-        <Save size={12} /> Guardar
+        <Save size={12} /> <span className="hidden sm:inline">Guardar</span>
       </button>
 
       <button
@@ -205,7 +206,7 @@ export function FuerzaSyncBar({
         title="Cargar fuerza"
         className="flex items-center gap-1 border border-outline-variant/40 hover:border-primary-container/60 text-secondary/70 hover:text-primary-container px-2 py-1 clip-chamfer font-mono text-[9px] uppercase tracking-widest transition-colors"
       >
-        <FolderOpen size={12} /> Cargar
+        <FolderOpen size={12} /> <span className="hidden sm:inline">Cargar</span>
       </button>
 
       <button
