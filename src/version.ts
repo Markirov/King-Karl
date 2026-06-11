@@ -8,5 +8,5 @@
 // Importante: no cambies el formato de la linea `export const VERSION = 'x.y.z';`
 // porque el script lo detecta con regex.
 
-export const VERSION = '2.2.7';
+export const VERSION = '2.2.8';
 export const VERSION_DISPLAY = `Ver. ${VERSION}`;
