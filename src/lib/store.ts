@@ -4,7 +4,7 @@ import { saveConfigBatch } from './sheets-service';
 import type { RosterEntry } from './roster';
 
 const DEFAULT_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbyAAh-lYB1L72hTH72lpYDD0mcaAyeERLjJp1e0Ar0hhuZK8TszJdu-qmlN_cwi4sEncQ/exec';
+  'https://script.google.com/macros/s/AKfycbyIDYDFO2UyLJ7I6c0QadLU4O85gQWPoaaYo9HmObQaZloSq8bsy_ET_UevkLvDY61a9w/exec';
 
 interface AppState {
   campaign: CampaignConfig;

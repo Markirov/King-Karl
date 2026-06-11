@@ -2,9 +2,29 @@
 // GOOGLE SHEETS SERVICE — Apps Script backend communication
 // ═══════════════════════════════════════════════════════════════
 
+// URL deployment activo del Apps Script (actualizada 2026-06-09)
+const DEFAULT_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbyIDYDFO2UyLJ7I6c0QadLU4O85gQWPoaaYo9HmObQaZloSq8bsy_ET_UevkLvDY61a9w/exec';
+
+// URLs viejas conocidas que deben migrarse silenciosamente a la nueva.
+const STALE_URLS = [
+  'https://script.google.com/macros/s/AKfycbyAAh-lYB1L72hTH72lpYDD0mcaAyeERLjJp1e0Ar0hhuZK8TszJdu-qmlN_cwi4sEncQ/exec',
+];
+
+// Migración auto: si el usuario tiene una URL custom vieja, la limpiamos
+// para que use la nueva default. Se ejecuta una vez al cargar el módulo.
+(() => {
+  try {
+    const custom = localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM');
+    if (custom && STALE_URLS.includes(custom)) {
+      console.warn('[sheets] URL custom vieja detectada → migrando a default nueva.');
+      localStorage.removeItem('GOOGLE_SCRIPT_URL_CUSTOM');
+    }
+  } catch {/* ignore */}
+})();
+
 function getUrl(): string {
-  return localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM') ||
-    'https://script.google.com/macros/s/AKfycbyAAh-lYB1L72hTH72lpYDD0mcaAyeERLjJp1e0Ar0hhuZK8TszJdu-qmlN_cwi4sEncQ/exec';
+  return localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM') || DEFAULT_SCRIPT_URL;
 }
 
 export async function sheetsGet(params: Record<string, string>) {
