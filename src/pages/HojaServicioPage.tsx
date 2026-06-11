@@ -5,6 +5,7 @@
 // ══════════════════════════════════════════════════════════════
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getVeterancy } from '@/lib/barracones-data';
 import { useAppStore } from '@/lib/store';
 import { registerMissionFull, registerXPExpense } from '@/lib/sheets-service';
@@ -318,7 +319,10 @@ function PaperPilotRow({ player, index, isLast, onUpdate }: PaperPilotRowProps) 
         {/* XP misión */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: 8, letterSpacing: 2, color: C.goldDeep, fontFamily: '"Share Tech Mono", monospace', marginBottom: 2 }}>MISIÓN XP</div>
-          <input type="number" min={0} value={player.xpGanado}
+          <input type="number" min={0}
+            value={player.xpGanado || ''}
+            placeholder="0"
+            onFocus={e => e.target.select()}
             onChange={e => onUpdate(index, { xpGanado: Math.max(0, parseInt(e.target.value) || 0) })}
             style={{ ...inputBase, width: '100%', color: C.greenDeep, marginTop: 'auto' }} />
         </div>
@@ -332,7 +336,10 @@ function PaperPilotRow({ player, index, isLast, onUpdate }: PaperPilotRowProps) 
               background: C.paperHi + '88', color: C.redDeep, fontFamily: '"Share Tech Mono", monospace',
               fontSize: 14, lineHeight: 1, cursor: 'pointer',
             }}>−</button>
-            <input type="number" value={player.chequeos}
+            <input type="number"
+              value={player.chequeos || ''}
+              placeholder="0"
+              onFocus={e => e.target.select()}
               onChange={e => onUpdate(index, { chequeos: parseInt(e.target.value) || 0 })}
               style={{
                 ...inputBase, flex: 1, minWidth: 0,
@@ -416,7 +423,10 @@ function TesRow({ label, sign, value, onChange, color }: TesRowProps) {
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>{label}</div>
       <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color, width: 12, textAlign: 'center' }}>{sign}</span>
-      <input type="number" min={0} value={value}
+      <input type="number" min={0}
+        value={value || ''}
+        placeholder="0"
+        onFocus={e => e.target.select()}
         onChange={e => onChange(Math.max(0, parseInt(e.target.value) || 0))}
         style={{
           width: 100, height: 26,
@@ -434,6 +444,7 @@ function TesRow({ label, sign, value, onChange, color }: TesRowProps) {
 export function HojaServicioPage() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
+  const location = useLocation();
 
   const { roster, rosterLoading, campaign } = useAppStore();
 
@@ -492,8 +503,19 @@ export function HojaServicioPage() {
       if (rawG) { hudGastos = JSON.parse(rawG); localStorage.removeItem('kk_hoja_gastos_from_hud'); }
     } catch { /* ignore */ }
 
-    setPlayers(activos.map((r, i) => {
+    setPlayers(prev => activos.map((r, i) => {
       const hg = hudGastos?.[i];
+      const existing = prev.find(p => p.name === r.jugador);
+      // Si HUD trajo datos, sobrescribe. Si no, preserva valores en edición.
+      const xpGanado = hudXP != null
+        ? (hudXP[i] ?? 0)
+        : (existing?.xpGanado ?? 0);
+      const chequeos = hudGastos != null
+        ? (hg?.chequeos ?? 0)
+        : (existing?.chequeos ?? 0);
+      const rerolls = hudGastos != null
+        ? (hg?.rerolls ?? 0)
+        : (existing?.rerolls ?? 0);
       return {
         name:         r.jugador,
         nombre:       r.nombre || r.jugador,
@@ -502,14 +524,14 @@ export function HojaServicioPage() {
         xpTotal:      r.xpTotal,
         xpDisponible: r.xpDisponible,
         nivel:        getVeterancy(r.xpTotal).nombre,
-        xpGanado:     hudXP?.[i] ?? 0,
-        chequeos:     hg?.chequeos ?? 0,
-        rerolls:      hg?.rerolls ?? 0,
+        xpGanado,
+        chequeos,
+        rerolls,
         loading:      false,
       };
     }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roster, rosterLoading]);
+  }, [roster, rosterLoading, location.key]);
 
   const upd = useCallback((idx: number, patch: Partial<PlayerRow>) => {
     setPlayers(prev => prev.map((p, i) => i === idx ? { ...p, ...patch } : p));
