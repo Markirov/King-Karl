@@ -29,6 +29,7 @@ import { TelegramToggle } from '@/components/ui/TelegramToggle';
 import type { MechSlot } from '@/lib/combat-types';
 import {
   loadLibroMayor, commitLibroEntryAndTreasury, deleteLibroEntryAndTreasury,
+  loadMovimientos,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
   type LibroMayorEntry, type LibroMayorCategoria, type LibroMayorTipo,
   type PersonalEntry, type PersonalRol, type PersonalNivel, type PersonalEstado,
@@ -141,17 +142,20 @@ export function FinanzasPage() {
       height: '100%', overflow: 'auto',
       background: T.void, color: T.cream,
       fontFamily: 'Inter, sans-serif',
-      padding: '24px 36px 36px',
+      padding: '16px 24px 36px',
     }}>
-      {view === 'home' && (
-        <FinanzasHome
-          onLibro={() => { setFinanzasPendingModal(null); setActiveSubTab('libro-mayor'); }}
-          onCompras={() => goToLibroWithModal('compras')}
-          onTaller={() => goToLibroWithModal('taller')}
-          onPersonal={() => setActiveSubTab('personal')}
-          onProjector={() => goToLibroWithModal('projector')}
-        />
-      )}
+      {/* Barra de acciones fija para TODAS las sub-secciones */}
+      <FinanzasActionBar
+        activeView={view}
+        onHome={()      => { setFinanzasPendingModal(null); setActiveSubTab('home'); }}
+        onLibro={()     => { setFinanzasPendingModal(null); setActiveSubTab('libro-mayor'); }}
+        onCompras={()   => goToLibroWithModal('compras')}
+        onTaller={()    => goToLibroWithModal('taller')}
+        onPersonal={()  => setActiveSubTab('personal')}
+        onProjector={() => goToLibroWithModal('projector')}
+      />
+
+      {view === 'home' && <FinanzasHome />}
       {view === 'libro-mayor' && (
         <LibroMayorTab campaignDate={campaignDate} campaignYear={campaign?.campaignYear ?? 3026} campaignMonth={campaign?.campaignMonth ?? 1} roster={roster} />
       )}
@@ -161,10 +165,12 @@ export function FinanzasPage() {
 }
 
 // ══════════════════════════════════════════════════════════
-//  PORTADA — 5 botones grandes
+//  ACTION BAR — siempre visible, todas las sub-secciones
 // ══════════════════════════════════════════════════════════
 
-interface FinanzasHomeProps {
+interface FinanzasActionBarProps {
+  activeView: 'home' | 'libro-mayor' | 'personal';
+  onHome:      () => void;
   onLibro:     () => void;
   onCompras:   () => void;
   onTaller:    () => void;
@@ -172,67 +178,142 @@ interface FinanzasHomeProps {
   onProjector: () => void;
 }
 
-function FinanzasHome({ onLibro, onCompras, onTaller, onPersonal, onProjector }: FinanzasHomeProps) {
-  const BTN: React.CSSProperties = {
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-    gap: 12, padding: '40px 20px',
-    background: `linear-gradient(180deg, ${T.gold}10 0%, ${T.void} 100%)`,
-    border: `2px solid ${T.gold}`,
-    color: T.cream,
+function FinanzasActionBar({ activeView, onHome, onLibro, onCompras, onTaller, onPersonal, onProjector }: FinanzasActionBarProps) {
+  const BTN_BASE: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 8,
+    padding: '10px 14px',
+    background: T.void,
+    border: `1px solid ${T.gold}`,
+    color: T.gold,
     cursor: 'pointer',
-    fontFamily: '"Space Grotesk", sans-serif',
-    fontSize: 18, fontWeight: 700, letterSpacing: 2,
-    minHeight: 180,
-    clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)',
-    transition: 'all 0.15s ease',
+    fontFamily: '"Share Tech Mono", monospace',
+    fontSize: 11, letterSpacing: 2, fontWeight: 700,
+    clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%)',
+    transition: 'all 0.12s ease',
+    whiteSpace: 'nowrap',
   };
-  const ICON: React.CSSProperties = { fontSize: 56, lineHeight: 1 };
-  const hover = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.background = `linear-gradient(180deg, ${T.gold}30 0%, ${T.surface} 100%)`;
-    e.currentTarget.style.transform = 'translateY(-2px)';
-  };
-  const leave = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.background = `linear-gradient(180deg, ${T.gold}10 0%, ${T.void} 100%)`;
-    e.currentTarget.style.transform = 'none';
-  };
+  const active = (on: boolean): React.CSSProperties => on
+    ? { ...BTN_BASE, background: `${T.gold}25`, color: T.creamHi }
+    : BTN_BASE;
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', paddingTop: 20 }}>
-      <div style={{ marginBottom: 32 }}>
-        <SmallLabel>Finanzas · Centro de operaciones contable</SmallLabel>
+    <div style={{
+      display: 'flex', gap: 8, flexWrap: 'wrap',
+      marginBottom: 20, paddingBottom: 14,
+      borderBottom: `1px solid ${T.outlineV}`,
+    }}>
+      <button style={active(activeView === 'home')} onClick={onHome} title="Histórico">
+        📒 INICIO
+      </button>
+      <button style={active(activeView === 'libro-mayor')} onClick={onLibro}>
+        📒 LIBRO DE CUENTAS
+      </button>
+      <button style={BTN_BASE} onClick={onCompras}>🛒 COMPRAS</button>
+      <button style={BTN_BASE} onClick={onTaller}>🔧 TALLER</button>
+      <button style={active(activeView === 'personal')} onClick={onPersonal}>
+        👥 PERSONAL
+      </button>
+      <button style={BTN_BASE} onClick={onProjector}>📊 PROYECTAR MES</button>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+//  PORTADA — histórico movimientos
+// ══════════════════════════════════════════════════════════
+
+function FinanzasHome() {
+  const [movs, setMovs] = useState<{ fecha: string; dinero: number; gastos: number; tipo: string; descripcion: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    loadMovimientos(30).then(res => {
+      if (res.success && Array.isArray((res.data as any)?.movimientos)) {
+        setMovs((res.data as any).movimientos);
+      }
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const totalIngresos = movs.reduce((s, m) => s + (m.dinero  || 0), 0);
+  const totalGastos   = movs.reduce((s, m) => s + (m.gastos  || 0), 0);
+  const balance       = totalIngresos - totalGastos;
+
+  return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ marginBottom: 18 }}>
+        <SmallLabel>Histórico · últimos 30 movimientos</SmallLabel>
         <h1 style={{
           fontFamily: '"Space Grotesk", sans-serif',
-          fontSize: 36, fontWeight: 800, color: T.creamHi,
-          margin: '8px 0 0', letterSpacing: -0.5,
-        }}>FINANZAS</h1>
+          fontSize: 28, fontWeight: 800, color: T.creamHi,
+          margin: '6px 0 0', letterSpacing: -0.4,
+        }}>HISTÓRICO DE MOVIMIENTOS</h1>
       </div>
 
-      {/* Fila 1 — 3 botones */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 16 }}>
-        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onLibro}>
-          <div style={ICON}>📒</div>
-          <div>LIBRO DE CUENTAS</div>
-        </button>
-        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onCompras}>
-          <div style={ICON}>🛒</div>
-          <div>COMPRAS</div>
-        </button>
-        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onTaller}>
-          <div style={ICON}>🔧</div>
-          <div>TALLER</div>
-        </button>
+      {/* KPIs resumen */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 22 }}>
+        <Kpi label="Ingresos visibles" value={fmtMoney(totalIngresos)} color={T.greenDeep} />
+        <Kpi label="Gastos visibles"   value={fmtMoney(totalGastos)}   color={T.bloodLight} />
+        <Kpi label="Balance"           value={fmtMoney(balance)}        color={balance >= 0 ? T.greenDeep : T.bloodLight} />
       </div>
 
-      {/* Fila 2 — 2 botones */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onPersonal}>
-          <div style={ICON}>👥</div>
-          <div>PERSONAL</div>
-        </button>
-        <button style={BTN} onMouseEnter={hover} onMouseLeave={leave} onClick={onProjector}>
-          <div style={ICON}>📊</div>
-          <div>PROYECTAR MES</div>
-        </button>
+      {/* Tabla histórico */}
+      <div style={{ background: T.surface, border: `1px solid ${T.outlineV}` }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: '110px 90px 1fr 130px',
+          padding: '10px 14px', gap: 12,
+          borderBottom: `1px solid ${T.outlineV}`,
+          fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 2,
+        }}>
+          <div>FECHA</div>
+          <div>TIPO</div>
+          <div>CONCEPTO</div>
+          <div style={{ textAlign: 'right' }}>CANTIDAD ₡</div>
+        </div>
+
+        {loading && (
+          <div style={{ padding: 30, textAlign: 'center', color: T.outline, fontFamily: '"Share Tech Mono", monospace', fontSize: 11 }}>
+            Cargando histórico…
+          </div>
+        )}
+
+        {!loading && movs.length === 0 && (
+          <div style={{ padding: 30, textAlign: 'center', color: T.outline, fontFamily: '"Share Tech Mono", monospace', fontSize: 11 }}>
+            Sin movimientos registrados
+          </div>
+        )}
+
+        {!loading && movs.map((m, i) => {
+          const isIngreso = (m.dinero || 0) > 0;
+          const cantidad  = m.dinero || m.gastos || 0;
+          const color     = isIngreso ? T.greenDeep : T.bloodLight;
+          const fechaShort = m.fecha
+            ? new Date(m.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+            : '—';
+          return (
+            <div key={i} style={{
+              display: 'grid', gridTemplateColumns: '110px 90px 1fr 130px',
+              padding: '8px 14px', gap: 12, alignItems: 'center',
+              borderBottom: i < movs.length - 1 ? `1px solid ${T.outlineV}40` : 'none',
+              fontFamily: 'Inter, sans-serif', fontSize: 12,
+            }}>
+              <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: T.bone }}>{fechaShort}</div>
+              <div style={{
+                fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1,
+                color: isIngreso ? T.greenDeep : T.bloodLight,
+              }}>{isIngreso ? '➕ INGR' : '➖ GAST'}</div>
+              <div style={{ color: T.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {m.descripcion || m.tipo || '—'}
+              </div>
+              <div style={{
+                fontFamily: '"Share Tech Mono", monospace', fontSize: 12, fontWeight: 700,
+                textAlign: 'right', color,
+              }}>
+                {isIngreso ? '+' : '−'}{fmtMoney(Math.abs(cantidad))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -342,12 +423,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
         title="Libro Mayor"
         subtitle="Ingresos y gastos ad-hoc fuera de misión"
         action={!editorOpen ? (
-          <div style={{ display: 'flex', gap: 10 }}>
-            <SecondaryBtn onClick={() => setTallerOpen(true)}>🔧 TALLER</SecondaryBtn>
-            <SecondaryBtn onClick={() => setAcqOpen(true)}>🛒 COMPRAS</SecondaryBtn>
-            <SecondaryBtn onClick={() => setProjectorOpen(true)}>📊 PROYECTAR MES</SecondaryBtn>
-            <PrimaryBtn onClick={openNew}>+ NUEVA ENTRADA</PrimaryBtn>
-          </div>
+          <PrimaryBtn onClick={openNew}>+ NUEVA ENTRADA</PrimaryBtn>
         ) : null}
       />
 
