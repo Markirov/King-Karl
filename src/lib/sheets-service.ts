@@ -2,17 +2,19 @@
 // GOOGLE SHEETS SERVICE — Apps Script backend communication
 // ═══════════════════════════════════════════════════════════════
 
-// URL deployment activo del Apps Script (actualizada 2026-06-09)
+// URL deployment activo del Apps Script (fallback bundled).
+// Fuente de verdad: public/config.json (fetched al iniciar app).
 const DEFAULT_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbyIDYDFO2UyLJ7I6c0QadLU4O85gQWPoaaYo9HmObQaZloSq8bsy_ET_UevkLvDY61a9w/exec';
+
+const REMOTE_CONFIG_KEY = 'GOOGLE_SCRIPT_URL_REMOTE';
 
 // URLs viejas conocidas que deben migrarse silenciosamente a la nueva.
 const STALE_URLS = [
   'https://script.google.com/macros/s/AKfycbyAAh-lYB1L72hTH72lpYDD0mcaAyeERLjJp1e0Ar0hhuZK8TszJdu-qmlN_cwi4sEncQ/exec',
 ];
 
-// Migración auto: si el usuario tiene una URL custom vieja, la limpiamos
-// para que use la nueva default. Se ejecuta una vez al cargar el módulo.
+// Migración auto: si el usuario tiene una URL custom vieja, la limpiamos.
 (() => {
   try {
     const custom = localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM');
@@ -20,11 +22,51 @@ const STALE_URLS = [
       console.warn('[sheets] URL custom vieja detectada → migrando a default nueva.');
       localStorage.removeItem('GOOGLE_SCRIPT_URL_CUSTOM');
     }
+    const remote = localStorage.getItem(REMOTE_CONFIG_KEY);
+    if (remote && STALE_URLS.includes(remote)) {
+      localStorage.removeItem(REMOTE_CONFIG_KEY);
+    }
   } catch {/* ignore */}
 })();
 
+/**
+ * Prioridad URL:
+ *   1. CUSTOM (SecretMenu, override manual del usuario)
+ *   2. REMOTE (public/config.json, sync automático)
+ *   3. DEFAULT_SCRIPT_URL (bundled fallback)
+ */
 function getUrl(): string {
-  return localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM') || DEFAULT_SCRIPT_URL;
+  return localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM')
+      || localStorage.getItem(REMOTE_CONFIG_KEY)
+      || DEFAULT_SCRIPT_URL;
+}
+
+/**
+ * Sincroniza URL desde public/config.json (servido por GitHub Pages).
+ * Llamar al iniciar la app. Si la remote difiere de la cached, actualiza.
+ * No bloquea: silencioso si falla.
+ */
+export async function syncScriptUrlFromRemote(): Promise<void> {
+  try {
+    const base = (import.meta as any).env?.BASE_URL ?? '/';
+    const res = await fetch(`${base}config.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return;
+    const cfg = await res.json();
+    const remoteUrl = String(cfg?.scriptUrl || '').trim();
+    if (!remoteUrl || !remoteUrl.startsWith('https://script.google.com/')) return;
+
+    const cached = localStorage.getItem(REMOTE_CONFIG_KEY);
+    if (cached !== remoteUrl) {
+      localStorage.setItem(REMOTE_CONFIG_KEY, remoteUrl);
+      console.log('[sheets] Script URL sincronizada desde config.json:', remoteUrl);
+      // Limpia STALE_URLS por si remote ya migró
+      if (STALE_URLS.includes(localStorage.getItem('GOOGLE_SCRIPT_URL_CUSTOM') || '')) {
+        localStorage.removeItem('GOOGLE_SCRIPT_URL_CUSTOM');
+      }
+    }
+  } catch (e) {
+    console.warn('[sheets] No se pudo sincronizar URL remota:', e);
+  }
 }
 
 export async function sheetsGet(params: Record<string, string>) {

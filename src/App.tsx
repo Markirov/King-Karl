@@ -5,7 +5,7 @@ import { Header } from '@/components/shell/Header';
 import { SectionTabs } from '@/components/shell/SectionTabs';
 import { useAppStore } from '@/lib/store';
 import { getPaletteForPath, getNavItemByPath } from '@/lib/navigation';
-import { loadConfig } from '@/lib/sheets-service';
+import { loadConfig, syncScriptUrlFromRemote } from '@/lib/sheets-service';
 import { loadRoster } from '@/lib/roster';
 
 // Pages
@@ -28,6 +28,12 @@ import { PortadaPage } from '@/pages/PortadaPage';
 export function App() {
   const location = useLocation();
   const { setActivePalette, setCampaign, useLegacyDesigns, setRoster, setRosterLoading } = useAppStore();
+
+  // Sync URL Apps Script desde public/config.json antes de cargar nada más.
+  // Si la URL cambió en config.json, la app la recoge transparente sin redeploy.
+  useEffect(() => {
+    syncScriptUrlFromRemote();
+  }, []);
 
   // Load campaign config from Google Sheets on startup
   useEffect(() => {

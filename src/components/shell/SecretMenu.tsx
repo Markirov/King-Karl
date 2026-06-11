@@ -215,6 +215,22 @@ export function SecretMenu({ open, onClose }: Props) {
                     <input value={scriptUrl} onChange={e => setScriptUrl(e.target.value)}
                       placeholder="https://script.google.com/macros/s/..."
                       className="w-full h-8 bg-surface-container-lowest border border-outline-variant/25 px-2 font-mono text-[10px] text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container" />
+                    <button
+                      onClick={async () => {
+                        const { syncScriptUrlFromRemote } = await import('@/lib/sheets-service');
+                        await syncScriptUrlFromRemote();
+                        const remote = localStorage.getItem('GOOGLE_SCRIPT_URL_REMOTE');
+                        if (remote) {
+                          alert(`URL sincronizada desde config.json:\n${remote}\n\nRecarga la app (F5) para usarla.`);
+                        } else {
+                          alert('No se pudo leer config.json o no contiene scriptUrl válida.');
+                        }
+                      }}
+                      className="w-full h-7 bg-secondary/10 hover:bg-secondary/25 border border-secondary/40 text-secondary font-mono text-[9px] uppercase tracking-widest transition-colors"
+                      title="Descarga la URL del config.json remoto y la actualiza en localStorage"
+                    >
+                      ↻ Sync desde config.json
+                    </button>
                   </div>
 
                   {/* ─ Crónicas / Campaña ─ */}
