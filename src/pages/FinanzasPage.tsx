@@ -29,7 +29,6 @@ import { TelegramToggle } from '@/components/ui/TelegramToggle';
 import type { MechSlot } from '@/lib/combat-types';
 import {
   loadLibroMayor, commitLibroEntryAndTreasury, deleteLibroEntryAndTreasury,
-  loadMovimientos,
   loadPersonal, savePersonalEntry, deletePersonalEntry,
   type LibroMayorEntry, type LibroMayorCategoria, type LibroMayorTipo,
   type PersonalEntry, type PersonalRol, type PersonalNivel, type PersonalEstado,
@@ -223,26 +222,54 @@ function FinanzasActionBar({ activeView, onHome, onLibro, onCompras, onTaller, o
 // ══════════════════════════════════════════════════════════
 
 function FinanzasHome() {
-  const [movs, setMovs] = useState<{ fecha: string; dinero: number; gastos: number; tipo: string; descripcion: string }[]>([]);
+  const { setActiveSubTab } = useAppStore();
+  const [entries, setEntries] = useState<LibroMayorEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editing, setEditing] = useState<LibroMayorEntry | null>(null);
 
-  useEffect(() => {
+  const refresh = async () => {
     setLoading(true);
-    loadMovimientos(30).then(res => {
-      if (res.success && Array.isArray((res.data as any)?.movimientos)) {
-        setMovs((res.data as any).movimientos);
-      }
-    }).finally(() => setLoading(false));
-  }, []);
+    const res = await loadLibroMayor();
+    if (res.success && Array.isArray((res.data as any)?.entries)) {
+      setEntries((res.data as any).entries as LibroMayorEntry[]);
+    }
+    setLoading(false);
+  };
 
-  const totalIngresos = movs.reduce((s, m) => s + (m.dinero  || 0), 0);
-  const totalGastos   = movs.reduce((s, m) => s + (m.gastos  || 0), 0);
+  useEffect(() => { refresh(); }, []);
+
+  // Últimos 30 ordenados por fecha desc
+  const sorted = useMemo(
+    () => [...entries].sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '')).slice(0, 30),
+    [entries],
+  );
+
+  const totalIngresos = sorted.filter(e => e.tipo === 'ingreso').reduce((s, e) => s + (e.cantidad || 0), 0);
+  const totalGastos   = sorted.filter(e => e.tipo === 'gasto').reduce((s, e) => s + (e.cantidad || 0), 0);
   const balance       = totalIngresos - totalGastos;
+
+  const handleSave = async () => {
+    if (!editing) return;
+    const payload = { ...editing, id: editing.id || genId('lm') };
+    const prevEntry = editing.id ? entries.find(e => e.id === editing.id) ?? null : null;
+    setEditorOpen(false);
+    setEditing(null);
+    await commitLibroEntryAndTreasury(payload, prevEntry);
+    refresh();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Borrar entrada del Libro Mayor?')) return;
+    const entry = entries.find(e => e.id === id);
+    if (entry) await deleteLibroEntryAndTreasury(entry);
+    refresh();
+  };
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
       <div style={{ marginBottom: 18 }}>
-        <SmallLabel>Histórico · últimos 30 movimientos</SmallLabel>
+        <SmallLabel>Histórico · últimas 30 entradas del Libro Mayor</SmallLabel>
         <h1 style={{
           fontFamily: '"Space Grotesk", sans-serif',
           fontSize: 28, fontWeight: 800, color: T.creamHi,
@@ -250,17 +277,29 @@ function FinanzasHome() {
         }}>HISTÓRICO DE MOVIMIENTOS</h1>
       </div>
 
-      {/* KPIs resumen */}
+      {/* KPIs resumen (sobre lo visible) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 22 }}>
         <Kpi label="Ingresos visibles" value={fmtMoney(totalIngresos)} color={T.greenDeep} />
         <Kpi label="Gastos visibles"   value={fmtMoney(totalGastos)}   color={T.bloodLight} />
         <Kpi label="Balance"           value={fmtMoney(balance)}        color={balance >= 0 ? T.greenDeep : T.bloodLight} />
       </div>
 
+      {/* Editor inline */}
+      {editorOpen && editing && (
+        <div style={{ marginBottom: 18 }}>
+          <LibroMayorEditor
+            entry={editing}
+            setEntry={setEditing}
+            onSave={handleSave}
+            onCancel={() => { setEditorOpen(false); setEditing(null); }}
+          />
+        </div>
+      )}
+
       {/* Tabla histórico */}
       <div style={{ background: T.surface, border: `1px solid ${T.outlineV}` }}>
         <div style={{
-          display: 'grid', gridTemplateColumns: '110px 90px 1fr 130px',
+          display: 'grid', gridTemplateColumns: '100px 80px 1fr 130px 110px',
           padding: '10px 14px', gap: 12,
           borderBottom: `1px solid ${T.outlineV}`,
           fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 2,
@@ -269,6 +308,7 @@ function FinanzasHome() {
           <div>TIPO</div>
           <div>CONCEPTO</div>
           <div style={{ textAlign: 'right' }}>CANTIDAD ₡</div>
+          <div style={{ textAlign: 'right' }}>ACCIONES</div>
         </div>
 
         {loading && (
@@ -277,44 +317,61 @@ function FinanzasHome() {
           </div>
         )}
 
-        {!loading && movs.length === 0 && (
+        {!loading && sorted.length === 0 && (
           <div style={{ padding: 30, textAlign: 'center', color: T.outline, fontFamily: '"Share Tech Mono", monospace', fontSize: 11 }}>
-            Sin movimientos registrados
+            Sin entradas registradas
           </div>
         )}
 
-        {!loading && movs.map((m, i) => {
-          const isIngreso = (m.dinero || 0) > 0;
-          const cantidad  = m.dinero || m.gastos || 0;
+        {!loading && sorted.map((e, i) => {
+          const isIngreso = e.tipo === 'ingreso';
           const color     = isIngreso ? T.greenDeep : T.bloodLight;
-          const fechaShort = m.fecha
-            ? new Date(m.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+          const fechaShort = e.fecha
+            ? new Date(e.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: '2-digit' })
             : '—';
           return (
-            <div key={i} style={{
-              display: 'grid', gridTemplateColumns: '110px 90px 1fr 130px',
+            <div key={e.id || i} style={{
+              display: 'grid', gridTemplateColumns: '100px 80px 1fr 130px 110px',
               padding: '8px 14px', gap: 12, alignItems: 'center',
-              borderBottom: i < movs.length - 1 ? `1px solid ${T.outlineV}40` : 'none',
+              borderBottom: i < sorted.length - 1 ? `1px solid ${T.outlineV}40` : 'none',
               fontFamily: 'Inter, sans-serif', fontSize: 12,
             }}>
               <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: T.bone }}>{fechaShort}</div>
               <div style={{
                 fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1,
-                color: isIngreso ? T.greenDeep : T.bloodLight,
+                color,
               }}>{isIngreso ? '➕ INGR' : '➖ GAST'}</div>
-              <div style={{ color: T.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {m.descripcion || m.tipo || '—'}
+              <div style={{ color: T.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                title={e.nota || ''}>
+                {e.concepto || '—'}
               </div>
               <div style={{
                 fontFamily: '"Share Tech Mono", monospace', fontSize: 12, fontWeight: 700,
                 textAlign: 'right', color,
               }}>
-                {isIngreso ? '+' : '−'}{fmtMoney(Math.abs(cantidad))}
+                {isIngreso ? '+' : '−'}{fmtMoney(Math.abs(e.cantidad || 0))}
+              </div>
+              <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                <button onClick={() => { setEditing({ ...e }); setEditorOpen(true); }} style={smallBtn(T.gold)}>EDIT</button>
+                <button onClick={() => handleDelete(e.id)} style={smallBtn(T.bloodLight)}>×</button>
               </div>
             </div>
           );
         })}
       </div>
+
+      {entries.length > 30 && !loading && (
+        <div style={{ marginTop: 12, textAlign: 'center' }}>
+          <button onClick={() => setActiveSubTab('libro-mayor')} style={{
+            background: 'transparent', border: 'none',
+            color: T.gold, cursor: 'pointer',
+            fontFamily: '"Share Tech Mono", monospace', fontSize: 11, letterSpacing: 2,
+            textDecoration: 'underline',
+          }}>
+            VER LIBRO MAYOR COMPLETO ({entries.length} entradas) →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -587,18 +644,22 @@ function LibroMayorEditor({ entry, setEntry, onSave, onCancel }: {
   onSave: () => void;
   onCancel: () => void;
 }) {
-  const valid = entry.concepto.trim().length > 0 && entry.cantidad > 0;
+  const valid = entry.concepto.trim().length > 0 && entry.cantidad >= 0;
+
+  // Normaliza fecha a YYYY-MM-DD (input date lo exige)
+  const fechaInput = (entry.fecha || '').slice(0, 10);
 
   return (
     <div style={editorBox}>
-      <SmallLabel>{entry.id ? 'Editar Entrada' : 'Nueva Entrada'}</SmallLabel>
+      <SmallLabel>{entry.id ? `Editar Entrada · ${entry.id}` : 'Nueva Entrada'}</SmallLabel>
+
       <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 160px 140px', gap: 12, marginTop: 10 }}>
-        <FieldLabel>Fecha</FieldLabel>
+        <FieldLabel>Fecha (campaña)</FieldLabel>
         <FieldLabel>Concepto</FieldLabel>
         <FieldLabel>Categoría</FieldLabel>
         <FieldLabel>Cantidad ₡</FieldLabel>
 
-        <input type="date" value={entry.fecha.slice(0, 10)}
+        <input type="date" value={fechaInput}
           onChange={e => setEntry({ ...entry, fecha: e.target.value })}
           style={inputStyle} />
         <input type="text" value={entry.concepto}
@@ -621,6 +682,25 @@ function LibroMayorEditor({ entry, setEntry, onSave, onCancel }: {
           style={{ ...inputStyle, fontFamily: '"Share Tech Mono", monospace', textAlign: 'right' }} />
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 12, marginTop: 12 }}>
+        <div>
+          <FieldLabel>Tipo</FieldLabel>
+          <select value={entry.tipo}
+            onChange={e => setEntry({ ...entry, tipo: e.target.value as LibroMayorTipo })}
+            style={inputStyle}>
+            <option value="ingreso">ingreso (+)</option>
+            <option value="gasto">gasto (−)</option>
+          </select>
+        </div>
+        <div>
+          <FieldLabel>Jugador relacionado (opcional)</FieldLabel>
+          <input type="text" value={entry.jugador}
+            onChange={e => setEntry({ ...entry, jugador: e.target.value })}
+            placeholder="Handle del jugador (Marcos, Jaime…)"
+            style={inputStyle} />
+        </div>
+      </div>
+
       <div style={{ marginTop: 12 }}>
         <FieldLabel>Nota (opcional)</FieldLabel>
         <input type="text" value={entry.nota}
@@ -629,17 +709,9 @@ function LibroMayorEditor({ entry, setEntry, onSave, onCancel }: {
           style={inputStyle} />
       </div>
 
-      <div style={{ marginTop: 12 }}>
-        <FieldLabel>Jugador relacionado (opcional)</FieldLabel>
-        <input type="text" value={entry.jugador}
-          onChange={e => setEntry({ ...entry, jugador: e.target.value })}
-          placeholder="Handle del jugador (Marcos, Jaime…)"
-          style={inputStyle} />
-      </div>
-
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
         <SecondaryBtn onClick={onCancel}>Cancelar</SecondaryBtn>
-        <PrimaryBtn disabled={!valid} onClick={onSave}>Guardar</PrimaryBtn>
+        <PrimaryBtn disabled={!valid} onClick={onSave}>{entry.id ? 'Guardar cambios' : 'Crear entrada'}</PrimaryBtn>
       </div>
     </div>
   );
