@@ -102,9 +102,13 @@ export function App() {
 
       {/* Content area */}
       <main
+        style={hasTabs
+          ? { marginTop: 'calc(48px + var(--tabs-h, 40px))', height: 'calc(100vh - 48px - var(--tabs-h, 40px))' }
+          : undefined
+        }
         className={`
           2xl:ml-[220px] overflow-y-auto overflow-x-hidden custom-scrollbar
-          ${hasTabs ? 'mt-[88px] h-[calc(100vh-88px)]' : 'mt-12 h-[calc(100vh-48px)]'}
+          ${hasTabs ? '' : 'mt-12 h-[calc(100vh-48px)]'}
         `}
       >
         <Routes>
