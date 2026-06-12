@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { MechState, MechSession } from '@/lib/combat-types';
 import { ARMOR_SLOTS } from '@/lib/combat-data';
@@ -54,6 +54,20 @@ export function ArmorDiagram({ state, session, selectedSection, damageAmount, se
   const MECH_ZONES = state.isQuad ? MECH_ZONES_QUAD : MECH_ZONES_BIPED;
   const detailRef = useRef<HTMLDivElement>(null);
   useDismissable(detailRef, !!selectedSection, () => setSelectedSection(null));
+
+  // Bloquea scroll/pan/zoom mientras el detail panel (slider de daños) esté abierto.
+  // Evita que en tablet con zoom se mueva la pantalla mientras ajustas el slider.
+  useEffect(() => {
+    if (!selectedSection) return;
+    const prevOverflow = document.body.style.overflow;
+    const prevTouchAction = document.body.style.touchAction;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouchAction;
+    };
+  }, [selectedSection]);
   return (
     <div className="bg-surface-container p-4 relative clip-chamfer border-t-2 border-primary-container/40 h-full flex flex-col">
       <div className="flex items-center justify-between mb-2 z-10">

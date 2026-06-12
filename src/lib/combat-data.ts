@@ -560,6 +560,16 @@ export function mechAdjustAmmoBin(session: MechSession, binId: number, delta: nu
   return s;
 }
 
+/** Ajusta calor manualmente (flames, infierno, etc). Clamp [0, 99]. */
+export function mechAdjustHeat(session: MechSession, delta: number): MechSession {
+  const s = structuredClone(session);
+  const before = s.heat;
+  s.heat = Math.max(0, Math.min(99, s.heat + delta));
+  if (s.heat === before) return session;
+  s.logs.unshift(`> HEAT ajuste manual: ${before} → ${s.heat} (${delta > 0 ? '+' : ''}${delta})`);
+  return s;
+}
+
 // ── Heat Calculation ──
 
 export interface HeatDelta {

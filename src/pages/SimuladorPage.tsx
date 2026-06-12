@@ -218,7 +218,7 @@ export function SimuladorPage() {
               <Crosshair size={20} /> {ss.destroyed ? 'DESTRUIDO' : 'Fin de Turno'}
             </button>
 
-            <HeatMonitor state={ms} session={ss} />
+            <HeatMonitor state={ms} session={ss} onAdjustHeat={sim.adjustHeat} />
           </div>
 
           {/* Center: Armor Diagram */}

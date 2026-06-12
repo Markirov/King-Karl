@@ -8,7 +8,7 @@ import type { DamageFlags } from '@/lib/combat-types';
 import { loadLocalSnapshot, saveLocalSnapshot, clearLocalSnapshot } from '@/lib/simulador-persistence';
 import type { SimuladorSnapshot } from '@/lib/simulador-persistence';
 import {
-  mechInitSession, mechApplyDamage, mechApplyHeal, mechForceRevive, mechAdjustAmmoBin,
+  mechInitSession, mechApplyDamage, mechApplyHeal, mechForceRevive, mechAdjustAmmoBin, mechAdjustHeat,
   mechNextTurn, mechToggleWeapon, mechToggleCrit,
   calcGunneryTotal, calcPilotingTotal,
   countSystemCritHits, canFire,
@@ -337,6 +337,11 @@ const [damageAmount, setDamageAmount] = useState(0);
     updateMechSession(s => mechAdjustAmmoBin(s, binId, delta));
   };
 
+  const adjustHeat = (delta: number) => {
+    if (!mechSession) return;
+    updateMechSession(s => mechAdjustHeat(s, delta));
+  };
+
   const setMoveMode = (mode: MoveMode) => {
     updateMechSession(s => ({ ...s, moveMode: mode }));
   };
@@ -657,7 +662,7 @@ const [damageAmount, setDamageAmount] = useState(0);
     toggleWeapon, handleFire,
     handleDamage, applyDamageToSelected,
     toggleCrit,
-    forceReviveMech, adjustAmmo,
+    forceReviveMech, adjustAmmo, adjustHeat,
     setMoveMode, setJumpUsed,
     setWounds, setPilot, setPilotFull, resetLog,
 

@@ -1,9 +1,13 @@
 import type { MechState, MechSession } from '@/lib/combat-types';
 import { getHeatWarnings, mechCalcHeatDelta } from '@/lib/combat-data';
 
-interface Props { state: MechState; session: MechSession; }
+interface Props {
+  state: MechState;
+  session: MechSession;
+  onAdjustHeat?: (delta: number) => void;
+}
 
-export function HeatMonitor({ state, session }: Props) {
+export function HeatMonitor({ state, session, onAdjustHeat }: Props) {
   const warnings = getHeatWarnings(session.heat);
   const hd = mechCalcHeatDelta(state, session);
   const pct = Math.min(100, (session.heat / 30) * 100);
@@ -40,6 +44,24 @@ export function HeatMonitor({ state, session }: Props) {
         : severity === 'warning' ? 'bg-on-tertiary/10 border-on-tertiary-fixed-variant/30 text-on-tertiary-container'
         : 'bg-secondary/10 border-secondary/30 text-secondary'
       }`}>{warnings.join(' | ')}</div>
+
+      {/* Ajuste manual de calor (flames, infierno, etc) */}
+      {onAdjustHeat && (
+        <div className="mt-2 border-t border-outline-variant pt-2">
+          <div className="flex items-center justify-between text-[8px] font-mono text-secondary/60 uppercase tracking-widest mb-1">
+            <span>Ajuste manual</span>
+            <span>llamas / infierno</span>
+          </div>
+          <div className="grid grid-cols-6 gap-1">
+            <button onClick={() => onAdjustHeat(-5)} className="bg-secondary/10 hover:bg-secondary/30 border border-secondary/40 text-secondary font-mono text-[10px] py-1.5">−5</button>
+            <button onClick={() => onAdjustHeat(-1)} className="bg-secondary/10 hover:bg-secondary/30 border border-secondary/40 text-secondary font-mono text-[10px] py-1.5">−1</button>
+            <button onClick={() => onAdjustHeat(+1)} className="bg-error/10 hover:bg-error/30 border border-error/40 text-error font-mono text-[10px] py-1.5">+1</button>
+            <button onClick={() => onAdjustHeat(+2)} className="bg-error/10 hover:bg-error/30 border border-error/40 text-error font-mono text-[10px] py-1.5">+2</button>
+            <button onClick={() => onAdjustHeat(+5)} className="bg-error/10 hover:bg-error/30 border border-error/40 text-error font-mono text-[10px] py-1.5">+5</button>
+            <button onClick={() => onAdjustHeat(+10)} className="bg-error/20 hover:bg-error/40 border border-error text-error font-mono text-[10px] py-1.5 font-bold">+10</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
