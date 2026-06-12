@@ -121,6 +121,33 @@ export function FuerzaSyncBar({
   const handleLoadSlot = (slot: FuerzaSlot) => {
     const entry = slots[slot];
     if (!entry?.snapshot?.schemaVersion) return;
+
+    // Confirmación: cargar sobreescribe el estado actual del simulador.
+    // Si hay unidades cargadas o cambios sin guardar, avisa.
+    const snap = entry.snapshot;
+    const occupied = (snap.mechSlots?.filter(s => s?.state).length ?? 0)
+                  + (snap.vehicleSlots?.filter(s => s?.state).length ?? 0);
+
+    const currentSnap = getSnapshot();
+    const currentOccupied = (currentSnap.mechSlots?.filter(s => s?.state).length ?? 0)
+                          + (currentSnap.vehicleSlots?.filter(s => s?.state).length ?? 0);
+
+    const warningParts: string[] = [
+      `Cargar FUERZA${slot} (${entry.nombre || '—'})`,
+      `${occupied} unidad${occupied !== 1 ? 'es' : ''} · ${entry.bv} BV`,
+      '',
+      '⚠ Esto SOBREESCRIBE el estado actual del simulador.',
+    ];
+    if (currentOccupied > 0) {
+      warningParts.push(`Tienes ${currentOccupied} unidad${currentOccupied !== 1 ? 'es' : ''} cargada${currentOccupied !== 1 ? 's' : ''} ahora.`);
+    }
+    if (dirty) {
+      warningParts.push('⚠ Hay cambios LOCALES sin guardar — se perderán.');
+    }
+    warningParts.push('', '¿Continuar?');
+
+    if (!confirm(warningParts.join('\n'))) return;
+
     hydrateFromSnapshot(entry.snapshot);
     setSlotsPanelOpen(false);
     markSynced();
