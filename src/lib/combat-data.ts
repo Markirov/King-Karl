@@ -438,8 +438,28 @@ export function mechApplyDamage(
 
   if (remaining <= 0) return { session: s, logs };
 
-  // 2. IS
   const isKey = slotDef.ik;
+
+  // 1.5 Localización YA destruida (IS≤0 previamente) — transfer directo al siguiente
+  // Aplica cada vez, no solo la primera. Bug fix: antes el damage se "comía" en una loc muerta.
+  const maxIS = state.is[isKey as keyof typeof state.is] ?? 0;
+  if (maxIS > 0 && (s.is[isKey] ?? 0) <= 0) {
+    const transferTo = DAMAGE_TRANSFER[isKey];
+    if (transferTo) {
+      const tArmorKey = transferTo === 'CT' ? 'CTf'
+                      : transferTo === 'LT' ? 'LTf'
+                      : transferTo === 'RT' ? 'RTf'
+                      : transferTo;
+      logs.push(`> ${isKey} ya DESTRUIDO — TRANSFER: ${remaining} → ${transferTo}`);
+      const sub = mechApplyDamage(state, s, tArmorKey, remaining);
+      return { session: sub.session, logs: [...logs, ...sub.logs] };
+    }
+    // Sin transfer (CT/HD) → daño absorbido por nada (ya está destruido el mech)
+    logs.push(`> ${isKey} ya DESTRUIDO — damage descartado`);
+    return { session: s, logs };
+  }
+
+  // 2. IS
   if (s.is[isKey] !== undefined && s.is[isKey] > 0) {
     const absorbed = Math.min(remaining, s.is[isKey]);
     s.is[isKey] -= absorbed;
