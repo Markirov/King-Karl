@@ -282,6 +282,67 @@ export async function clearFuerzaConfigSlot(slot: FuerzaSlot) {
   });
 }
 
+// ── Enemigos HUD — slots fijos en Configuracion (ENEMIGO1..ENEMIGO5) ──
+
+export type EnemigoSlot = 1 | 2 | 3 | 4 | 5;
+
+export interface EnemigoUnitMinimal {
+  name:  string;
+  xp:    number;
+  color: string;
+}
+
+export interface EnemigoConfigEntry {
+  nombre:    string;
+  count:     number;
+  totalBV:   number;
+  updatedAt: string;
+  enemies:   EnemigoUnitMinimal[];
+}
+
+const enemigoKey = (slot: EnemigoSlot) => `ENEMIGO${slot}` as const;
+
+/** Guarda fuerza enemiga en slot ENEMIGO1..5 de Configuracion. */
+export async function saveEnemigoConfigSlot(
+  slot: EnemigoSlot,
+  payload: { nombre: string; enemies: EnemigoUnitMinimal[] },
+) {
+  const totalBV = payload.enemies.reduce((s, e) => s + (e.xp || 0), 0);
+  const entry: EnemigoConfigEntry = {
+    nombre:    payload.nombre,
+    count:     payload.enemies.length,
+    totalBV,
+    updatedAt: new Date().toISOString(),
+    enemies:   payload.enemies,
+  };
+  return sheetsPost({
+    action: 'saveConfiguracionBatch',
+    config: JSON.stringify({ [enemigoKey(slot)]: JSON.stringify(entry) }),
+  });
+}
+
+/** Lee los 5 slots ENEMIGO en una sola request. */
+export async function loadAllEnemigoConfigSlots(): Promise<Record<EnemigoSlot, EnemigoConfigEntry | null>> {
+  const res = await loadConfig();
+  const out: Record<EnemigoSlot, EnemigoConfigEntry | null> = { 1: null, 2: null, 3: null, 4: null, 5: null };
+  if (!res?.success) return out;
+  const cfg = (res.data as any)?.config ?? res.data;
+  ([1, 2, 3, 4, 5] as EnemigoSlot[]).forEach(s => {
+    const raw = cfg?.[enemigoKey(s)];
+    if (!raw) return;
+    try { out[s] = JSON.parse(raw) as EnemigoConfigEntry; } catch {}
+  });
+  return out;
+}
+
+/** Borra slot ENEMIGO (escribe '' en celda). */
+export async function clearEnemigoConfigSlot(slot: EnemigoSlot) {
+  return sheetsPost({
+    action: 'saveConfiguracionBatch',
+    config: JSON.stringify({ [enemigoKey(slot)]: '' }),
+  });
+}
+
 export const saveFuerza = (data: {
   id?: string;
   nombre: string;

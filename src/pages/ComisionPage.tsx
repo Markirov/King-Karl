@@ -191,7 +191,7 @@ interface MechAssetProps {
   weight: number; weightClass: string; bv: number; price: number; status: string; damage: number;
   img: string; imgScale?: number; imgOffsetX?: number;
 }
-function MechAsset({ pilot, call, chassis, weight, weightClass, bv, price, status, damage, img, imgScale = 1, imgOffsetX = 0 }: MechAssetProps) {
+function MechAsset({ pilot, call, chassis, weight, weightClass, bv, price, status, damage, simDamagePct }: MechAssetProps) {
   const warn = status !== 'READY';
   const statusColor = warn ? T.bloodLight : T.ice;
   const infoColor = warn ? T.bloodLight : T.outline;
@@ -201,99 +201,68 @@ function MechAsset({ pilot, call, chassis, weight, weightClass, bv, price, statu
       position: 'relative',
       background: T.surfaceLow,
       borderLeft: `2px solid ${warn ? T.bloodDark : T.gold}`,
-      padding: '12px 14px',
-      display: 'grid', gridTemplateColumns: '120px 1fr', gap: 14,
-      clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)',
-      minHeight: 148, overflow: 'hidden',
+      padding: '8px 10px',
+      display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 6,
+      clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%)',
+      minHeight: 90, overflow: 'hidden',
     }}>
-      {/* Mech image panel */}
-      <div style={{
-        background: T.void,
-        borderLeft: `1px solid ${T.outlineV}`,
-        position: 'relative',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden',
-      }}>
-        {/* Scanline backdrop */}
+      {/* Header */}
+      <div style={{ minWidth: 0 }}>
+        {/* Nombre del Piloto */}
         <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.025) 50%)',
-          backgroundSize: '100% 3px',
-        }} />
-        {/* Grid reticle */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage:
-            `linear-gradient(${T.outlineV} 1px, transparent 1px),` +
-            `linear-gradient(90deg, ${T.outlineV} 1px, transparent 1px)`,
-          backgroundSize: '16px 16px', opacity: 0.15,
-        }} />
-        <img src={img} alt={chassis} style={{
-          position: 'relative', zIndex: 2,
-          width: `${70 * imgScale}%`, height: `${70 * imgScale}%`,
-          objectFit: 'contain',
-          transform: `translateX(${imgOffsetX}px)`,
-          filter: warn
-            ? 'saturate(0.4) brightness(0.85) sepia(0.3) hue-rotate(-20deg)'
-            : 'saturate(0.85) contrast(1.05)',
-          mixBlendMode: 'luminosity',
-        }} />
-        {/* Tonnage chip */}
-        <div style={{
-          position: 'absolute', top: 4, left: 4, zIndex: 3,
-          fontFamily: '"Share Tech Mono", monospace', fontSize: 9,
-          color: T.gold, letterSpacing: 1,
-          background: 'rgba(10,14,20,0.7)', padding: '1px 4px',
-        }}>{weight}t</div>
-        {/* Damaged chip */}
-        {warn && (
+          fontFamily: '"Space Grotesk", sans-serif', fontSize: 12, fontWeight: 700,
+          color: T.creamHi, letterSpacing: 0.2, lineHeight: 1.1, marginBottom: 2,
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>{pilot}</div>
+        
+        {/* Apodo (Se mantiene en medio) */}
+        <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 8.5, color: T.gold, letterSpacing: 1.2 }}>
+          ‹ {call.toUpperCase()} ›
+        </div>
+        
+        {/* Modelo/Chassis y Tonelaje */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 6, marginTop: 1 }}>
           <div style={{
-            position: 'absolute', bottom: 4, left: 4, right: 4, zIndex: 3,
-            fontFamily: '"Share Tech Mono", monospace', fontSize: 8,
-            color: T.bloodLight, letterSpacing: 2, textAlign: 'center',
-            background: 'rgba(122,22,32,0.7)', padding: '2px 0',
-          }}>⚠ DAÑADO</div>
-        )}
+            fontFamily: 'Inter, sans-serif', fontSize: 10, color: T.bone,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            flex: 1, minWidth: 0,
+          }}>{chassis}</div>
+          <div style={{
+            fontFamily: '"Share Tech Mono", monospace', fontSize: 9,
+            color: T.gold, letterSpacing: 1, flexShrink: 0,
+          }}>{weight}t</div>
+        </div>
       </div>
 
-      {/* Info */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
-        <div>
+      {/* Damage bar + stats */}
+      <div>
+        <div style={{ height: 2, background: T.void, position: 'relative', overflow: 'hidden' }}>
           <div style={{
-            fontFamily: '"Space Grotesk", sans-serif', fontSize: 14, fontWeight: 700,
-            color: T.creamHi, letterSpacing: 0.3, lineHeight: 1.1,
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>{chassis}</div>
-          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9.5, color: T.gold, letterSpacing: 1.5, marginTop: 4 }}>
-            ‹ {call.toUpperCase()} ›
-          </div>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: T.bone, marginTop: 2 }}>{pilot}</div>
+            position: 'absolute', left: 0, top: 0, bottom: 0,
+            width: `${100 - damage}%`,
+            background: damage > 30 ? T.bloodDark : damage > 0 ? T.cream : T.gold,
+          }} />
         </div>
-
-        {/* Damage bar */}
-        <div style={{ marginTop: 8 }}>
-          <div style={{ height: 3, background: T.void, position: 'relative', overflow: 'hidden' }}>
-            <div style={{
-              position: 'absolute', left: 0, top: 0, bottom: 0,
-              width: `${100 - damage}%`,
-              background: damage > 30 ? T.bloodDark : damage > 0 ? T.cream : T.gold,
-            }} />
-          </div>
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', marginTop: 5,
-            fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: 1.5,
-          }}>
-            <span style={{ color: statusColor }}>{status}</span>
-            <span style={{ color: statusColor }}>{weightClass}</span>
-          </div>
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', marginTop: 2,
-            fontFamily: '"Share Tech Mono", monospace', fontSize: 9,
-            color: T.outline, letterSpacing: 1.5,
-          }}>
-            <span style={{ color: infoColor }}>PRECIO {formatCzar(price)}</span>
-            <span>BV {bv.toLocaleString('es-ES', { useGrouping: 'always' })}</span>
-          </div>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', marginTop: 3,
+          fontFamily: '"Share Tech Mono", monospace', fontSize: 8, letterSpacing: 1,
+        }}>
+          <span style={{ color: statusColor }}>{warn ? '⚠ ' : ''}{status}</span>
+          <span style={{ color: statusColor }}>{weightClass}</span>
+        </div>
+        
+        {/* Añadimos el % de daño del mech aquí debajo de la clase y a la derecha del BV */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', marginTop: 1,
+          fontFamily: '"Share Tech Mono", monospace', fontSize: 8,
+          color: T.outline, letterSpacing: 1,
+        }}>
+          <span style={{ color: infoColor }}>BV {bv.toLocaleString('es-ES', { useGrouping: 'always' })}</span>
+          {simDamagePct !== null && (
+            <span style={{ color: simDamagePct > 0 ? T.bloodLight : T.outline }}>
+              {simDamagePct}ESTADO %
+            </span>
+          )}
         </div>
       </div>
     </article>
@@ -944,10 +913,10 @@ export function ComisionPage() {
                 title="Ir a Finanzas"
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr 1fr' : isTabletDown ? 'repeat(3, minmax(120px, 1fr))' : 'repeat(3, auto)',
-                  columnGap: isMobile ? 14 : isTabletDown ? 20 : 32,
-                  rowGap: isMobile ? 10 : 14,
-                  padding: isMobile ? '12px 14px' : '14px 22px',
+                  gridTemplateColumns: isMobile ? '1fr 1fr' : isTabletDown ? 'repeat(3, minmax(110px, 1fr))' : 'repeat(3, minmax(160px, 1fr))',
+                  columnGap: isMobile ? 12 : isTabletDown ? 18 : 24,
+                  rowGap: isMobile ? 10 : 12,
+                  padding: isMobile ? '12px 14px' : '14px 20px 22px',
                   marginTop: isMobile ? 16 : 0,
                   background: 'rgba(199,151,100,0.05)',
                   border: '1px solid #c79764',
@@ -958,7 +927,7 @@ export function ComisionPage() {
                   textAlign: 'left',
                   fontFamily: 'inherit', color: 'inherit',
                   transition: 'background 0.15s, border-color 0.15s',
-                  width: isMobile ? '100%' : 'auto',
+                  width: '100%', maxWidth: 720,
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.12)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.05)'; }}
@@ -978,13 +947,13 @@ export function ComisionPage() {
                   ['Personal',           personalFmt],
                 ] as [string, string][]).map(([k, v], i) => (
                   <div key={i} style={{ minWidth: 0 }}>
-                    <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: '#c79764', letterSpacing: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.toUpperCase()}</div>
+                    <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 8.5, color: '#c79764', letterSpacing: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.toUpperCase()}</div>
                     <div style={{
                       fontFamily: '"Space Grotesk", sans-serif',
-                      fontSize: isMobile ? 15 : isTabletDown ? 17 : 20,
+                      fontSize: isMobile ? 14 : isTabletDown ? 15 : 17,
                       fontWeight: 700, color: T.creamHi, marginTop: 2,
                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    }}>{v}</div>
+                    }} title={v}>{v}</div>
                   </div>
                 ))}
 
@@ -1013,11 +982,10 @@ export function ComisionPage() {
           </div>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : isTabletDown ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-            gridTemplateRows: isMobile ? 'repeat(6, auto)' : isTabletDown ? 'repeat(3, auto)' : 'repeat(2, 1fr)',
-            gap: isMobile ? 10 : 14,
+            gridTemplateColumns: isMobile ? '1fr 1fr' : isTabletDown ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
+            gap: isMobile ? 8 : 10,
             flex: isTabletDown ? 'none' : 1,
-            minHeight: isTabletDown ? 'auto' : 200,
+            alignContent: 'start',
           }}>
             {mechCards.map((c, i) => c ? (
               <MechAsset key={i}
@@ -1030,8 +998,8 @@ export function ComisionPage() {
               <div key={i} style={{
                 background: T.surfaceLow, borderLeft: `2px solid ${T.outlineV}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
-                color: T.outline, letterSpacing: 2,
+                fontFamily: '"Share Tech Mono", monospace', fontSize: 8.5,
+                color: T.outline, letterSpacing: 1.5, minHeight: 90,
               }}>SLOT VACÍO</div>
             ))}
           </div>

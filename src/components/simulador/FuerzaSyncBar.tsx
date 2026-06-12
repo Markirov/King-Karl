@@ -56,7 +56,45 @@ export function FuerzaSyncBar({
     setLoadingSlots(false);
   };
 
+  // ── Slot 5 protegido — requiere clave "Mark" para sobrescribir ──
+  const PROTECTED_FUERZA_SLOTS: FuerzaSlot[] = [5];
+  const PROTECTED_PASSWORD = 'Mark';
+  const UNLOCK_KEY = 'kk_fuerza_slot_unlock';
+
+  const isFuerzaSlotUnlocked = (slot: FuerzaSlot): boolean => {
+    if (!PROTECTED_FUERZA_SLOTS.includes(slot)) return true;
+    try {
+      const raw = sessionStorage.getItem(UNLOCK_KEY);
+      if (!raw) return false;
+      const arr = JSON.parse(raw) as number[];
+      return Array.isArray(arr) && arr.includes(slot);
+    } catch { return false; }
+  };
+
+  const unlockFuerzaSlot = (slot: FuerzaSlot) => {
+    try {
+      const raw = sessionStorage.getItem(UNLOCK_KEY);
+      const arr: number[] = raw ? JSON.parse(raw) : [];
+      if (!arr.includes(slot)) arr.push(slot);
+      sessionStorage.setItem(UNLOCK_KEY, JSON.stringify(arr));
+    } catch { /* ignore */ }
+  };
+
+  /** Pide clave si el slot está protegido. true = puede escribir. */
+  const guardFuerzaSlotWrite = (slot: FuerzaSlot): boolean => {
+    if (isFuerzaSlotUnlocked(slot)) return true;
+    const pwd = prompt(`FUERZA${slot} protegida. Introduce la clave:`);
+    if (pwd === null) return false;
+    if (pwd === PROTECTED_PASSWORD) {
+      unlockFuerzaSlot(slot);
+      return true;
+    }
+    alert(`Clave incorrecta. FUERZA${slot} no modificada.`);
+    return false;
+  };
+
   const handleSaveSlot = async (slot: FuerzaSlot) => {
+    if (!guardFuerzaSlotWrite(slot)) return;
     setPushState('pushing');
     setPushError(null);
     const snap: SimuladorSnapshot = {
@@ -89,6 +127,7 @@ export function FuerzaSyncBar({
   };
 
   const handleClearSlot = async (slot: FuerzaSlot) => {
+    if (!guardFuerzaSlotWrite(slot)) return;
     if (!confirm(`Borrar slot FUERZA${slot}?`)) return;
     await clearFuerzaConfigSlot(slot);
     const all = await loadAllFuerzaConfigSlots();

@@ -1,8 +1,12 @@
 import { useReducer, useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Play, RotateCcw, Cloud, Download, Upload, ChevronDown, ChevronUp, Skull, Shield, FileText, Search } from 'lucide-react';
+import { Plus, Trash2, Play, RotateCcw, Cloud, Download, Upload, ChevronDown, ChevronUp, Skull, Shield, FileText, Search, Archive } from 'lucide-react';
 import { getVeterancy } from '@/lib/barracones-data';
-import { loadPlayer } from '@/lib/sheets-service';
+import {
+  loadPlayer,
+  loadAllEnemigoConfigSlots, saveEnemigoConfigSlot, clearEnemigoConfigSlot,
+  type EnemigoSlot, type EnemigoConfigEntry,
+} from '@/lib/sheets-service';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -225,6 +229,54 @@ export function HudTacticoPage() {
     saveForces(updated); setForcesState(updated);
   }, [forces]);
 
+  // ── Slots ENEMIGO en Configuracion (5 fijos) ──
+  const [enemigoSlots, setEnemigoSlots] = useState<Record<EnemigoSlot, EnemigoConfigEntry | null>>({ 1: null, 2: null, 3: null, 4: null, 5: null });
+  const [enemigoLoading, setEnemigoLoading] = useState(false);
+  const [enemigoNombre, setEnemigoNombre] = useState('');
+
+  const refreshEnemigoSlots = useCallback(async () => {
+    setEnemigoLoading(true);
+    const all = await loadAllEnemigoConfigSlots();
+    setEnemigoSlots(all);
+    setEnemigoLoading(false);
+  }, []);
+
+  // Carga una vez al montar
+  useEffect(() => { refreshEnemigoSlots(); }, [refreshEnemigoSlots]);
+
+  const handleSaveEnemigoSlot = useCallback(async (slot: EnemigoSlot) => {
+    if (state.enemies.length === 0) return;
+    const nombre = enemigoNombre.trim() || `Enemigo ${slot}`;
+    const enemies = state.enemies.map(e => ({ name: e.name, xp: e.xp, color: e.color }));
+    const res = await saveEnemigoConfigSlot(slot, { nombre, enemies });
+    if (res?.success) {
+      await refreshEnemigoSlots();
+      setEnemigoNombre('');
+    } else {
+      alert('Error guardando ENEMIGO' + slot);
+    }
+  }, [state.enemies, enemigoNombre, refreshEnemigoSlots]);
+
+  const handleLoadEnemigoSlot = useCallback((slot: EnemigoSlot, replace: boolean) => {
+    const entry = enemigoSlots[slot];
+    if (!entry || !Array.isArray(entry.enemies)) return;
+    const newEnemies: BTEnemy[] = entry.enemies.map(u => ({
+      id: Date.now().toString() + Math.random().toString(36).slice(2),
+      name: u.name, xp: u.xp, color: u.color,
+    }));
+    if (replace) {
+      dispatch({ type: 'LOAD_ENEMIES', enemies: newEnemies });
+    } else {
+      newEnemies.forEach(e => dispatch({ type: 'ADD_ENEMY', enemy: e }));
+    }
+  }, [enemigoSlots]);
+
+  const handleClearEnemigoSlot = useCallback(async (slot: EnemigoSlot) => {
+    if (!confirm(`Borrar ENEMIGO${slot}?`)) return;
+    await clearEnemigoConfigSlot(slot);
+    await refreshEnemigoSlots();
+  }, [refreshEnemigoSlots]);
+
   const exportForces = useCallback(() => {
     const blob = new Blob([JSON.stringify(forces, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -418,6 +470,86 @@ export function HudTacticoPage() {
                     onDelete={() => deleteForce(f.id)}
                   />
                 ))}
+              </div>
+            )}
+          </section>
+
+          {/* Slots ENEMIGO1..5 — Configuracion sheet */}
+          <section className="bg-surface-container p-3 sm:p-4 border-t-2 border-amber-400">
+            <h2 className="font-headline text-[10px] font-bold text-amber-400 tracking-[3px] uppercase mb-2 flex items-center gap-2">
+              <Archive size={12} /> Slots Enemigo (Configuracion)
+            </h2>
+            <p className="font-mono text-[9px] text-outline mb-3">
+              5 slots fijos en celdas ENEMIGO1..ENEMIGO5. Guardar sobrescribe.
+            </p>
+
+            <input
+              value={enemigoNombre}
+              onChange={e => setEnemigoNombre(e.target.value)}
+              placeholder="Nombre fuerza enemiga (opcional, default Enemigo N)"
+              className="w-full h-8 bg-surface-container-high border border-outline-variant/30 px-3 font-mono text-[10px] text-on-surface placeholder:text-outline focus:outline-none focus:border-amber-400 mb-3"
+            />
+
+            {enemigoLoading && (
+              <p className="text-[10px] font-mono text-outline italic text-center py-2">Cargando slots…</p>
+            )}
+
+            {!enemigoLoading && (
+              <div className="space-y-1.5">
+                {([1, 2, 3, 4, 5] as EnemigoSlot[]).map(s => {
+                  const entry = enemigoSlots[s];
+                  const occupied = !!entry?.enemies?.length;
+                  return (
+                    <div key={s} className="border border-outline-variant/30 bg-surface-container-high p-2">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-headline text-[10px] font-bold text-amber-400 tracking-widest">
+                          ENEMIGO{s}
+                        </span>
+                        {occupied ? (
+                          <span className="font-mono text-[9px] text-secondary/70">
+                            {entry!.nombre} · {entry!.count}u · {entry!.totalBV} BV
+                          </span>
+                        ) : (
+                          <span className="font-mono text-[9px] text-outline italic">— vacío —</span>
+                        )}
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleSaveEnemigoSlot(s)}
+                          disabled={state.enemies.length === 0}
+                          className="flex-1 bg-amber-400/15 hover:bg-amber-400/30 disabled:opacity-30 border border-amber-400/50 text-amber-400 py-1 font-mono text-[9px] uppercase tracking-widest"
+                          title={occupied ? 'Sobrescribir slot' : 'Guardar en slot vacío'}
+                        >
+                          {occupied ? 'Sobrescribir' : 'Guardar'}
+                        </button>
+                        <button
+                          onClick={() => handleLoadEnemigoSlot(s, true)}
+                          disabled={!occupied}
+                          className="flex-1 bg-green-400/15 hover:bg-green-400/30 disabled:opacity-20 border border-green-400/50 text-green-400 py-1 font-mono text-[9px] uppercase tracking-widest"
+                        >
+                          Cargar
+                        </button>
+                        {state.enemies.length > 0 && occupied && (
+                          <button
+                            onClick={() => handleLoadEnemigoSlot(s, false)}
+                            className="bg-secondary/15 hover:bg-secondary/30 border border-secondary/50 text-secondary py-1 px-2 font-mono text-[9px] uppercase tracking-widest"
+                            title="Añadir a actuales"
+                          >
+                            +
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleClearEnemigoSlot(s)}
+                          disabled={!occupied}
+                          className="bg-error/15 hover:bg-error/30 disabled:opacity-20 border border-error/50 text-error py-1 px-2 font-mono text-[9px] uppercase tracking-widest"
+                          title="Vaciar slot"
+                        >
+                          <Trash2 size={9} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </section>

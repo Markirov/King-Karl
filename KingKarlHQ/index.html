@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComStar HUD - Gatos de Guerra</title>
+    <!-- Tailwind CSS para los estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-left: 1px solid rgba(234,88,12,0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(234,88,12,0.5); border-radius: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(234,88,12,0.8); }
+        .scanlines { background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; }
+        
+        /* Efectos Neon/Holográficos */
+        .panel-container {
+            background-color: #0a0a0c;
+            border: 1px solid rgba(234, 88, 12, 0.6);
+            border-radius: 0.125rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(234, 88, 12, 0.05);
+        }
+        .panel-header {
+            background: linear-gradient(to right, rgba(124, 45, 18, 0.6), #0a0a0c);
+            border-bottom: 1px solid rgba(234, 88, 12, 0.6);
+            padding: 0.375rem 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="h-screen bg-black text-slate-300 font-sans p-2 flex flex-col overflow-hidden" style="background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%)">
+
+    <!-- HEADER PRINCIPAL -->
+    <header class="border-2 border-orange-600 bg-gradient-to-b from-[#1a0a00] to-black p-2 mb-2 flex flex-wrap justify-between items-center rounded-sm shadow-[0_0_20px_rgba(234,88,12,0.15)] relative">
+        <div class="absolute top-0 left-0 w-full h-full scanlines pointer-events-none opacity-30"></div>
+        <div class="flex items-center gap-3 z-10">
+            <i class="fa-solid fa-shield text-orange-500 text-2xl"></i>
+            <h1 class="text-orange-500 font-black text-lg md:text-xl tracking-widest drop-shadow-[0_0_8px_rgba(234,88,12,0.8)]">
+                UNIDAD MERCENARIA: "LOS GATOS DE GUERRA" <span class="text-slate-400 font-normal">| CENTRO DE MANDO</span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-6 text-xs font-mono font-bold z-10">
+            <span class="text-cyan-400 flex items-center gap-2"><i class="fa-solid fa-bolt"></i> STARDATE: <span id="stardate-label">Cargando...</span></span>
+            <span class="bg-green-900/50 text-green-400 border border-green-500 px-3 py-1 rounded-sm shadow-[0_0_10px_rgba(34,197,94,0.3)]" id="status-label">CONECTANDO...</span>
+        </div>
+    </header>
+
+    <!-- GRID DE PANELES -->
+    <main class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 overflow-hidden">
+        
+        <!-- ================= COLUMNA IZQUIERDA ================= -->
+        <div class="col-span-1 md:col-span-3 flex flex-col gap-2 overflow-hidden">
+            
+            <div class="panel-container flex-[1.5]">
+                <div class="panel-header"><span class="text-orange-500 font-bold text-xs tracking-widest uppercase">1. BARRACONES (PERSONAL)</span></div>
+                <div class="flex-1 overflow-auto p-2 custom-scrollbar">
+                    <!-- Los pilotos se inyectarán aquí con JavaScript -->
+                    <div id="pilots-grid" class="grid grid-cols-2 gap-2">
+                        <div class="text-xs text-slate-500 text-center col-span-2 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Obteniendo datos DB...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-container flex-[1.2]">
+                <div class="panel-header"><span class="text-orange-500 font-bold text-xs tracking-widest uppercase">2. HOJA DE SERVICIO</span></div>
+                <div class="flex-1 p-2 custom-scrollbar flex flex-col justify-center px-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 border border-orange-500 bg-orange-900/40 flex items-center justify-center text-[10px] text-orange-400">S1</div>
+                        <div class="h-px bg-orange-800 flex-1"></div>
+                        <div class="w-6 h-6 border border-cyan-500 bg-cyan-900/40 flex items-center justify-center text-[10px] text-cyan-400">S2</div>
+                        <div class="h-px bg-slate-800 flex-1"></div>
+                        <div class="w-6 h-6 border border-slate-700 flex items-center justify-center text-[10px] text-slate-600">S3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= COLUMNA CENTRAL ================= -->
+        <div class="col-span-1 md:col-span-6 flex flex-col gap-2 overflow-hidden">
+            
+            <!-- HANGAR CENTRAL (HUD) -->
+            <div class="flex-[2] bg-[#02050a] border border-cyan-800 relative rounded-sm overflow-hidden flex flex-col shadow-[inset_0_0_50px_rgba(8,145,178,0.15)]">
+                <div class="absolute top-4 left-4 border-l-2 border-cyan-500 pl-2 z-10">
+                    <div class="text-[10px] text-cyan-600 font-mono mb-1">FONDOS DISPONIBLES</div>
+                    <div id="finances-balance" class="text-xl md:text-3xl font-bold text-cyan-300 tracking-widest drop-shadow-[0_0_8px_rgba(8,145,178,0.8)]">
+                        --- ₡
+                    </div>
+                </div>
+                
+                <div class="absolute bottom-4 left-4 z-10">
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-200/20 uppercase tracking-widest">MARAUDER</h2>
+                </div>
+
+                <!-- Silueta de Mech CSS -->
+                <div class="absolute inset-0 flex items-center justify-center z-0 pointer-events-none">
+                    <div class="absolute top-0 w-3/4 h-32 bg-gradient-to-b from-cyan-900/20 to-transparent"></div>
+                    <div class="absolute bottom-0 w-full h-16 bg-cyan-900/10" style="transform: perspective(100px) rotateX(45deg)"></div>
+                    <div class="relative flex flex-col items-center mt-12 scale-110 md:scale-125">
+                        <div class="flex gap-12 mb-[-10px] z-0">
+                            <div class="w-12 h-16 bg-[#1a202c] border border-[#2d3748] rounded-sm grid grid-cols-2 gap-1 p-1">
+                                <div class="bg-black rounded-full w-full h-full border border-slate-700"></div><div class="bg-black rounded-full w-full h-full border border-slate-700"></div><div class="bg-black rounded-full w-full h-full border border-slate-700"></div><div class="bg-black rounded-full w-full h-full border border-slate-700"></div>
+                            </div>
+                            <div class="w-12 h-16 bg-[#1a202c] border border-[#2d3748] rounded-sm grid grid-cols-2 gap-1 p-1">
+                                <div class="bg-black rounded-full w-full h-full border border-slate-700"></div><div class="bg-black rounded-full w-full h-full border border-slate-700"></div><div class="bg-black rounded-full w-full h-full border border-slate-700"></div><div class="bg-black rounded-full w-full h-full border border-slate-700"></div>
+                            </div>
+                        </div>
+                        <div class="w-24 h-20 bg-gradient-to-b from-[#2d3748] to-[#1a202c] border-2 border-[#4a5568] rounded-xl flex items-center justify-center z-10 relative shadow-2xl">
+                            <div class="w-12 h-6 bg-cyan-900 border border-cyan-400 rounded-full shadow-[0_0_15px_rgba(8,145,178,0.5)]"></div>
+                        </div>
+                        <div class="flex gap-8 mt-[-5px] z-0">
+                            <div class="w-6 h-32 bg-gradient-to-b from-[#2d3748] to-[#11141a] border border-[#4a5568] flex flex-col items-center">
+                                <div class="w-8 h-4 bg-slate-600 mt-12"></div>
+                                <div class="w-10 h-4 bg-slate-700 mt-auto mb-[-2px] rounded-t-sm"></div>
+                            </div>
+                            <div class="w-6 h-32 bg-gradient-to-b from-[#2d3748] to-[#11141a] border border-[#4a5568] flex flex-col items-center">
+                                <div class="w-8 h-4 bg-slate-600 mt-12"></div>
+                                <div class="w-10 h-4 bg-slate-700 mt-auto mb-[-2px] rounded-t-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 flex gap-2 overflow-hidden">
+                <div class="panel-container flex-[1.5]">
+                    <div class="panel-header">
+                        <span class="text-orange-500 font-bold text-xs tracking-widest uppercase">5. HUD TÁCTICO</span>
+                        <span class="text-[10px] text-cyan-400 font-mono">SYS OK</span>
+                    </div>
+                    <div class="flex-1 p-2 custom-scrollbar">
+                        <div class="w-full h-full border border-slate-700 bg-[#050a0f] relative overflow-hidden flex items-center">
+                            <!-- Gráfico de HUD con SVG en crudo -->
+                            <svg class="w-full h-full absolute inset-0" viewBox="0 0 100 50" preserveAspectRatio="none">
+                                <path d="M0 40 L100 10" stroke="#0ea5e9" stroke-width="0.5" fill="none" />
+                                <path d="M0 20 L100 45" stroke="#ea580c" stroke-width="0.5" fill="none" stroke-dasharray="2,2" />
+                                <circle cx="70" cy="19" r="1.5" fill="#ef4444" />
+                                <circle cx="30" cy="28" r="1" fill="#22c55e" />
+                            </svg>
+                            <div class="absolute bottom-2 left-2 text-xs font-mono text-slate-500">Rx-80 / AUTO-TRACKING</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= COLUMNA DERECHA ================= -->
+        <div class="col-span-1 md:col-span-3 flex flex-col gap-2 overflow-hidden">
+            
+            <div class="panel-container flex-[1.5]">
+                <div class="panel-header"><span class="text-orange-500 font-bold text-xs tracking-widest uppercase">6. CONTRATOS</span></div>
+                <div class="flex-1 overflow-auto p-2 custom-scrollbar flex flex-col gap-2" id="contracts-list">
+                    <div class="text-xs text-slate-500 text-center py-4"><i class="fa-solid fa-satellite-dish fa-fade"></i> Escaneando...</div>
+                </div>
+            </div>
+
+            <div class="panel-container flex-[1.5]">
+                <div class="panel-header"><span class="text-orange-500 font-bold text-xs tracking-widest uppercase">7. FINANZAS Y MANTENIMIENTO</span></div>
+                <div class="flex-1 overflow-auto p-2 custom-scrollbar flex flex-col">
+                    <div class="mt-auto grid grid-cols-2 gap-2 text-[10px] font-mono mt-2">
+                        <div class="bg-slate-900 p-2 border border-slate-800">
+                            <span class="text-cyan-600 block mb-1">GASTOS OP.</span>
+                            <span class="text-slate-300 font-bold" id="finances-costs">-- ₡</span>
+                        </div>
+                        <div class="bg-slate-900 p-2 border border-slate-800">
+                            <span class="text-orange-600 block mb-1">MANTENIMIENTO</span>
+                            <span class="text-slate-300 font-bold" id="finances-maint">-- ₡</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- EL CEREBRO DE LA INTERFAZ: COMUNICACIÓN CON FASTAPI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // 1. Solicita todos los datos al mismo tiempo al servidor Python
+                const [statusRes, pilotsRes, financesRes, contractsRes] = await Promise.all([
+                    fetch('/api/status'),
+                    fetch('/api/pilots'),
+                    fetch('/api/finances'),
+                    fetch('/api/contracts')
+                ]);
+
+                // 2. Extrae el JSON de las respuestas
+                const status = await statusRes.json();
+                const pilots = await pilotsRes.json();
+                const finances = await financesRes.json();
+                const contracts = await contractsRes.json();
+
+                // 3. Actualiza los indicadores visuales superiores
+                document.getElementById('status-label').textContent = status.status;
+                document.getElementById('stardate-label').textContent = status.stardate;
+
+                // 4. Dibuja los Pilotos en el panel de Barracones
+                const pilotsGrid = document.getElementById('pilots-grid');
+                pilotsGrid.innerHTML = ''; // Limpia el cargando...
+                
+                pilots.forEach(pilot => {
+                    // Genera el código HTML para cada piloto de la base de datos
+                    const card = document.createElement('div');
+                    card.className = "border border-slate-700 bg-slate-900/50 p-2 relative group hover:border-cyan-500/50 transition-colors cursor-pointer";
+                    
+                    const warningIcon = pilot.status !== 'OK' ? '<i class="fa-solid fa-triangle-exclamation text-red-500 absolute top-1 right-1 text-xs"></i>' : '';
+                    
+                    card.innerHTML = `
+                        <div class="w-full h-12 bg-slate-800 border border-slate-600 mb-1 flex items-center justify-center overflow-hidden">
+                            <i class="fa-solid fa-user text-slate-500 text-xl group-hover:text-cyan-400 transition-colors"></i>
+                        </div>
+                        <div class="text-[10px] font-bold text-slate-200">${pilot.name} <span class="text-cyan-500">"${pilot.callsign}"</span></div>
+                        <div class="text-[9px] text-orange-400 font-mono mt-1">XP: ${pilot.xp}</div>
+                        ${warningIcon}
+                    `;
+                    pilotsGrid.appendChild(card);
+                });
+
+                // 5. Actualiza las Finanzas (Formateando los números con comas)
+                document.getElementById('finances-balance').textContent = finances.balance.toLocaleString() + ' ₡';
+                document.getElementById('finances-costs').textContent = finances.operational_costs.toLocaleString() + ' ₡';
+                document.getElementById('finances-maint').textContent = finances.maintenance.toLocaleString() + ' ₡';
+
+                // 6. Dibuja los Contratos
+                const contractsList = document.getElementById('contracts-list');
+                contractsList.innerHTML = '';
+                
+                contracts.forEach(contract => {
+                    const el = document.createElement('div');
+                    el.className = "bg-slate-900/60 border border-slate-700 p-2 hover:border-orange-500/50 cursor-pointer transition-colors group relative";
+                    el.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="text-xs font-bold text-slate-200"><i class="fa-solid fa-crosshairs text-orange-500 mr-1"></i> ${contract.faction}</div>
+                            <div class="text-[10px] font-mono text-green-400 bg-green-900/20 px-1 border border-green-800/30">${contract.payout}</div>
+                        </div>
+                        <div class="text-[9px] text-slate-400 uppercase">MISIÓN: ${contract.type} | Dificultad: ${contract.difficulty}</div>
+                        <div class="absolute right-0 top-0 bottom-0 w-1 bg-orange-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom"></div>
+                    `;
+                    contractsList.appendChild(el);
+                });
+
+            } catch (error) {
+                console.error("Error crítico de comunicación", error);
+                document.getElementById('status-label').textContent = "ERROR DE ENLACE HPG";
+                document.getElementById('status-label').className = "bg-red-900/50 text-red-400 border border-red-500 px-3 py-1 rounded-sm shadow-[0_0_10px_rgba(239,68,68,0.3)]";
+                document.getElementById('pilots-grid').innerHTML = '<div class="col-span-2 text-red-500 text-xs text-center">Fallo de Base de Datos. Comprueba el log de Python.</div>';
+            }
+        });
+    </script>
+</body>
+</html>
