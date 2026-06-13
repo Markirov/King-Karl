@@ -251,6 +251,39 @@ export async function saveFuerzaConfigSlot(
   });
 }
 
+// ── FUERZACAMPAÑA — celda dedicada modo campaña ────────────────
+// Misma estructura FuerzaConfigEntry. Vive en celda 'FUERZACAMPAÑA' de Configuracion.
+
+const FUERZA_CAMPANA_KEY = 'FUERZACAMPAÑA';
+
+export async function saveFuerzaCampana(
+  payload: { nombre: string; bv: number; snapshot: SimuladorSnapshot },
+) {
+  const entry: FuerzaConfigEntry = {
+    nombre:    payload.nombre,
+    bv:        payload.bv,
+    updatedAt: new Date().toISOString(),
+    snapshot:  payload.snapshot,
+  };
+  return sheetsPost({
+    action: 'saveConfiguracionBatch',
+    config: JSON.stringify({ [FUERZA_CAMPANA_KEY]: JSON.stringify(entry) }),
+  });
+}
+
+export async function loadFuerzaCampana(): Promise<FuerzaConfigEntry | null> {
+  const res = await loadConfig();
+  if (!res?.success) return null;
+  const cfg = (res.data as any)?.config ?? res.data;
+  const raw = cfg?.[FUERZA_CAMPANA_KEY];
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as FuerzaConfigEntry;
+  } catch {
+    return null;
+  }
+}
+
 /** Lee un slot. null si vacío o malformado. */
 export async function loadFuerzaConfigSlot(slot: FuerzaSlot): Promise<FuerzaConfigEntry | null> {
   const res = await loadConfig();

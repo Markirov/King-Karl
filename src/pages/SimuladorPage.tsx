@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Crosshair } from 'lucide-react';
 import { TallerModal, genId, getCampaignDateISO } from '@/pages/FinanzasPage';
-import { commitLibroEntryAndTreasury, removeMechFromUnit, saveFuerzaConfigSlot, loadFuerzaConfigSlot, saveConfigBatch } from '@/lib/sheets-service';
-import { loadLocalSnapshot } from '@/lib/simulador-persistence';
+import { commitLibroEntryAndTreasury, removeMechFromUnit, saveFuerzaCampana, loadFuerzaCampana, saveConfigBatch, loadAllFuerzaConfigSlots, saveFuerzaConfigSlot, type FuerzaSlot } from '@/lib/sheets-service';
+import { loadLocalSnapshot, snapshotHasUnits } from '@/lib/simulador-persistence';
 import { loadRoster } from '@/lib/roster';
 import { useSimulador } from '@/hooks/useSimulador';
 import { UnitSlots } from '@/components/simulador/UnitSlots';
@@ -72,7 +72,7 @@ export function SimuladorPage() {
         const snap: any = { schemaVersion: 1, updatedAt: new Date().toISOString(), ...sim.getSnapshot() };
         const bv = (snap.mechSlots ?? []).reduce((a: number, s: any) => a + (s?.state?.bv ?? 0), 0)
                  + (snap.vehicleSlots ?? []).reduce((a: number, s: any) => a + ((s?.state as any)?.bv ?? 0), 0);
-        const res = await saveFuerzaConfigSlot(5, { nombre: 'Campaña', bv, snapshot: snap });
+        const res = await saveFuerzaCampana({ nombre: 'Campaña', bv, snapshot: snap });
         if (res?.success) {
           // ESTADOMECHS map
           const map: Record<string, number> = {};
@@ -154,24 +154,82 @@ export function SimuladorPage() {
 
   const handleToggleCampaign = async () => {
     if (campaignMode) {
-      // Salir: pide clave (proteccion guardado en curso si dirty)
-      if (sim.dirty) {
-        if (!confirm('Hay cambios locales sin sync a FUERZA5. ¿Salir igualmente?')) return;
+      // Salir: pregunta si guardar a FUERZACAMPAÑA
+      const choice = confirm('¿Guardar estado actual a FUERZACAMPAÑA antes de salir?\n\nOK = Guardar y salir\nCancelar = Solo salir (sin guardar)');
+      if (choice) {
+        try {
+          const snap: any = { schemaVersion: 1, updatedAt: new Date().toISOString(), ...sim.getSnapshot() };
+          const bv = (snap.mechSlots ?? []).reduce((a: number, s: any) => a + (s?.state?.bv ?? 0), 0)
+                   + (snap.vehicleSlots ?? []).reduce((a: number, s: any) => a + ((s?.state as any)?.bv ?? 0), 0);
+          const res = await saveFuerzaCampana({ nombre: 'Campaña', bv, snapshot: snap });
+          if (!res?.success) {
+            alert('Error guardando FUERZACAMPAÑA: ' + ((res as any)?.error || 'no_response'));
+            return;
+          }
+          // ESTADOMECHS map
+          const map: Record<string, number> = {};
+          for (const ms2 of (snap.mechSlots ?? [])) {
+            const st: any = ms2?.state; const se: any = ms2?.session;
+            if (!st || !se) continue;
+            const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'];
+            const isLocs    = ['HD','CT','LT','RT','LA','RA','LL','RL'];
+            const armorMax = armorLocs.reduce((s,k) => s + ((st.armor || {})[k] ?? 0), 0);
+            const armorCur = armorLocs.reduce((s,k) => s + ((se.armor || {})[k] ?? 0), 0);
+            const isMax    = isLocs.reduce((s,k) => s + ((st.is || {})[k] ?? 0), 0);
+            const isCur    = isLocs.reduce((s,k) => s + ((se.is || {})[k] ?? 0), 0);
+            const total = armorMax + isMax;
+            if (total <= 0) continue;
+            const pct = se.destroyed ? 0 : Math.round(((armorCur + isCur) / total) * 100);
+            const key = `${st.chassis || ''} ${st.model || ''}`.trim();
+            if (key) map[key] = pct;
+          }
+          await saveConfigBatch({ ESTADOMECHS: JSON.stringify(map) });
+          sim.markSynced?.();
+        } catch (err) {
+          alert('Fallo guardando: ' + err);
+          return;
+        }
       }
+      // Limpia el simulador para dejarlo listo para partidas sueltas
+      sim.resetSession();
       setCampaignMode(false);
       return;
     }
-    // Entrar: pide clave + carga FUERZA5
-    if (!gateCampaignWrite('cargar FUERZA5')) return;
+    // Entrar: pide clave + carga FUERZACAMPAÑA
+    if (!gateCampaignWrite('cargar FUERZACAMPAÑA')) return;
     try {
-      const entry = await loadFuerzaConfigSlot(5);
+      // Si hay una partida suelta en curso, respaldarla antes de sobrescribir
+      const currentSnap = loadLocalSnapshot();
+      if (currentSnap && snapshotHasUnits(currentSnap)) {
+        const slots = await loadAllFuerzaConfigSlots();
+        const freeSlot = ([5, 4, 3, 2, 1] as FuerzaSlot[]).find(s => !slots[s]?.snapshot);
+        const bv = (currentSnap.mechSlots ?? []).reduce((a: number, s: any) => a + (s?.state?.bv ?? 0), 0)
+                 + (currentSnap.vehicleSlots ?? []).reduce((a: number, s: any) => a + ((s?.state as any)?.bv ?? 0), 0);
+        let targetSlot: FuerzaSlot | null = freeSlot ?? null;
+        if (!targetSlot) {
+          const overwrite = confirm('Los 5 slots de Fuerzas están ocupados.\n\n¿Sobrescribir FUERZA5 con la partida suelta actual antes de cargar la campaña?\n\nOK = Sobrescribir FUERZA5\nCancelar = Descartar partida suelta sin guardar');
+          if (overwrite) targetSlot = 5;
+        }
+        if (targetSlot) {
+          const res = await saveFuerzaConfigSlot(targetSlot, { nombre: 'Partida suelta', bv, snapshot: currentSnap });
+          if (!res?.success) {
+            alert('Error guardando partida suelta en FUERZA' + targetSlot + ': ' + ((res as any)?.error || 'no_response'));
+            // continúa igualmente con la carga de campaña
+          }
+        }
+      }
+
+      const entry = await loadFuerzaCampana();
       if (entry?.snapshot?.schemaVersion) {
         sim.hydrateFromSnapshot(entry.snapshot);
         sim.markSynced();
+      } else {
+        // Sin FUERZACAMPAÑA guardada todavía: arranca limpio
+        sim.resetSession();
       }
       setCampaignMode(true);
     } catch (err) {
-      alert('Fallo al cargar FUERZA5: ' + err);
+      alert('Fallo al cargar FUERZACAMPAÑA: ' + err);
     }
   };
 
@@ -487,7 +545,7 @@ export function SimuladorPage() {
             const snap: any = { schemaVersion: 1, updatedAt: new Date().toISOString(), ...sim.getSnapshot() };
             const bv = (snap.mechSlots ?? []).reduce((a: number, s: any) => a + (s?.state?.bv ?? 0), 0)
                      + (snap.vehicleSlots ?? []).reduce((a: number, s: any) => a + ((s?.state as any)?.bv ?? 0), 0);
-            await saveFuerzaConfigSlot(5, { nombre: 'Fuerza 5', bv, snapshot: snap });
+            await saveFuerzaCampana({ nombre: 'Campaña auto', bv, snapshot: snap });
             // ESTADOMECHS map
             const map: Record<string, number> = {};
             for (const ms2 of (snap.mechSlots ?? [])) {

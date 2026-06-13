@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CloudUpload, AlertCircle, Trash2, Archive, Lock, LockOpen } from 'lucide-react';
 import {
-  loadAllFuerzaConfigSlots, saveFuerzaConfigSlot, clearFuerzaConfigSlot, saveConfigBatch,
+  loadAllFuerzaConfigSlots, saveFuerzaConfigSlot, clearFuerzaConfigSlot,
   type FuerzaSlot, type FuerzaConfigEntry,
 } from '@/lib/sheets-service';
 import type { SimuladorSnapshot } from '@/lib/simulador-persistence';
@@ -118,31 +118,8 @@ export function FuerzaSyncBar({
       setSlots(all);
       setSlotNombre('');
 
-      // Slot 5 = "fuerza activa" → escribe ESTADOMECHS (mapa %estado por mech) para Comision.
-      if (slot === 5) {
-        try {
-          const map: Record<string, number> = {};
-          for (const ms of (snap.mechSlots ?? [])) {
-            const st: any = ms?.state; const se: any = ms?.session;
-            if (!st || !se) continue;
-            const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'];
-            const isLocs    = ['HD','CT','LT','RT','LA','RA','LL','RL'];
-            const armorMax = armorLocs.reduce((s,k) => s + ((st.armor || {})[k] ?? 0), 0);
-            const armorCur = armorLocs.reduce((s,k) => s + ((se.armor || {})[k] ?? 0), 0);
-            const isMax    = isLocs.reduce((s,k) => s + ((st.is || {})[k] ?? 0), 0);
-            const isCur    = isLocs.reduce((s,k) => s + ((se.is || {})[k] ?? 0), 0);
-            const total = armorMax + isMax;
-            if (total <= 0) continue;
-            // Mech destruido -> estado 0% (override aunque queden pts en otras locs).
-            const pct = se.destroyed
-              ? 0
-              : Math.round(((armorCur + isCur) / total) * 100);
-            const key = `${st.chassis || ''} ${st.model || ''}`.trim();
-            if (key) map[key] = pct;
-          }
-          await saveConfigBatch({ ESTADOMECHS: JSON.stringify(map) });
-        } catch {/* ignore */}
-      }
+      // FUERZA1-5 ya no tratan ESTADOMECHS — eso vive en modo campaña
+      // (escritura en FUERZACAMPAÑA + ESTADOMECHS via SimuladorPage).
     } else {
       setPushState('error');
       setPushError(String((res as any)?.error || 'no_save'));
@@ -211,6 +188,14 @@ export function FuerzaSyncBar({
             </button>
           )}
 
+          {/* Modo campaña: oculta lista FUERZA1-5 (FUERZA5 se gestiona auto) */}
+          {campaignMode ? (
+            <div className="font-mono text-[10px] text-amber-400/80 bg-amber-400/5 border border-amber-400/30 px-3 py-2">
+              Modo campaña activo · FUERZA5 sincroniza auto cada 5 min.<br />
+              Sal del modo para editar slots manuales.
+            </div>
+          ) : (<>
+
           {/* Nombre opcional al guardar */}
           <input
             type="text"
@@ -276,6 +261,7 @@ export function FuerzaSyncBar({
               })}
             </ul>
           )}
+          </>)}
         </div>
       )}
     </div>

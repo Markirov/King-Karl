@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Crosshair, Lock, LockOpen } from 'lucide-react';
+import { Crosshair } from 'lucide-react';
 import { TallerModal, genId, getCampaignDateISO } from '@/pages/FinanzasPage';
-import { commitLibroEntryAndTreasury, removeMechFromUnit, saveFuerzaConfigSlot, saveConfigBatch } from '@/lib/sheets-service';
+import { commitLibroEntryAndTreasury, removeMechFromUnit, saveFuerzaCampana, loadFuerzaCampana, saveConfigBatch } from '@/lib/sheets-service';
+import { loadLocalSnapshot } from '@/lib/simulador-persistence';
 import { loadRoster } from '@/lib/roster';
 import { useSimulador } from '@/hooks/useSimulador';
 import { UnitSlots } from '@/components/simulador/UnitSlots';
@@ -23,6 +24,27 @@ import { useAppStore } from '@/lib/store';
 import type { FireTarget } from '@/lib/combat-types';
 
 const TAB_MAP: Record<string, string> = { mechs: 'mechs', vehicles: 'vehiculos' };
+
+// Orden fijo PJs (8 slots simulador en modo campaña). Match contra roster.jugador.
+const CAMPAIGN_PILOT_ORDER = ['Jaime', 'Marcos', 'Joan', 'Alex', 'Erik', 'Zhao', 'Val', 'Tariq'];
+
+const CAMPAIGN_UNLOCK_KEY = 'kk_campaign_unlock';
+const CAMPAIGN_PASSWORD = 'Mark';
+
+function isCampaignUnlocked(): boolean {
+  return sessionStorage.getItem(CAMPAIGN_UNLOCK_KEY) === '1';
+}
+function gateCampaignWrite(actionLabel: string): boolean {
+  if (isCampaignUnlocked()) return true;
+  const pwd = prompt(`Modo Campaña (${actionLabel}): introduce la clave`);
+  if (pwd === null) return false;
+  if (pwd === CAMPAIGN_PASSWORD) {
+    sessionStorage.setItem(CAMPAIGN_UNLOCK_KEY, '1');
+    return true;
+  }
+  alert('Clave incorrecta');
+  return false;
+}
 
 export function SimuladorPage() {
   const { activeSubTab, setActiveSubTab, simuladorPortada, setSimuladorPortada, roster, setRoster, campaign } = useAppStore();
@@ -46,13 +68,11 @@ export function SimuladorPage() {
     const id = setInterval(async () => {
       if (!sim.dirty) return;
       try {
-        const raw = sessionStorage.getItem('kk_fuerza_slot_unlock');
-        const arr = raw ? JSON.parse(raw) : [];
-        if (!Array.isArray(arr) || !arr.includes(5)) return; // sin clave -> skip
+        if (!isCampaignUnlocked()) return; // sin clave -> skip
         const snap: any = { schemaVersion: 1, updatedAt: new Date().toISOString(), ...sim.getSnapshot() };
         const bv = (snap.mechSlots ?? []).reduce((a: number, s: any) => a + (s?.state?.bv ?? 0), 0)
                  + (snap.vehicleSlots ?? []).reduce((a: number, s: any) => a + ((s?.state as any)?.bv ?? 0), 0);
-        const res = await saveFuerzaConfigSlot(5, { nombre: 'Campaña', bv, snapshot: snap });
+        const res = await saveFuerzaCampana({ nombre: 'Campaña', bv, snapshot: snap });
         if (res?.success) {
           // ESTADOMECHS map
           const map: Record<string, number> = {};
@@ -120,6 +140,72 @@ export function SimuladorPage() {
       return true;
     });
   }, [roster]);
+
+  // Modo campaña: orden FIJO de PJs (CAMPAIGN_PILOT_ORDER). Cada slot
+  // pre-bound al PJ en esa posicion. Si el roster no tiene ese jugador,
+  // se muestra label con el handle igualmente.
+  const campaignPilots = useMemo(() => {
+    if (!campaignMode) return null;
+    return CAMPAIGN_PILOT_ORDER.map(handle => {
+      const entry = roster.find(r => r.jugador.toLowerCase() === handle.toLowerCase());
+      return entry?.apodo || entry?.nombre || handle;
+    });
+  }, [campaignMode, roster]);
+
+  const handleToggleCampaign = async () => {
+    if (campaignMode) {
+      // Salir: pregunta si guardar a FUERZACAMPAÑA
+      const choice = confirm('¿Guardar estado actual a FUERZACAMPAÑA antes de salir?\n\nOK = Guardar y salir\nCancelar = Solo salir (sin guardar)');
+      if (choice) {
+        try {
+          const snap: any = { schemaVersion: 1, updatedAt: new Date().toISOString(), ...sim.getSnapshot() };
+          const bv = (snap.mechSlots ?? []).reduce((a: number, s: any) => a + (s?.state?.bv ?? 0), 0)
+                   + (snap.vehicleSlots ?? []).reduce((a: number, s: any) => a + ((s?.state as any)?.bv ?? 0), 0);
+          const res = await saveFuerzaCampana({ nombre: 'Campaña', bv, snapshot: snap });
+          if (!res?.success) {
+            alert('Error guardando FUERZACAMPAÑA: ' + ((res as any)?.error || 'no_response'));
+            return;
+          }
+          // ESTADOMECHS map
+          const map: Record<string, number> = {};
+          for (const ms2 of (snap.mechSlots ?? [])) {
+            const st: any = ms2?.state; const se: any = ms2?.session;
+            if (!st || !se) continue;
+            const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'];
+            const isLocs    = ['HD','CT','LT','RT','LA','RA','LL','RL'];
+            const armorMax = armorLocs.reduce((s,k) => s + ((st.armor || {})[k] ?? 0), 0);
+            const armorCur = armorLocs.reduce((s,k) => s + ((se.armor || {})[k] ?? 0), 0);
+            const isMax    = isLocs.reduce((s,k) => s + ((st.is || {})[k] ?? 0), 0);
+            const isCur    = isLocs.reduce((s,k) => s + ((se.is || {})[k] ?? 0), 0);
+            const total = armorMax + isMax;
+            if (total <= 0) continue;
+            const pct = se.destroyed ? 0 : Math.round(((armorCur + isCur) / total) * 100);
+            const key = `${st.chassis || ''} ${st.model || ''}`.trim();
+            if (key) map[key] = pct;
+          }
+          await saveConfigBatch({ ESTADOMECHS: JSON.stringify(map) });
+          sim.markSynced?.();
+        } catch (err) {
+          alert('Fallo guardando: ' + err);
+          return;
+        }
+      }
+      setCampaignMode(false);
+      return;
+    }
+    // Entrar: pide clave + carga FUERZACAMPAÑA
+    if (!gateCampaignWrite('cargar FUERZACAMPAÑA')) return;
+    try {
+      const entry = await loadFuerzaCampana();
+      if (entry?.snapshot?.schemaVersion) {
+        sim.hydrateFromSnapshot(entry.snapshot);
+        sim.markSynced();
+      }
+      setCampaignMode(true);
+    } catch (err) {
+      alert('Fallo al cargar FUERZACAMPAÑA: ' + err);
+    }
+  };
 
   // Toggles Clan + Año compactos (van pegados a CatalogSearch en el portal)
   const flagToggles = (
@@ -192,15 +278,6 @@ export function SimuladorPage() {
   const { mechState: ms, mechSession: ss, vehicleState: vs, vehicleSession: vss } = sim;
   const isMech = sim.activeTab === 'mechs';
 
-  // Slot names for UnitSlots
-  // Modo campaña: muestra iniciales/apodo de PJs activos (roster) en vez de mech name.
-  const campaignPilots = useMemo(() => {
-    if (!campaignMode) return null;
-    return roster
-      .filter(r => r.estado === 'activo' || r.estado === 'herido')
-      .map(r => r.apodo || r.nombre || r.jugador || '?');
-  }, [campaignMode, roster]);
-
   const slotNames = isMech
     ? sim.mechSlots.map((s, i) => {
         if (campaignPilots && campaignPilots[i]) return campaignPilots[i];
@@ -240,6 +317,8 @@ export function SimuladorPage() {
           hydrateFromSnapshot={sim.hydrateFromSnapshot}
           clearCurrentUnit={sim.clearCurrentUnit}
           markSynced={sim.markSynced}
+          campaignMode={campaignMode}
+          onToggleCampaignMode={handleToggleCampaign}
           bvTotal={
             sim.mechSlots.reduce((acc, s) => acc + (s.state?.bv ?? 0), 0) +
             sim.vehicleSlots.reduce((acc, s) => acc + ((s.state as any)?.bv ?? 0), 0)
@@ -387,6 +466,11 @@ export function SimuladorPage() {
           campaignDate={getCampaignDateISO(campaign?.campaignYear, campaign?.campaignMonth)}
           initialSimSlotIdx={tallerSlotIdx}
           onClose={() => setTallerSlotIdx(null)}
+          onRestore={() => {
+            // restoreMechSlotFull ya actualizó localStorage; rehidratamos el estado en RAM
+            const snap = loadLocalSnapshot();
+            if (snap) sim.hydrateFromSnapshot(snap);
+          }}
           onCommit={async (total, concepto, mechName) => {
             await commitLibroEntryAndTreasury({
               id: genId('lm'),
@@ -435,7 +519,7 @@ export function SimuladorPage() {
             const snap: any = { schemaVersion: 1, updatedAt: new Date().toISOString(), ...sim.getSnapshot() };
             const bv = (snap.mechSlots ?? []).reduce((a: number, s: any) => a + (s?.state?.bv ?? 0), 0)
                      + (snap.vehicleSlots ?? []).reduce((a: number, s: any) => a + ((s?.state as any)?.bv ?? 0), 0);
-            await saveFuerzaConfigSlot(5, { nombre: 'Fuerza 5', bv, snapshot: snap });
+            await saveFuerzaCampana({ nombre: 'Campaña auto', bv, snapshot: snap });
             // ESTADOMECHS map
             const map: Record<string, number> = {};
             for (const ms2 of (snap.mechSlots ?? [])) {
