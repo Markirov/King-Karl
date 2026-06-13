@@ -23,9 +23,21 @@ export interface RosterEntry {
   dinero:        string | number;
   estado:        PilotEstado;
   lanza:         string;       // Personajes col V (ej. "Primus", "Secundus")
+  /** Personajes col O — habilidad Disparo Mech ya calculada (TN BT). */
+  disparoMech:   number | null;
+  /** Personajes col P — habilidad Pilotaje Mech ya calculada (TN BT). */
+  pilotajeMech:  number | null;
 }
 
 const ESTADOS_VALIDOS: PilotEstado[] = ['activo', 'herido', 'hospitalizado', 'kia', 'mia', 'retirado'];
+
+/** Lee skill TN (entero >=0). null si vacio/no numerico. */
+function parseSkill(v: any): number | null {
+  if (v === null || v === undefined || v === '') return null;
+  const n = Number(v);
+  if (!Number.isFinite(n)) return null;
+  return Math.max(0, Math.floor(n));
+}
 
 function normEstado(s: any): PilotEstado {
   const v = (s ?? '').toString().trim().toLowerCase();
@@ -61,6 +73,8 @@ export async function loadRoster(): Promise<RosterEntry[]> {
     dinero:        r.dinero ?? '',
     estado:        normEstado(r.estado),
     lanza:         (r.lanza || '').toString().trim(),
+    disparoMech:   parseSkill(r.disparoMech ?? r.disparo ?? r.gunnery ?? r.colO),
+    pilotajeMech:  parseSkill(r.pilotajeMech ?? r.pilotaje ?? r.piloting ?? r.colP),
   }));
 }
 

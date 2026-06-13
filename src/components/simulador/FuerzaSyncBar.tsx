@@ -1,8 +1,8 @@
 // FuerzaSyncBar — indicador estado + Slots/Reset fuerza
 import { useEffect, useRef, useState } from 'react';
-import { CloudUpload, AlertCircle, Trash2, Archive } from 'lucide-react';
+import { CloudUpload, AlertCircle, Trash2, Archive, Lock, LockOpen } from 'lucide-react';
 import {
-  loadAllFuerzaConfigSlots, saveFuerzaConfigSlot, clearFuerzaConfigSlot,
+  loadAllFuerzaConfigSlots, saveFuerzaConfigSlot, clearFuerzaConfigSlot, saveConfigBatch,
   type FuerzaSlot, type FuerzaConfigEntry,
 } from '@/lib/sheets-service';
 import type { SimuladorSnapshot } from '@/lib/simulador-persistence';
@@ -13,16 +13,21 @@ interface Props {
   lastLocalSave: string | null;
   getSnapshot: () => Omit<SimuladorSnapshot, 'schemaVersion' | 'updatedAt'>;
   hydrateFromSnapshot: (snap: SimuladorSnapshot) => void;
-  resetSession: () => void;
+  clearCurrentUnit: () => void;
   markSynced: () => void;
   /** BV total para guardar como metadato (calcula caller). */
   bvTotal: number;
+  /** Modo campaña activo (FUERZA5 lock + pilot order fijo). */
+  campaignMode?: boolean;
+  /** Toggle handler (pide clave si activa). */
+  onToggleCampaignMode?: () => void | Promise<void>;
 }
 
 type PushState = 'idle' | 'pushing' | 'ok' | 'error';
 
 export function FuerzaSyncBar({
-  dirty, lastLocalSave, getSnapshot, hydrateFromSnapshot, resetSession, markSynced, bvTotal,
+  dirty, lastLocalSave, getSnapshot, hydrateFromSnapshot, clearCurrentUnit, markSynced, bvTotal,
+  campaignMode, onToggleCampaignMode,
 }: Props) {
   const [pushState, setPushState] = useState<PushState>('idle');
   const [pushError, setPushError] = useState<string | null>(null);
@@ -46,18 +51,9 @@ export function FuerzaSyncBar({
     }
   }, [pushState]);
 
-  // ── Slots fijos en Configuracion ──
-
-  const openSlotsPanel = async () => {
-    setSlotsPanelOpen(true);
-    setLoadingSlots(true);
-    const all = await loadAllFuerzaConfigSlots();
-    setSlots(all);
-    setLoadingSlots(false);
-  };
-
-  // ── Slot 5 protegido — requiere clave "Mark" para sobrescribir ──
-  const PROTECTED_FUERZA_SLOTS: FuerzaSlot[] = [5];
+  // ── Slot 5 protegido — clave "Mark" para sobrescribir/borrar ──
+  // Slot 5 ya no protegido — el lock vive en modo campaña.
+  const PROTECTED_FUERZA_SLOTS: FuerzaSlot[] = [];
   const PROTECTED_PASSWORD = 'Mark';
   const UNLOCK_KEY = 'kk_fuerza_slot_unlock';
 
@@ -80,7 +76,6 @@ export function FuerzaSyncBar({
     } catch { /* ignore */ }
   };
 
-  /** Pide clave si el slot está protegido. true = puede escribir. */
   const guardFuerzaSlotWrite = (slot: FuerzaSlot): boolean => {
     if (isFuerzaSlotUnlocked(slot)) return true;
     const pwd = prompt(`FUERZA${slot} protegida. Introduce la clave:`);
@@ -91,6 +86,16 @@ export function FuerzaSyncBar({
     }
     alert(`Clave incorrecta. FUERZA${slot} no modificada.`);
     return false;
+  };
+
+  // ── Slots fijos en Configuracion ──
+
+  const openSlotsPanel = async () => {
+    setSlotsPanelOpen(true);
+    setLoadingSlots(true);
+    const all = await loadAllFuerzaConfigSlots();
+    setSlots(all);
+    setLoadingSlots(false);
   };
 
   const handleSaveSlot = async (slot: FuerzaSlot) => {
@@ -112,6 +117,32 @@ export function FuerzaSyncBar({
       const all = await loadAllFuerzaConfigSlots();
       setSlots(all);
       setSlotNombre('');
+
+      // Slot 5 = "fuerza activa" → escribe ESTADOMECHS (mapa %estado por mech) para Comision.
+      if (slot === 5) {
+        try {
+          const map: Record<string, number> = {};
+          for (const ms of (snap.mechSlots ?? [])) {
+            const st: any = ms?.state; const se: any = ms?.session;
+            if (!st || !se) continue;
+            const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'];
+            const isLocs    = ['HD','CT','LT','RT','LA','RA','LL','RL'];
+            const armorMax = armorLocs.reduce((s,k) => s + ((st.armor || {})[k] ?? 0), 0);
+            const armorCur = armorLocs.reduce((s,k) => s + ((se.armor || {})[k] ?? 0), 0);
+            const isMax    = isLocs.reduce((s,k) => s + ((st.is || {})[k] ?? 0), 0);
+            const isCur    = isLocs.reduce((s,k) => s + ((se.is || {})[k] ?? 0), 0);
+            const total = armorMax + isMax;
+            if (total <= 0) continue;
+            // Mech destruido -> estado 0% (override aunque queden pts en otras locs).
+            const pct = se.destroyed
+              ? 0
+              : Math.round(((armorCur + isCur) / total) * 100);
+            const key = `${st.chassis || ''} ${st.model || ''}`.trim();
+            if (key) map[key] = pct;
+          }
+          await saveConfigBatch({ ESTADOMECHS: JSON.stringify(map) });
+        } catch {/* ignore */}
+      }
     } else {
       setPushState('error');
       setPushError(String((res as any)?.error || 'no_save'));
@@ -121,33 +152,6 @@ export function FuerzaSyncBar({
   const handleLoadSlot = (slot: FuerzaSlot) => {
     const entry = slots[slot];
     if (!entry?.snapshot?.schemaVersion) return;
-
-    // Confirmación: cargar sobreescribe el estado actual del simulador.
-    // Si hay unidades cargadas o cambios sin guardar, avisa.
-    const snap = entry.snapshot;
-    const occupied = (snap.mechSlots?.filter(s => s?.state).length ?? 0)
-                  + (snap.vehicleSlots?.filter(s => s?.state).length ?? 0);
-
-    const currentSnap = getSnapshot();
-    const currentOccupied = (currentSnap.mechSlots?.filter(s => s?.state).length ?? 0)
-                          + (currentSnap.vehicleSlots?.filter(s => s?.state).length ?? 0);
-
-    const warningParts: string[] = [
-      `Cargar FUERZA${slot} (${entry.nombre || '—'})`,
-      `${occupied} unidad${occupied !== 1 ? 'es' : ''} · ${entry.bv} BV`,
-      '',
-      '⚠ Esto SOBREESCRIBE el estado actual del simulador.',
-    ];
-    if (currentOccupied > 0) {
-      warningParts.push(`Tienes ${currentOccupied} unidad${currentOccupied !== 1 ? 'es' : ''} cargada${currentOccupied !== 1 ? 's' : ''} ahora.`);
-    }
-    if (dirty) {
-      warningParts.push('⚠ Hay cambios LOCALES sin guardar — se perderán.');
-    }
-    warningParts.push('', '¿Continuar?');
-
-    if (!confirm(warningParts.join('\n'))) return;
-
     hydrateFromSnapshot(entry.snapshot);
     setSlotsPanelOpen(false);
     markSynced();
@@ -173,9 +177,9 @@ export function FuerzaSyncBar({
 
       <button
         onClick={() => {
-          if (confirm('Vaciar simulador y borrar sesión local. ¿Continuar?')) resetSession();
+          if (confirm('Borrar la unidad en uso de este slot. ¿Continuar?')) clearCurrentUnit();
         }}
-        title="Cerrar misión (limpia slots y snapshot local)"
+        title="Borrar unidad en uso (solo este slot)"
         className="flex items-center gap-1 border border-outline-variant/40 hover:border-error/60 text-secondary/40 hover:text-error px-2 py-1 clip-chamfer font-mono text-[9px] uppercase tracking-widest transition-colors"
       >
         <Trash2 size={12} />
@@ -190,6 +194,22 @@ export function FuerzaSyncBar({
           <div className="font-mono text-[9px] text-secondary/50 mb-3">
             5 espacios en celdas FUERZA1..5 de Configuracion. Guardar sobrescribe.
           </div>
+
+          {/* Toggle Modo Campaña */}
+          {onToggleCampaignMode && (
+            <button
+              onClick={onToggleCampaignMode}
+              className={`w-full flex items-center justify-center gap-2 px-3 py-2 mb-3 clip-chamfer font-mono text-[10px] uppercase tracking-widest transition-colors border ${
+                campaignMode
+                  ? 'bg-amber-400/20 border-amber-400 text-amber-400'
+                  : 'bg-surface-container border-outline-variant/40 text-secondary/70 hover:border-amber-400/60 hover:text-amber-400'
+              }`}
+              title={campaignMode ? 'Modo campaña activo — pulsa para salir' : 'Activar modo campaña (carga FUERZA5 + lock)'}
+            >
+              {campaignMode ? <Lock size={12} /> : <LockOpen size={12} />}
+              {campaignMode ? 'Modo Campaña ON' : 'Modo Campaña'}
+            </button>
+          )}
 
           {/* Nombre opcional al guardar */}
           <input

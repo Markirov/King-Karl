@@ -16,9 +16,33 @@ import { stripMarkdownLite } from '@/lib/markdown-lite';
 import { readPartes, loadPartesFromSheets, type ParteEntry, type ParteTone } from '@/lib/parte-store';
 import { loadMovimientos, type MovimientoEntry } from '@/lib/sheets-service';
 import { isActivo } from '@/lib/roster';
+// IMPORTANTE: Importamos el catálogo global para que lea tonelaje y BV de modelos que no tienen .ssw
+import { useMechCatalog, findMechByName } from '@/hooks/useMechCatalog';
 
 const SLOTS_KEY = 'barracones_slots_v1';
 const SLOT_COUNT = 6;
+
+// ⚠️ MOCK DEL SIMULADOR ASÍNCRONO DESDE SHEETS
+// Reemplaza esto por tu función real que haga el fetch a Sheets
+// (por ejemplo: import { loadSnapshotFromSheets } from '@/lib/sheets-service';)
+const loadSnapshotFromSheets = async (): Promise<any> => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({
+        mechSlots: [
+          {
+            state: { chassis: 'Shootist', armor: { CTf: 20 }, is: { CT: 10 } },
+            session: { armor: { CTf: 2 }, is: { CT: 5 } } 
+          },
+          {
+            state: { chassis: 'Dervish', armor: { CTf: 20 }, is: { CT: 10 } },
+            session: { armor: { CTf: 20 }, is: { CT: 10 } } 
+          }
+        ]
+      });
+    }, 800);
+  });
+};
 
 // Per-chassis display tweaks (image scale/offset) for known mechs
 const MECH_META: Record<string, { weight: number; bv: number; cost: number; imgScale?: number; imgOffsetX?: number }> = {
@@ -113,8 +137,6 @@ function parseCurrencyValue(raw: string | undefined): number | null {
     const n = Number(`${intPart || '0'}.${decPart}`);
     return Number.isFinite(n) ? n : null;
   }
-  // Caso típico de coma flotante (p.ej. "2100783.900000024"): un único separador y muchos decimales.
-  // Debe leerse como decimal, no como miles concatenados.
   if (!hasGroupSepBefore && decPart.length > 2) {
     const normalized = decSep === ','
       ? cleaned.replace(/\./g, '').replace(',', '.')
@@ -126,12 +148,38 @@ function parseCurrencyValue(raw: string | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+// HP de Piloto
 function calcDamagePct(pilot: Pilot): number {
   const fue   = pilot.fue || 6;
   const locs  = calcHp(fue);
   const total = locs.reduce((a, l) => a + l.max, 0);
   const dmg   = Object.values(pilot.hpDmg ?? {}).reduce((a: number, d) => a + (Number(d) || 0), 0);
   return total > 0 ? Math.round((dmg / total) * 100) : 0;
+}
+
+// % de Daño del Mech desde el Simulador
+function getMechSimDamage(chassisName: string, snapshot: any): number | null {
+  if (!snapshot || !snapshot.mechSlots || !chassisName) return null;
+  
+  const slot = snapshot.mechSlots.find((s: any) =>
+    s?.state?.chassis?.toLowerCase().includes(chassisName.toLowerCase())
+  );
+  if (!slot || !slot.state || !slot.session) return null;
+
+  const st = slot.state;
+  const se = slot.session;
+  // Mech destruido -> 100% daño (estado 0%) aunque queden pts en otras locs.
+  if (se.destroyed) return 100;
+  const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'];
+  const armorMax  = armorLocs.reduce((s,k) => s + ((st.armor || {})[k] ?? 0), 0);
+  const armorCur  = armorLocs.reduce((s,k) => s + ((se.armor || {})[k] ?? 0), 0);
+  const isLocs    = ['HD','CT','LT','RT','LA','RA','LL','RL'];
+  const isMax     = isLocs.reduce((s,k) => s + ((st.is || {})[k] ?? 0), 0);
+  const isCur     = isLocs.reduce((s,k) => s + ((se.is || {})[k] ?? 0), 0);
+  const totalMax  = armorMax + isMax;
+  const totalLost = (armorMax - armorCur) + (isMax - isCur);
+
+  return totalMax > 0 ? Math.round((totalLost / totalMax) * 100) : 0;
 }
 
 // ── Paleta ──
@@ -189,6 +237,7 @@ function AgendaRow({ num, label, note, tone = 'neutral' }: AgendaRowProps) {
 interface MechAssetProps {
   pilot: string; call: string; chassis: string;
   weight: number; weightClass: string; bv: number; price: number; status: string; damage: number;
+  simDamagePct: number | null;
   img: string; imgScale?: number; imgOffsetX?: number;
 }
 function MechAsset({ pilot, call, chassis, weight, weightClass, bv, price, status, damage, simDamagePct }: MechAssetProps) {
@@ -215,7 +264,7 @@ function MechAsset({ pilot, call, chassis, weight, weightClass, bv, price, statu
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>{pilot}</div>
         
-        {/* Apodo (Se mantiene en medio) */}
+        {/* Apodo */}
         <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 8.5, color: T.gold, letterSpacing: 1.2 }}>
           ‹ {call.toUpperCase()} ›
         </div>
@@ -248,21 +297,20 @@ function MechAsset({ pilot, call, chassis, weight, weightClass, bv, price, statu
           fontFamily: '"Share Tech Mono", monospace', fontSize: 8, letterSpacing: 1,
         }}>
           <span style={{ color: statusColor }}>{warn ? '⚠ ' : ''}{status}</span>
-          <span style={{ color: statusColor }}>{weightClass}</span>
+          {weight > 0 && <span style={{ color: statusColor }}>{weightClass}</span>}
         </div>
-        
-        {/* Añadimos el % de daño del mech aquí debajo de la clase y a la derecha del BV */}
+
+        {/* BV + Estado en misma linea */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', marginTop: 1,
-          fontFamily: '"Share Tech Mono", monospace', fontSize: 8,
-          color: T.outline, letterSpacing: 1,
+          fontFamily: '"Share Tech Mono", monospace', fontSize: 8, letterSpacing: 1,
         }}>
           <span style={{ color: infoColor }}>BV {bv.toLocaleString('es-ES', { useGrouping: 'always' })}</span>
-          {simDamagePct !== null && (
-            <span style={{ color: simDamagePct > 0 ? T.bloodLight : T.outline }}>
-              {simDamagePct}ESTADO %
-            </span>
-          )}
+          {typeof simDamagePct === 'number' && (() => {
+            const estadoPct = Math.max(0, 100 - simDamagePct);
+            const c = estadoPct >= 90 ? T.gold : estadoPct >= 50 ? T.cream : T.bloodLight;
+            return <span style={{ color: c }}>ESTADO {estadoPct}%</span>;
+          })()}
         </div>
       </div>
     </article>
@@ -700,6 +748,9 @@ export function ComisionPage() {
   const BASE = import.meta.env.BASE_URL;
   const { isTabletDown, isMobile } = useViewport();
 
+  // NUEVO: Hook del catálogo global
+  const { catalog: mechCatalog } = useMechCatalog();
+
   const mesNombre = MESES[(campaign.campaignMonth ?? 1) - 1] ?? 'Enero';
   const mesAbrev  = mesNombre.slice(0, 3).toUpperCase();
   const heroLabel = `${mesAbrev} · ${campaign.campaignYear ?? 3026} · DISTRITO KAPTEYN`;
@@ -711,7 +762,7 @@ export function ComisionPage() {
   const contratoFmt = fmtValor(campaign.contratoValor);
   const valorUnidadFmt = fmtValor(campaign.valorUnidad);
 
-  // Load pilot slots from localStorage (same key as useBarracones)
+  // Load pilot slots from localStorage
   const [slots, setSlots] = useState<(Pilot | null)[]>(Array(SLOT_COUNT).fill(null));
   useEffect(() => {
     try {
@@ -728,6 +779,25 @@ export function ComisionPage() {
   }, []);
 
   const [mechFileStats, setMechFileStats] = useState<Record<string, MechFileStats>>({});
+  
+  // Cargar el snapshot del simulador
+  const [simSnapshot, setSimSnapshot] = useState<any>(null);
+  
+  useEffect(() => {
+    let cancelled = false;
+    
+    // Al inicializar, pedimos el JSON asíncronamente (la celda que es la fuente de verdad)
+    loadSnapshotFromSheets()
+      .then(data => {
+        if (!cancelled && data) {
+          setSimSnapshot(data);
+        }
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, []);
+  
   useEffect(() => {
     let cancelled = false;
     const names = Array.from(new Set(roster.map(r => r.mech).filter(Boolean)));
@@ -758,7 +828,7 @@ export function ComisionPage() {
     return () => { cancelled = true; };
   }, [roster, BASE]);
 
-  // Build mech cards from roster (fuente única). Slots aporta hpDmg si están cacheados.
+  // Build mech cards from roster
   const mechCards = roster.map((r, i) => {
     const p = slots[i] ?? null;
     if (!p && !r.mech && !r.nombre && !r.apodo) return null;
@@ -770,12 +840,40 @@ export function ComisionPage() {
       const key      = mechKey(mech);
       const meta     = MECH_META[key] ?? { weight: 0, bv: 0, cost: 0 };
       const stats    = mech ? mechFileStats[mech] : undefined;
-      const weight   = stats?.tons ?? meta.weight;
+      
+      // NUEVO: Buscar en el catálogo global si no hay stats locales del .ssw
+      const catMatch = mechCatalog ? findMechByName(mechCatalog.mechs, mech || '') : null;
+
+      // Actualizado para pillar el tonelaje y BV de catMatch también
+      const weight   = stats?.tons ?? catMatch?.tons ?? meta.weight;
       const weightClass = mechWeightCategory(weight);
-      const bv       = stats?.bv ?? meta.bv;
-      const price    = stats?.cost ?? meta.cost;
+      const bv       = stats?.bv ?? catMatch?.bv2 ?? meta.bv;
+      const price    = stats?.cost ?? catMatch?.cost ?? meta.cost;
+      
       const apodo       = r.apodo?.trim() || p?.apodo?.trim() || p?.callsign || '?';
       const fullName    = nombre || p?.callsign || '—';
+      
+      // Prioridad ESTADOMECHS (Configuracion, escrito por simulador slot 5).
+      // Match tolerante: substring contra mechs (case-insensitive, longest match).
+      let simDamagePct: number | null = null;
+      if (campaign.estadoMechs && mech) {
+        const target = mech.toLowerCase().trim();
+        let best: { k: string; pct: number } | null = null;
+        for (const [k, v] of Object.entries(campaign.estadoMechs)) {
+          const kl = k.toLowerCase().trim();
+          if (target.includes(kl) || kl.includes(target)) {
+            if (!best || kl.length > best.k.length) best = { k: kl, pct: Number(v) };
+          }
+        }
+        if (best && Number.isFinite(best.pct)) {
+          simDamagePct = Math.max(0, Math.min(100, 100 - best.pct)); // estado% -> daño%
+        }
+      }
+      // Fallback: snapshot del simulador (stub, puede fallar).
+      if (simDamagePct === null && simSnapshot) {
+        simDamagePct = getMechSimDamage(mech || '', simSnapshot);
+      }
+      
       return {
         pilot:      fullName,
         call:       apodo,
@@ -786,6 +884,7 @@ export function ComisionPage() {
         price,
         status,
         damage:     dmgPct,
+        simDamagePct: simDamagePct,
         img:        mechImage(mech, BASE),
         imgScale:   meta.imgScale,
         imgOffsetX: meta.imgOffsetX,
@@ -802,7 +901,6 @@ export function ComisionPage() {
     ? `${total} UNIDADES · ${ready} OPERATIVAS · ${inBahia} EN BAHÍA`
     : `${total} UNIDADES · TODAS OPERATIVAS`;
 
-  // KPI agregados Dashboard (F1)
   const bvTotal      = mechCards.reduce((s, c) => s + (c?.bv || 0), 0);
   const personalAct  = roster.filter(isActivo).length;
   const personalTot  = roster.length;
@@ -836,7 +934,6 @@ export function ComisionPage() {
           borderBottom: `1px solid ${T.outlineV}`,
           minHeight: isTabletDown ? 'auto' : 300,
         }}>
-          {/* Banner art — oculto en mobile/tablet */}
           {!isTabletDown && (
             <div style={{
               position: 'absolute', right: -40, top: -20, bottom: -20,
@@ -849,7 +946,6 @@ export function ComisionPage() {
               WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, #000 35%, #000 85%, rgba(0,0,0,0.7) 100%)',
             }} />
           )}
-          {/* Vignette */}
           <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, rgba(10,14,20,0.85) 0%, rgba(10,14,20,0.5) 55%, transparent 100%)` }} />
 
           <div style={{
@@ -861,7 +957,6 @@ export function ComisionPage() {
             alignItems: isMobile ? 'flex-start' : 'stretch',
           }}>
 
-            {/* Emblem — full height */}
             <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
               <img
                 src={`${BASE}KIngKarlKRifle.png`}
@@ -876,7 +971,6 @@ export function ComisionPage() {
               />
             </div>
 
-            {/* Text — flex column, top content + bottom stats */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 <div style={{
@@ -932,7 +1026,6 @@ export function ComisionPage() {
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.12)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(199,151,100,0.05)'; }}
               >
-                {/* Esquinas decorativas bronce */}
                 <span style={{ position: 'absolute', top: -1, left: -1, width: 8, height: 8, borderTop: '2px solid #c79764', borderLeft: '2px solid #c79764' }} />
                 <span style={{ position: 'absolute', top: -1, right: -1, width: 8, height: 8, borderTop: '2px solid #c79764', borderRight: '2px solid #c79764' }} />
                 <span style={{ position: 'absolute', bottom: -1, left: -1, width: 8, height: 8, borderBottom: '2px solid #c79764', borderLeft: '2px solid #c79764' }} />
@@ -957,7 +1050,6 @@ export function ComisionPage() {
                   </div>
                 ))}
 
-                {/* Hint ir a finanzas */}
                 <div style={{
                   position: 'absolute', bottom: 4, right: 10,
                   fontFamily: '"Share Tech Mono", monospace', fontSize: 8,
@@ -991,7 +1083,7 @@ export function ComisionPage() {
               <MechAsset key={i}
                 pilot={c.pilot} call={c.call}
                 chassis={c.chassis} weight={c.weight} weightClass={c.weightClass} bv={c.bv} price={c.price}
-                status={c.status} damage={c.damage}
+                status={c.status} damage={c.damage} simDamagePct={c.simDamagePct}
                 img={c.img} imgScale={c.imgScale} imgOffsetX={c.imgOffsetX}
               />
             ) : (
@@ -1016,33 +1108,43 @@ export function ComisionPage() {
         overflow: 'hidden',
       }}>
 
-        {/* Orden del Día */}
         <OrdenDelDia />
-
-        {/* Última entrada · Crónicas */}
         <UltimaCronica />
-
-        {/* Últimos Movimientos (Dashboard F1) */}
         <UltimosMovimientos />
 
-        {/* Parte diario + moral */}
         <div style={{ marginTop: 'auto' }}>
           <SmallLabel>Parte Diario</SmallLabel>
           <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: T.bone, lineHeight: 1.8, letterSpacing: 0.5 }}>
             <ParteDiario />
           </div>
-          <div style={{
-            marginTop: 12, padding: '10px 12px', background: T.void,
-            borderLeft: `2px solid ${T.gold}`,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-          }}>
-            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 2 }}>
-              MORAL DE LA UNIDAD
-            </span>
-            <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 18, fontWeight: 800, color: T.ice, letterSpacing: -0.3 }}>
-              88<span style={{ fontSize: 11, color: T.outline }}> /100</span>
-            </span>
-          </div>
+          {(() => {
+            // Estado global = media de estado% por mech (100 - damage%).
+            // Lee de ESTADOMECHS si esta, fallback a calculo desde mechCards.
+            const estados: number[] = mechCards
+              .map(c => (c && typeof c.simDamagePct === 'number') ? Math.max(0, 100 - c.simDamagePct) : null)
+              .filter((x): x is number => x !== null);
+            const avg = estados.length > 0
+              ? Math.round(estados.reduce((a, b) => a + b, 0) / estados.length)
+              : null;
+            const color = avg === null ? T.outline
+              : avg >= 80 ? T.gold
+              : avg >= 50 ? T.cream
+              : T.bloodLight;
+            return (
+              <div style={{
+                marginTop: 12, padding: '10px 12px', background: T.void,
+                borderLeft: `2px solid ${T.gold}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+              }}>
+                <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline, letterSpacing: 2 }}>
+                  ESTADO DE LA UNIDAD
+                </span>
+                <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: 18, fontWeight: 800, color, letterSpacing: -0.3 }}>
+                  {avg ?? '—'}<span style={{ fontSize: 11, color: T.outline }}> /100</span>
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

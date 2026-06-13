@@ -1,3 +1,4 @@
+import { Wrench } from 'lucide-react';
 import type { MechState, MechSession, MoveMode } from '@/lib/combat-types';
 import { WOUND_CHECKS } from '@/lib/combat-data';
 
@@ -21,22 +22,41 @@ interface Props {
   onSetMoveMode: (m: MoveMode) => void;
   onSetJumpUsed: (h: number) => void;
   onLoadPilot: (p: AvailablePilot) => void;
+  onOpenTaller?: () => void;
+  onHandleDestruction?: () => void;
 }
 
-export function PilotPanel({ state, session, gunneryTotal, pilotingTotal, sysHits, effectiveWalkMP, effectiveRunMP, availablePilots, onSetPilot, onSetWounds, onSetMoveMode, onSetJumpUsed, onLoadPilot }: Props) {
+export function PilotPanel({ state, session, gunneryTotal, pilotingTotal, sysHits, effectiveWalkMP, effectiveRunMP, availablePilots, onSetPilot, onSetWounds, onSetMoveMode, onSetJumpUsed, onLoadPilot, onOpenTaller, onHandleDestruction }: Props) {
   return (
     <section className="bg-surface-container-low p-4 relative clip-chamfer border-l-2 border-primary-container/30">
       {/* Identity */}
       <div className="mb-4 border-b border-outline-variant pb-3">
-        <div className="text-primary-container font-black text-xl tracking-tighter uppercase mb-1 truncate">{state.chassis}</div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="text-primary-container font-black text-xl tracking-tighter uppercase truncate flex-1">{state.chassis}</div>
+          {onOpenTaller && (
+            <button
+              onClick={onOpenTaller}
+              title="Abrir Taller con esta ficha"
+              className="shrink-0 border border-amber-400/40 hover:border-amber-400 text-amber-400/70 hover:text-amber-400 hover:bg-amber-400/10 p-1 clip-chamfer transition-colors"
+            >
+              <Wrench size={14} />
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-2 text-[10px] font-mono text-secondary/60 uppercase">
           <span>{state.model}</span><span className="w-1 h-1 bg-secondary/30 rounded-full" />
           <span>{state.tonnage}T</span><span className="w-1 h-1 bg-secondary/30 rounded-full" />
           <span>BV:{state.bv || '?'}</span>
         </div>
         {session.destroyed && (
-          <div className="mt-2 px-2 py-1 bg-error/20 border border-error text-error text-[10px] font-mono uppercase">
-            {session.destroyedReason}
+          <div className="mt-2 px-2 py-1 bg-error/20 border border-error text-error text-[10px] font-mono uppercase flex items-center justify-between gap-2">
+            <span className="truncate">{session.destroyedReason}</span>
+            {onHandleDestruction && (
+              <button
+                onClick={onHandleDestruction}
+                className="shrink-0 px-2 py-0.5 border border-error/60 hover:bg-error hover:text-error-container font-bold text-[9px] uppercase tracking-widest transition-colors"
+              >Gestionar</button>
+            )}
           </div>
         )}
       </div>

@@ -105,11 +105,11 @@ const fmtDate = (iso: string) => {
   } catch { return iso.slice(0, 10); }
 };
 
-const genId = (prefix: string) =>
+export const genId = (prefix: string) =>
   `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
 
 /** Fecha de campaña como YYYY-MM-DD (día 1 por defecto, sin tener campaignDay). */
-function getCampaignDateISO(year: number | undefined, month: number | undefined): string {
+export function getCampaignDateISO(year: number | undefined, month: number | undefined): string {
   const y = year ?? new Date().getFullYear();
   const m = month ?? 1;
   return `${y}-${String(m).padStart(2, '0')}-01`;
@@ -388,7 +388,7 @@ interface LibroMayorTabProps {
 }
 
 function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: LibroMayorTabProps) {
-  const { finanzasPendingModal, setFinanzasPendingModal } = useAppStore();
+  const { finanzasPendingModal, setFinanzasPendingModal, tallerAutoLoadSlot, setTallerAutoLoadSlot } = useAppStore();
   const [entries, setEntries] = useState<LibroMayorEntry[]>([]);
   const [personal, setPersonal] = useState<PersonalEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -510,7 +510,8 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
       {tallerOpen && (
         <TallerModal
           campaignDate={campaignDate}
-          onClose={() => setTallerOpen(false)}
+          initialSimSlotIdx={tallerAutoLoadSlot}
+          onClose={() => { setTallerOpen(false); setTallerAutoLoadSlot(null); }}
           onCommit={async (total, concepto, mechName) => {
             await commitLibroEntryAndTreasury({
               id: genId('lm'),
@@ -523,6 +524,7 @@ function LibroMayorTab({ campaignDate, campaignYear, campaignMonth, roster }: Li
               jugador: '',
             });
             setTallerOpen(false);
+            setTallerAutoLoadSlot(null);
             refresh();
           }}
         />
@@ -1795,10 +1797,14 @@ function BreakdownRow({ label, detail, value, color, bold }: {
 //  TALLER MODAL (A1) — factura reparación post-combate
 // ══════════════════════════════════════════════════════════
 
-function TallerModal({ onClose, onCommit }: {
+export function TallerModal({ onClose, onCommit, initialSimSlotIdx, onRestore }: {
   campaignDate: string;
   onClose: () => void;
   onCommit: (total: number, concepto: string, mechName: string) => Promise<void>;
+  /** Si se pasa, auto-carga ese slot del simulador al montar. */
+  initialSimSlotIdx?: number | null;
+  /** Notifica al caller tras restaurar mech en simulador (para rehydrate). */
+  onRestore?: () => void;
 }) {
   const { isTabletDown, isMobile } = useViewport();
   const { catalog } = useMechCatalog();
@@ -1812,11 +1818,11 @@ function TallerModal({ onClose, onCommit }: {
   const [damage, setDamage] = useState<MechRepairDamage>(emptyDamage);
   const [estadoPct, setEstadoPct] = useState(100);
   const [pctDañoTotal, setPctDañoTotal] = useState(0);
-  const [system, setSystem] = useState<RepairSystem>('propio');
+  const [system, setSystem] = useState<RepairSystem>('canon');
 
   // Simulador import
   const [showSimPicker, setShowSimPicker] = useState(false);
-  const [municionDetalle, setMunicionDetalle] = useState<{ family: string; spent: number; tons: number; cost: number }[]>([]);
+  const [municionDetalle, setMunicionDetalle] = useState<import('@/lib/repair-engine').MunicionDetalleEntry[]>([]);
   const [simSlotIdx, setSimSlotIdx] = useState<number | null>(null); // null = no cargado desde sim
   const simSlots: { slot: MechSlot; idx: number }[] = useMemo(() => {
     const snap = loadLocalSnapshot();
@@ -1868,6 +1874,18 @@ function TallerModal({ onClose, onCommit }: {
     setShowSimPicker(false);
     setSimSlotIdx(slotIdx);
   };
+
+  // Auto-load desde simulador si el caller paso initialSimSlotIdx (boton llave en PilotPanel)
+  useEffect(() => {
+    if (initialSimSlotIdx === null || initialSimSlotIdx === undefined) return;
+    if (!catalog) return; // espera a que el catalogo este listo
+    const snap = loadLocalSnapshot();
+    if (!snap) return;
+    const slot = snap.mechSlots[initialSimSlotIdx];
+    if (slot?.state && slot?.session) loadFromSimSlot(slot, initialSimSlotIdx);
+    // Solo en mount (o cuando llega catalog tarde)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalog]);
 
   // Sugerencias
   const suggestions = useMemo(() => {
@@ -2127,21 +2145,20 @@ function TallerModal({ onClose, onCommit }: {
               }}>
                 {system === 'propio'
                   ? 'Tu Taller: precio × peso × pts/2 × estado%. Cubre daño parcial.'
-                  : 'CamOps: sólo reemplazo total. Engine/Gyro parcial = 0 ₡ (sólo labor). Sin estado factura.'}
+                  : 'Tech Manual: precios canon. Reactor/Gyro parcial = 0 ₡ (sólo labor). Estado factura % también se aplica.'}
               </div>
 
               <SmallLabel>Estado factura · Datos sim</SmallLabel>
               <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 10, alignItems: 'end' }}>
                 {/* Estado factura — IZQ */}
                 <div>
-                  <FieldLabel>Estado factura (%) {system === 'canon' && '⊘'}</FieldLabel>
+                  <FieldLabel>Estado factura (%)</FieldLabel>
                   <select value={estadoPct}
-                    disabled={system === 'canon'}
                     onChange={e => {
                       const v = parseInt(e.target.value, 10);
                       setEstadoPct(Number.isFinite(v) ? v : 100);
                     }}
-                    style={{ ...inputStyle, opacity: system === 'canon' ? 0.4 : 1 }}>
+                    style={inputStyle}>
                     {[...ESTADO_FACTURA_PCT].map(p => (
                       <option key={p} value={p}>{p}% factura</option>
                     ))}
@@ -2154,15 +2171,13 @@ function TallerModal({ onClose, onCommit }: {
                   <div style={{ display: 'flex', gap: 4 }}>
                     {[0, 25, 50, 75, 100].map(p => (
                       <button key={p}
-                        disabled={system === 'canon'}
                         onClick={() => setEstadoPct(p)}
                         style={{
                           width: 36, padding: '6px 0',
                           background: estadoPct === p ? T.gold : T.void,
                           border: `1px solid ${T.gold}`,
                           color: estadoPct === p ? T.void : T.gold,
-                          cursor: system === 'canon' ? 'not-allowed' : 'pointer',
-                          opacity: system === 'canon' ? 0.3 : 1,
+                          cursor: 'pointer',
                           fontFamily: '"Share Tech Mono", monospace', fontSize: 10, fontWeight: 700,
                         }}>{p}</button>
                     ))}
@@ -2222,6 +2237,42 @@ function TallerModal({ onClose, onCommit }: {
                   <FacturaRow label="Retros"         value={factura.retros} />
                   <FacturaRow label="Radiadores"     value={factura.radiadores} />
                   <FacturaRow label="Armas"          value={factura.armas} />
+                  {(damage.armas?.length ?? 0) > 0 && (
+                    <div style={{
+                      marginLeft: 12, padding: '4px 8px',
+                      borderLeft: `2px solid ${T.outlineV}`,
+                      fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline,
+                      display: 'flex', flexDirection: 'column', gap: 4,
+                    }}>
+                      {(damage.armas ?? []).map((a, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ flex: 1, color: a.status === 'destruida' ? T.bloodLight : T.bone }}>
+                            {a.name} <span style={{ color: T.outline }}>
+                              [{a.loc} {a.slotsHit}/{a.slotsTotal} · {a.status === 'destruida' ? 'DESTR' : 'parcial'}]
+                            </span>
+                          </span>
+                          <input
+                            type="number"
+                            value={a.cost || ''}
+                            placeholder="₡ coste"
+                            onFocus={e => e.target.select()}
+                            onChange={e => {
+                              const val = parseInt(e.target.value) || 0;
+                              setDamage(d => ({
+                                ...d,
+                                armas: (d.armas ?? []).map((w, j) => j === i ? { ...w, cost: val } : w),
+                              }));
+                            }}
+                            style={{
+                              width: 90, padding: '2px 4px',
+                              background: T.surfaceLow, border: `1px solid ${T.outlineV}`,
+                              color: T.bone, fontFamily: '"Share Tech Mono", monospace', fontSize: 10,
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <FacturaRow label="Munición"       value={factura.municion} />
                   {municionDetalle.length > 0 && (
                     <div style={{
@@ -2229,12 +2280,45 @@ function TallerModal({ onClose, onCommit }: {
                       borderLeft: `2px solid ${T.outlineV}`,
                       fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: T.outline,
                     }}>
-                      {municionDetalle.map((d, i) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}>
-                          <span>{d.family} ({d.spent} disp · {d.tons}t)</span>
-                          <span style={{ color: T.bone }}>{fmtMoney(d.cost)}</span>
-                        </div>
-                      ))}
+                      {municionDetalle.map((d, i) => {
+                        const isLBX = !!d.lbxKey && d.clusterPrice !== undefined;
+                        const toggleAmmoType = (next: 'slug' | 'cluster') => {
+                          if (!isLBX || d.ammoType === next) return;
+                          const price = next === 'cluster' ? (d.clusterPrice ?? 0) : (d.slugPrice ?? 0);
+                          const newCost = d.tons * price;
+                          setMunicionDetalle(prev => prev.map((e, j) => j === i ? { ...e, ammoType: next, cost: newCost } : e));
+                          setDamage(dmg => {
+                            const total = municionDetalle.reduce((sum, e, j) => sum + (j === i ? newCost : e.cost), 0);
+                            return { ...dmg, municion: total };
+                          });
+                        };
+                        return (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ flex: 1 }}>{d.family} ({d.spent} disp · {d.tons}t)</span>
+                            {isLBX && (
+                              <div style={{ display: 'flex', gap: 2 }}>
+                                <button onClick={() => toggleAmmoType('slug')}
+                                  style={{
+                                    padding: '1px 6px', fontSize: 8, fontFamily: '"Share Tech Mono", monospace',
+                                    background: d.ammoType === 'slug' ? T.gold + '30' : 'transparent',
+                                    color: d.ammoType === 'slug' ? T.gold : T.outline,
+                                    border: `1px solid ${d.ammoType === 'slug' ? T.gold : T.outlineV}`,
+                                    cursor: 'pointer', textTransform: 'uppercase',
+                                  }}>Slug</button>
+                                <button onClick={() => toggleAmmoType('cluster')}
+                                  style={{
+                                    padding: '1px 6px', fontSize: 8, fontFamily: '"Share Tech Mono", monospace',
+                                    background: d.ammoType === 'cluster' ? T.gold + '30' : 'transparent',
+                                    color: d.ammoType === 'cluster' ? T.gold : T.outline,
+                                    border: `1px solid ${d.ammoType === 'cluster' ? T.gold : T.outlineV}`,
+                                    cursor: 'pointer', textTransform: 'uppercase',
+                                  }}>Cluster</button>
+                              </div>
+                            )}
+                            <span style={{ color: T.bone, minWidth: 70, textAlign: 'right' }}>{fmtMoney(d.cost)}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                   <div style={{ borderTop: `1px solid ${T.outlineV}`, paddingTop: 8, marginTop: 6 }}>
@@ -2285,6 +2369,7 @@ function TallerModal({ onClose, onCommit }: {
                         const ok = restoreMechSlotFull(simSlotIdx);
                         if (ok) {
                           console.log(`[Taller] Slot ${simSlotIdx + 1} restaurado en simulador (armor/IS/crits/ammo).`);
+                          onRestore?.();
                         }
                       }
                       // Telegram notif (drop silencioso, post-commit)

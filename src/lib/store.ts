@@ -37,6 +37,10 @@ interface AppState {
   /** Acción pendiente para portada Finanzas → Libro Mayor (abre modal al entrar). */
   finanzasPendingModal: 'taller' | 'compras' | 'projector' | null;
   setFinanzasPendingModal: (v: 'taller' | 'compras' | 'projector' | null) => void;
+
+  /** Slot de simulador a auto-cargar cuando se abre TallerModal desde botón llave. */
+  tallerAutoLoadSlot: number | null;
+  setTallerAutoLoadSlot: (v: number | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -88,4 +92,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   finanzasPendingModal: null,
   setFinanzasPendingModal: (v) => set({ finanzasPendingModal: v }),
+
+  tallerAutoLoadSlot: null,
+  setTallerAutoLoadSlot: (v) => set({ tallerAutoLoadSlot: v }),
 }));

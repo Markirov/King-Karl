@@ -19,30 +19,36 @@ export function parseCurrencyValue(raw: string | undefined): number | null {
   if (!s) return null;
   const cleaned = s.replace(/[^\d.,-]/g, '');
   if (!cleaned) return null;
-  const lastComma = cleaned.lastIndexOf(',');
-  const lastDot = cleaned.lastIndexOf('.');
-  const sep = Math.max(lastComma, lastDot);
-  if (sep === -1) {
-    const n = Number(cleaned.replace(/[^\d-]/g, ''));
+
+  // Heuristica: la coma SIEMPRE es decimal en es-ES. El punto es siempre
+  // separador de miles (solo grupos de 3). Para evitar interpretar
+  // "413.085" como 413,085 (float), si solo hay puntos y forman grupos
+  // de 3 -> tratar como miles.
+
+  const hasComma = cleaned.includes(',');
+  const hasDot   = cleaned.includes('.');
+
+  // Solo coma -> decimal
+  if (hasComma && !hasDot) {
+    const n = Number(cleaned.replace(',', '.'));
     return Number.isFinite(n) ? n : null;
   }
-  const intRaw = cleaned.slice(0, sep);
-  const intPart = intRaw.replace(/[.,]/g, '');
-  const decPart = cleaned.slice(sep + 1).replace(/[^\d]/g, '');
-  const hasGroupSepBefore = /[.,]/.test(intRaw);
-  const decSep = lastComma > lastDot ? ',' : '.';
-  if (decPart.length === 1 || decPart.length === 2) {
-    const n = Number(`${intPart || '0'}.${decPart}`);
+  // Solo puntos -> miles si formato \d{1,3}(\.\d{3})+ ; sino decimal
+  if (hasDot && !hasComma) {
+    if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+      const n = Number(cleaned.replace(/\./g, ''));
+      return Number.isFinite(n) ? n : null;
+    }
+    const n = Number(cleaned);
     return Number.isFinite(n) ? n : null;
   }
-  // Caso típico de coma flotante (p.ej. "2100783.900000024"): un único separador y muchos decimales.
-  if (!hasGroupSepBefore && decPart.length > 2) {
-    const normalized = decSep === ','
-      ? cleaned.replace(/\./g, '').replace(',', '.')
-      : cleaned.replace(/,/g, '');
+  // Ambos -> dot=miles, comma=decimal (es-ES standard)
+  if (hasDot && hasComma) {
+    const normalized = cleaned.replace(/\./g, '').replace(',', '.');
     const n = Number(normalized);
     return Number.isFinite(n) ? n : null;
   }
-  const n = Number(cleaned.replace(/[^\d-]/g, ''));
+  // Sin separadores
+  const n = Number(cleaned);
   return Number.isFinite(n) ? n : null;
 }

@@ -141,4 +141,6 @@ export interface CampaignConfig {
   valorUnidad:   string; // VALOR_UNIDAD from config (e.g. "7.480")
   totalMechs:    string; // TOTAL_MECHS from config
   pcJugadores:   string[]; // PC_JUGADORES from config — handles separados por coma (PCs vs NPCs)
+  /** ESTADOMECHS: map { "chassis model": pct_estado_0_100 }. Escrito por simulador slot 5. */
+  estadoMechs?:  Record<string, number>;
 }

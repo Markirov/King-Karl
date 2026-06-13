@@ -143,6 +143,23 @@ const [damageAmount, setDamageAmount] = useState(0);
   /** Marca estado como sincronizado tras push remoto OK. */
   const markSynced = useCallback(() => setDirty(false), []);
 
+  /** Borra solo la unidad activa (mech o vehículo) del slot actual, sin tocar el resto de la fuerza. */
+  const clearCurrentUnit = useCallback(() => {
+    if (activeTab === 'mechs') {
+      setMechSlots(prev => {
+        const next = [...prev];
+        next[currentMechIdx] = emptyMechSlot();
+        return next;
+      });
+    } else {
+      setVehicleSlots(prev => {
+        const next = [...prev];
+        next[currentVehicleIdx] = emptyVehicleSlot();
+        return next;
+      });
+    }
+  }, [activeTab, currentMechIdx, currentVehicleIdx]);
+
   // ── Current slot accessors ──
   const currentSlot = activeTab === 'mechs' ? mechSlots[currentMechIdx] : vehicleSlots[currentVehicleIdx];
   const mechState = activeTab === 'mechs' ? mechSlots[currentMechIdx].state : null;
@@ -693,6 +710,6 @@ const [damageAmount, setDamageAmount] = useState(0);
 
     // Persistence
     dirty, lastLocalSave,
-    getSnapshot, hydrateFromSnapshot, resetSession, markSynced,
+    getSnapshot, hydrateFromSnapshot, resetSession, clearCurrentUnit, markSynced,
   };
 }

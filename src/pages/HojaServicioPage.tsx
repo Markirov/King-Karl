@@ -8,7 +8,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getVeterancy } from '@/lib/barracones-data';
 import { useAppStore } from '@/lib/store';
-import { registerMissionFull, registerXPExpense } from '@/lib/sheets-service';
+import { registerMissionFull, registerXPExpense, commitLibroEntryAndTreasury } from '@/lib/sheets-service';
+import { genId, getCampaignDateISO } from '@/pages/FinanzasPage';
 import { sendTelegramNotif, getTelegramToggle } from '@/lib/telegram-service';
 import { TelegramToggle } from '@/components/ui/TelegramToggle';
 import { isActivo } from '@/lib/roster';
@@ -624,6 +625,32 @@ export function HojaServicioPage() {
             await registerXPExpense(p.name, rc.cost, `${p.name}: Repetir Tirada (${p.nivel})`);
           }
         }
+      }
+
+      // Derivar todas las lineas monetarias a LibroMayor para que
+      // CONTRATO_VALOR (formula SUMAR.SI) recalcule el balance.
+      const fechaLm = getCampaignDateISO(campaign?.campaignYear, campaign?.campaignMonth);
+      const lmLines: { amount: number; tipo: 'ingreso' | 'gasto'; cat: any; concepto: string }[] = [
+        { amount: pago,        tipo: 'ingreso', cat: 'contrato_secundario', concepto: `Pago misión ${meta.missionId}` },
+        { amount: salvamento,  tipo: 'ingreso', cat: 'venta_mech',          concepto: `Salvamento misión ${meta.missionId}` },
+        { amount: extrasHaber, tipo: 'ingreso', cat: 'ingreso_misc',        concepto: `Extras (haber) ${meta.missionId}` },
+        { amount: reparacion,  tipo: 'gasto',   cat: 'repuestos',           concepto: `Reparación misión ${meta.missionId}` },
+        { amount: municion,    tipo: 'gasto',   cat: 'repuestos',           concepto: `Munición misión ${meta.missionId}` },
+        { amount: blindaje,    tipo: 'gasto',   cat: 'repuestos',           concepto: `Blindaje misión ${meta.missionId}` },
+        { amount: extrasDebe,  tipo: 'gasto',   cat: 'sueldo_extra',        concepto: `Extras (debe) ${meta.missionId}` },
+      ];
+      for (const l of lmLines) {
+        if (!l.amount || l.amount <= 0) continue;
+        await commitLibroEntryAndTreasury({
+          id: genId('lm'),
+          fecha: fechaLm,
+          concepto: l.concepto,
+          cantidad: Math.round(l.amount),
+          tipo: l.tipo,
+          categoria: l.cat,
+          nota: `Misión ${meta.missionId} · Hoja de Servicio`,
+          jugador: '',
+        });
       }
 
       setStatus('ok');

@@ -60,6 +60,13 @@ export function App() {
         patch.pcJugadores = String(d['PC_JUGADORES'])
           .split(',').map(s => s.trim()).filter(Boolean);
       }
+      // ESTADOMECHS: JSON con %estado por mech (escrito por FuerzaSyncBar al guardar slot 5).
+      if (d['ESTADOMECHS']) {
+        try {
+          const map = JSON.parse(String(d['ESTADOMECHS']));
+          if (map && typeof map === 'object') patch.estadoMechs = map;
+        } catch {/* ignore */}
+      }
       if (Object.keys(patch).length) setCampaign(patch);
 
       // Hidratar toggle legacy global desde Sheets (sin reescribir a sheets)

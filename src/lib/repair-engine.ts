@@ -154,8 +154,8 @@ export interface MechRepairDamage {
   radiadores:   number;
   /** Actuadores dañados por tipo y cantidad. */
   actuadores:   { [k in keyof typeof PRECIO_ACTUADOR]?: number };
-  /** Armas con coste libre (no se lookup de catálogo aquí). */
-  armas?:       { name: string; cost: number }[];
+  /** Armas dañadas/destruidas. `cost` editable por usuario; status informativo. */
+  armas?:       { name: string; cost: number; status?: 'parcial' | 'destruida'; loc?: string; slotsHit?: number; slotsTotal?: number }[];
   /** Munición consumida en ₡. */
   municion?:    number;
 }
@@ -359,11 +359,23 @@ export function configFromCatalog(catalog: {
 // Si no encuentra match, devuelve 5000 (fallback genérico).
 
 export const PRECIO_MUNICION_PER_TON: { match: RegExp; price: number }[] = [
+  // Arrow IV
+  { match: /Arrow\s*IV|Arrow\s*4/i,  price: 15_000 },
   // Gauss family
   { match: /Heavy\s*Gauss/i,         price: 20_000 },
   { match: /Light\s*Gauss/i,         price: 20_000 },
   { match: /Gauss/i,                 price: 20_000 },
-  // AC variants
+  // LB-X (solid; cluster en LB5=15k, LB10=20k si usuario edita)
+  { match: /LB[- ]?2[- ]?X|LB.*\b2\b/i,  price:  2_000 },
+  { match: /LB[- ]?5[- ]?X|LB.*\b5\b/i,  price:  9_000 },
+  { match: /LB[- ]?10[- ]?X|LB.*\b10\b/i, price: 12_000 },
+  { match: /LB[- ]?20[- ]?X|LB.*\b20\b/i, price: 24_000 },
+  // Ultra AC
+  { match: /Ultra\s*AC[- ]?2|UAC[- ]?2/i,  price:  1_000 },
+  { match: /Ultra\s*AC[- ]?5|UAC[- ]?5/i,  price:  9_000 },
+  { match: /Ultra\s*AC[- ]?10|UAC[- ]?10/i, price: 12_000 },
+  { match: /Ultra\s*AC[- ]?20|UAC[- ]?20/i, price: 20_000 },
+  // AC variants (estandar)
   { match: /AC\s*\/?\s*2\b/i,        price:  1_000 },
   { match: /AC\s*\/?\s*5\b/i,        price:  4_500 },
   { match: /AC\s*\/?\s*10\b/i,       price:  6_000 },
@@ -395,6 +407,7 @@ export function ammoPricePerTon(family: string): number {
 // ── Derivar daños desde sesión simulador ──────────────────────
 
 import type { MechState, MechSession, CritSlot, AmmoBin } from './combat-types';
+import { weaponPriceFromName, lbxKeyFromAmmoFamily, LBX_CLUSTER_AMMO_COST } from './weapon-prices';
 
 /** Mapea slot.name del simulador → componente de reparación.
  *  Nombres literales de parsers.ts (SSW/MTF output). */
@@ -423,6 +436,21 @@ function mapCritToRepair(
   else if (n === 'Foot Actuator')                                  { out.actuadores['Tobillo'] = (out.actuadores['Tobillo'] ?? 0) + 1; }
 }
 
+export interface MunicionDetalleEntry {
+  family:        string;
+  spent:         number;
+  tons:          number;
+  cost:          number;
+  /** Codigo LB-X (LBX5/LBX10/...) si es LB-X y tiene precio cluster disponible. */
+  lbxKey?:       string;
+  /** 'slug' (solido, default) | 'cluster' (postas, mas caro). Solo aplica a LB-X. */
+  ammoType?:     'slug' | 'cluster';
+  /** Precio/ton solido — para recalcular al togglear. */
+  slugPrice?:    number;
+  /** Precio/ton cluster — solo si LBX_CLUSTER_AMMO_COST tiene entrada. */
+  clusterPrice?: number;
+}
+
 /**
  * Extrae MechRepairDamage desde el delta estado/sesión del simulador.
  *
@@ -437,7 +465,7 @@ export function deriveDamageFromSession(
 ): {
   damage: MechRepairDamage;
   pctDañoTotal: number;
-  municionDetalle: { family: string; spent: number; tons: number; cost: number }[];
+  municionDetalle: MunicionDetalleEntry[];
 } {
   // Armor delta
   const armorLocs = ['HD','CTf','CTr','LTf','LTr','RTf','RTr','LA','RA','LL','RL'] as const;
@@ -473,18 +501,53 @@ export function deriveDamageFromSession(
     }
   }
 
+  // Weapons hit scan — recorre state.weapons, cuenta slots con hit en cada arma
+  const armasOut: NonNullable<MechRepairDamage['armas']> = [];
+  for (const w of (state.weapons ?? [])) {
+    const slotsLoc = (session.crits ?? {})[w.loc] as CritSlot[] | undefined;
+    if (!slotsLoc) continue;
+    let hits = 0;
+    for (const idx of (w.slotIndices ?? [])) {
+      if (slotsLoc[idx]?.hit) hits++;
+    }
+    if (hits <= 0) continue;
+    const total = (w.slotIndices?.length ?? w.slotsUsed ?? 1);
+    const status: 'parcial' | 'destruida' = hits >= total ? 'destruida' : 'parcial';
+    const base = weaponPriceFromName(w.name || w.rawName || '', state.tonnage);
+    // Parcial = repair ~50% del precio. Destruida = reemplazo completo.
+    const cost = status === 'destruida' ? base : Math.round(base * 0.5);
+    armasOut.push({
+      name:       w.name || w.rawName || 'Arma',
+      cost,
+      status,
+      loc:        w.loc,
+      slotsHit:   hits,
+      slotsTotal: total,
+    });
+  }
+
   // Munición consumida: por cada bin, spent = max - current,
   // coste = ceil(spent / perTon) × precio/ton (compras por tonelada)
   let municionCost = 0;
-  const municionDetalle: { family: string; spent: number; tons: number; cost: number }[] = [];
+  const municionDetalle: MunicionDetalleEntry[] = [];
   for (const bin of (session.ammoBins ?? []) as AmmoBin[]) {
     const spent = Math.max(0, (bin.max ?? 0) - (bin.current ?? 0));
     if (spent <= 0 || !bin.perTon) continue;
-    const tons   = Math.ceil(spent / bin.perTon);
-    const price  = ammoPricePerTon(bin.family || '');
-    const cost   = tons * price;
+    const tons      = Math.ceil(spent / bin.perTon);
+    const slugPrice = ammoPricePerTon(bin.family || '');
+    const lbxKey    = lbxKeyFromAmmoFamily(bin.family || '');
+    const clusterPrice = lbxKey ? LBX_CLUSTER_AMMO_COST[lbxKey] : undefined;
+    // Default = slug (mas barato). Usuario togglea a cluster en UI si gasto postas.
+    const price    = slugPrice;
+    const cost     = tons * price;
     municionCost += cost;
-    municionDetalle.push({ family: bin.family, spent, tons, cost });
+    municionDetalle.push({
+      family: bin.family, spent, tons, cost,
+      lbxKey:       lbxKey ?? undefined,
+      ammoType:     lbxKey && clusterPrice ? 'slug' : undefined,
+      slugPrice:    lbxKey && clusterPrice ? slugPrice : undefined,
+      clusterPrice: clusterPrice,
+    });
   }
 
   return {
@@ -493,7 +556,7 @@ export function deriveDamageFromSession(
       estructura: isLost,
       blindaje:   armorLost,
       miomero:    0,   // no hay slot nombrado en crits para miomero
-      armas:      [],
+      armas:      armasOut,
       municion:   municionCost,
     },
     pctDañoTotal,
@@ -531,11 +594,6 @@ function canonGyroTons(engineRating: number, gyroType: string): number {
   }
 }
 
-/** Internal structure tons: ceil(tons × 0.10). EndoAcero pesa la mitad. */
-function canonStructureTons(tons: number, structType: string): number {
-  const base = Math.ceil(tons / 10);
-  return structType === 'EndoAcero' ? Math.ceil(base / 2) : base;
-}
 
 /**
  * Factura canon (CamOps): sólo se carga el precio total de la pieza
@@ -545,6 +603,7 @@ function canonStructureTons(tons: number, structType: string): number {
 export function calcRepairCostCanon(
   config: MechRepairConfig,
   damage: MechRepairDamage,
+  estadoFactPct = 100,
   pctDañoTotal = 0,
 ): RepairBreakdown {
   const peso   = config.tons;
@@ -570,15 +629,12 @@ export function calcRepairCostCanon(
   // === Sensores === 2000 × tons (sólo 1 conjunto por mech)
   const sensores = damage.sensores > 0 ? PRECIO_SENSORES_BASE * peso : 0;
 
-  // === Estructura === IS_tons × precio_base. Canon no escala por pts dañados;
-  // carga reemplazo completo de la localización afectada.
-  // Aproximación: si hay pts perdidos → cobrar fracción IS_tons proporcional.
+  // === Estructura === TM p.557: PRECIO_ESTRUCTURA × Unit Tonnage para
+  // reemplazo total. Pts perdidos / IS_total × cost para parcial.
   const estructuraBase = PRECIO_ESTRUCTURA[config.estructuraType] ?? PRECIO_ESTRUCTURA['Estandar'];
-  const isTons = canonStructureTons(peso, config.estructuraType);
-  // Canon TM: ~400 × IS_tons para reemplazo total. Pts perdidos / IS_total × cost
-  const isTotalPts = peso * 2.5; // aprox: IS total ~ 2.5 pts/ton mech (Atlas 100t = 250 pts ≈)
+  const isTotalPts = peso * 2.5; // aprox IS total ~ 2.5 pts/ton
   const estructura = damage.estructura > 0
-    ? Math.round((estructuraBase * isTons * damage.estructura) / isTotalPts)
+    ? Math.round((estructuraBase * peso * damage.estructura) / isTotalPts)
     : 0;
 
   // === Blindaje === ceil(pts/16) × precio_ton (idéntico a propio)
@@ -591,11 +647,11 @@ export function calcRepairCostCanon(
     ? (PRECIO_MIOMERO[config.miomeroType] ?? 0) * peso
     : 0;
 
-  // === Actuadores === Canon: actuadores son parte de la estructura; sólo se
-  // reemplazan junto con limb destroyed. Aproximación: precio flat × uds (sin peso)
+  // === Actuadores === TM p.557: precio_base × Unit Tonnage × qty.
+  // Hombro 100 / Codo 50 / Mano 80 / Cadera 150 / Rodilla 80 / Tobillo 120 (per ton).
   const actuadores = Object.entries(damage.actuadores ?? {}).reduce((sum, [name, qty]) => {
-    const price = PRECIO_ACTUADOR[name as keyof typeof PRECIO_ACTUADOR] ?? 0;
-    return sum + price * (qty ?? 0);
+    const pricePerTon = PRECIO_ACTUADOR[name as keyof typeof PRECIO_ACTUADOR] ?? 0;
+    return sum + pricePerTon * peso * (qty ?? 0);
   }, 0);
 
   // === Retros === Canon: precio × uds (sin peso)
@@ -615,8 +671,8 @@ export function calcRepairCostCanon(
     actuadores + retros + radiadores +
     armas + municion;
 
-  // Canon NO tiene estado factura %. Total = subtotal directo.
-  const total = subtotal;
+  // Estado factura: % modificador (default 100). Permite cargos/descuentos.
+  const total = Math.round(subtotal * (estadoFactPct / 100));
 
   const estadoMech: EstadoMech = destruido ? 'DESTRUIDO' : clasificarEstadoMech(pctDañoTotal);
 
@@ -625,7 +681,7 @@ export function calcRepairCostCanon(
     estructura, blindaje, miomero,
     actuadores, retros, radiadores,
     armas, municion,
-    subtotal, estadoFacturaPct: 100, total,
+    subtotal, estadoFacturaPct: estadoFactPct, total,
     estadoMech, destruido,
   };
 }
@@ -639,7 +695,7 @@ export function calcRepairCostBySystem(
   pctDañoTotal = 0,
 ): RepairBreakdown {
   return system === 'canon'
-    ? calcRepairCostCanon(config, damage, pctDañoTotal)
+    ? calcRepairCostCanon(config, damage, estadoFactPct, pctDañoTotal)
     : calcRepairCost(config, damage, estadoFactPct, pctDañoTotal);
 }
 

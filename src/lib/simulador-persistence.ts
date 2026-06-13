@@ -86,8 +86,18 @@ export function restoreMechSlotFull(slotIdx: number): boolean {
     se.crits[loc] = se.crits[loc].map(c => ({ ...c, hit: false }));
   }
 
-  // Ammo refill
+  // Ammo refill (bins + grupos agregados)
   se.ammoBins = (se.ammoBins || []).map(b => ({ ...b, current: b.max }));
+  se.ammoGroups = {};
+  se.ammoGroupMax = {};
+  for (const b of se.ammoBins) {
+    const key = `${b.loc}::${b.familyKey}`;
+    se.ammoGroups[key]    = (se.ammoGroups[key]    || 0) + b.current;
+    se.ammoGroupMax[key]  = (se.ammoGroupMax[key]  || 0) + b.max;
+  }
+  // Limpia shots pendientes + activeShots
+  se.activeShots = {};
+  se.shotSpend = {};
 
   // Reset combat
   se.heat = 0;
