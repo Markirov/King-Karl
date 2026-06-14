@@ -88,6 +88,9 @@ export interface MechSession {
   destroyed: boolean;
   destroyedReason: string;
   logs: string[];
+
+  /** Armas reparadas de forma PARCIAL (weapon.id → true) → +1 al to-hit hasta reparación total. */
+  weaponPartialRepair?: Record<number, boolean>;
 }
 
 export interface CritSlot {

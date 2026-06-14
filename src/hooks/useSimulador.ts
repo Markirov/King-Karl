@@ -344,6 +344,40 @@ const [damageAmount, setDamageAmount] = useState(0);
     updateMechSession(s => mechToggleCrit(mechState, s, loc, slotIdx));
   };
 
+  /**
+   * Repara un arma individual (limpia sus crits dañados).
+   * mode='total'   → sin penalización, quita marca de reparación parcial previa.
+   * mode='partial' → marca weaponPartialRepair[weaponId]=true → +1 al to-hit persistente.
+   */
+  const repairWeapon = (weaponId: number, mode: 'total' | 'partial') => {
+    if (!mechState || !mechSession) return;
+    const w = mechState.weapons.find(x => x.id === weaponId);
+    if (!w) return;
+    updateMechSession(s => {
+      const crits = { ...s.crits };
+      const locCrits = crits[w.loc] ? [...crits[w.loc]] : [];
+      for (const idx of (w.slotIndices || [])) {
+        if (locCrits[idx]) locCrits[idx] = { ...locCrits[idx], hit: false };
+      }
+      if (locCrits.length) crits[w.loc] = locCrits;
+
+      const weaponPartialRepair = { ...(s.weaponPartialRepair || {}) };
+      if (mode === 'partial') {
+        weaponPartialRepair[weaponId] = true;
+      } else {
+        delete weaponPartialRepair[weaponId];
+      }
+
+      const logLabel = mode === 'partial' ? 'PARCIAL (+1 al disparo)' : 'TOTAL';
+      return {
+        ...s,
+        crits,
+        weaponPartialRepair,
+        logs: [`> ${w.name} reparada: ${logLabel}`, ...(s.logs || [])].slice(0, 50),
+      };
+    });
+  };
+
   const forceReviveMech = () => {
     if (!mechSession) return;
     updateMechSession(s => mechForceRevive(s));
@@ -678,7 +712,7 @@ const [damageAmount, setDamageAmount] = useState(0);
     handleFileUpload, loadUnitText,
     toggleWeapon, handleFire,
     handleDamage, applyDamageToSelected,
-    toggleCrit,
+    toggleCrit, repairWeapon,
     forceReviveMech, adjustAmmo, adjustHeat,
     setMoveMode, setJumpUsed,
     setWounds, setPilot, setPilotFull, resetLog,

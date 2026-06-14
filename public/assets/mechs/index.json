@@ -160234,6 +160234,68 @@
     "source": "RS3039u"
   },
   {
+    "name": "Marauder MAD-3D KKK",
+    "chassis": "Marauder",
+    "model": "MAD-3D KKK",
+    "fullName": "Marauder MAD-3D KKK",
+    "file": "Marauder MAD-3D KKK.ssw",
+    "kind": "mech",
+    "tons": 75,
+    "weightClass": "heavy",
+    "categoria": "Pesado",
+    "isOmni": false,
+    "isClan": false,
+    "techBase": "Inner Sphere",
+    "unitType": "BattleMech",
+    "rulesLevel": 0,
+    "era": 1,
+    "year": 2834,
+    "bv2": 1470,
+    "cost": 6597500,
+    "motive": "Biped",
+    "numLegs": 2,
+    "engine": {
+      "rating": 300,
+      "type": "Fusion Engine"
+    },
+    "walkMP": 4,
+    "runMP": 6,
+    "jumpMP": 0,
+    "structure": "Standard Structure",
+    "armor": {
+      "type": "Standard Armor",
+      "total": 184,
+      "byLocation": {
+        "hd": 9,
+        "ct": 35,
+        "ctr": 10,
+        "lt": 17,
+        "ltr": 8,
+        "rt": 17,
+        "rtr": 8,
+        "la": 22,
+        "ra": 22,
+        "ll": 18,
+        "rl": 18
+      }
+    },
+    "heatSinks": {
+      "count": 20,
+      "type": "Single",
+      "dissipation": 20
+    },
+    "weapons": {
+      "PPC": 2,
+      "Medium Laser": 2,
+      "Large Laser": 1
+    },
+    "weaponsTotal": 5,
+    "totalHeat": 34,
+    "totalDamage": 38,
+    "ammo": [],
+    "source": "Salazar"
+  },
+  {
     "name": "Marauder MAD-3D Salazar",
     "chassis": "Marauder",
     "model": "MAD-3D Salazar",
