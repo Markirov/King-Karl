@@ -143,7 +143,7 @@ export function getMoveHeat(mode: MoveMode, jumpUsed: number): number {
     case 'stand': return 0;
     case 'walk': return 1;
     case 'run': return 2;
-    case 'jump': return Math.max(3, jumpUsed); // min 3 for jump
+    case 'jump': return Math.max(0, jumpUsed); // 1 heat por cada hex saltado
     default: return 0;
   }
 }
@@ -184,6 +184,26 @@ export function calcGunneryTotal(
 /** Calculate piloting total */
 export function calcPilotingTotal(basePiloting: number, gyroHits: number, wounds: number): number {
   return basePiloting + (gyroHits * 3);
+}
+
+/** Suma del modificador de dificultad (atk) de todos los componentes con ajuste manual activo. */
+export function getCritModsAtkTotal(critMods: Record<string, { heat: number; atk: number }> | undefined): number {
+  if (!critMods) return 0;
+  return Object.values(critMods).reduce((sum, m) => sum + (m.atk || 0), 0);
+}
+
+/** Modificadores critMods (heat + atk) en los slots de un arma concreta. */
+export function getWeaponCritMod(
+  weapon: { loc: string; slotIndices?: number[] },
+  critMods: Record<string, { heat: number; atk: number }> | undefined,
+): { heat: number; atk: number } {
+  if (!critMods) return { heat: 0, atk: 0 };
+  let heat = 0, atk = 0;
+  for (const idx of (weapon.slotIndices ?? [])) {
+    const m = critMods[`${weapon.loc}:${idx}`];
+    if (m) { heat += m.heat || 0; atk += m.atk || 0; }
+  }
+  return { heat, atk };
 }
 
 /** Shooting modifier from arm actuator crits for a given location (LA or RA) */
@@ -605,12 +625,33 @@ export function mechCalcHeatDelta(state: MechState, session: MechSession): HeatD
   const sysHits = countSystemCritHits(session.crits);
 
   const move = getMoveHeat(session.moveMode, session.jumpUsed);
+  // Para cada arma activa: heat base + weaponMods + critMods en SUS slots.
+  // critMods se aplican solo cuando el arma en ese slot se dispara (per-weapon).
   const weapons = state.weapons
     .filter(w => session.activeShots[w.id])
-    .reduce((sum, w) => sum + w.heat, 0);
+    .reduce((sum, w) => {
+      const baseHeat = w.heat + (session.weaponMods?.[w.id]?.heat ?? 0);
+      const slotCritHeat = (w.slotIndices ?? []).reduce((s2, idx) => {
+        const key = `${w.loc}:${idx}`;
+        return s2 + (session.critMods?.[key]?.heat ?? 0);
+      }, 0);
+      return sum + baseHeat + slotCritHeat;
+    }, 0);
   const engineHeat = sysHits.engine * 5;
 
-  const generated = move + weapons + engineHeat;
+  // critMods en slots Jump Jet → solo cuando el mech salta.
+  let jumpCritHeat = 0;
+  if (session.moveMode === 'jump') {
+    for (const [key, mod] of Object.entries(session.critMods || {})) {
+      if (!mod?.heat) continue;
+      const [loc, idxStr] = key.split(':');
+      const idx = Number(idxStr);
+      const slotName = session.crits?.[loc]?.[idx]?.name;
+      if (slotName === 'Jump Jet') jumpCritHeat += mod.heat;
+    }
+  }
+
+  const generated = move + weapons + engineHeat + jumpCritHeat;
   const dissipated = Math.max(0, state.diss - sysHits.heatsinks);
   const delta = generated - dissipated;
 

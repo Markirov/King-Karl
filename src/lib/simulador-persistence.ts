@@ -104,7 +104,8 @@ export function restoreMechSlotFull(slotIdx: number): boolean {
   se.wounds = 0;
   se.destroyed = false;
   se.destroyedReason = '';
-  se.weaponPartialRepair = {};
+  se.weaponMods = {};
+  se.critMods = {};
   se.logs = ['> RESTAURADO TRAS REPARACIÓN COMPLETA (Taller)', ...(se.logs || [])].slice(0, 50);
 
   saveLocalSnapshot({

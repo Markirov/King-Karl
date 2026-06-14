@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Wrench } from 'lucide-react';
 import type { MechState, MechSession } from '@/lib/combat-types';
 import { mechIsAmmoCrit } from '@/lib/weapons';
 import { ammoExplosionDmgPerRound, countSystemCritHits } from '@/lib/combat-data';
@@ -40,16 +41,6 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits, onAdjust
     // Si ya está hit → reparar sin preguntar
     if (alreadyHit) {
       onToggleCrit(loc, idx);
-      return;
-    }
-
-    // Slot sano: preguntar si es un golpe ROTO (crítico real) o una MODIFICACIÓN
-    // (ajuste manual de calor/dificultad sin marcar el componente como destruido).
-    const wantsBreak = confirm(
-      `${loc} / ${name}\n\nOK = ROTO (crítico, puede destruir el componente)\nCancelar = MODIFICACIÓN (ajustar calor/dificultad sin romperlo)`
-    );
-    if (!wantsBreak) {
-      onAdjustComponent?.(loc, idx, name);
       return;
     }
 
@@ -136,6 +127,18 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits, onAdjust
                                   </span>
                                 )}
                               </span>}
+                          {!isEmpty && !s.hit && onAdjustComponent && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onAdjustComponent(col.key, idx, s.name);
+                              }}
+                              title="Ajustar calor/dificultad de este componente"
+                              className="shrink-0 text-secondary/40 hover:text-amber-400 transition-colors"
+                            >
+                              <Wrench size={11} />
+                            </button>
+                          )}
                         </div>
                       );
                     })}

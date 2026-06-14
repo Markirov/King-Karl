@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Crosshair, Wrench } from 'lucide-react';
+import { Crosshair } from 'lucide-react';
 import { TallerModal, genId, getCampaignDateISO } from '@/pages/FinanzasPage';
 import { commitLibroEntryAndTreasury, removeMechFromUnit, saveFuerzaCampana, loadFuerzaCampana, saveConfigBatch, loadAllFuerzaConfigSlots, saveFuerzaConfigSlot, type FuerzaSlot } from '@/lib/sheets-service';
 import { loadLocalSnapshot, snapshotHasUnits } from '@/lib/simulador-persistence';
@@ -14,6 +14,7 @@ import { PilotPanel, type AvailablePilot } from '@/components/simulador/PilotPan
 import { HeatMonitor } from '@/components/simulador/HeatMonitor';
 import { ArmorDiagram } from '@/components/simulador/ArmorDiagram';
 import { CriticalMatrix } from '@/components/simulador/CriticalMatrix';
+import { AdjustModModal, type AdjustModTarget } from '@/components/simulador/AdjustModModal';
 import { CombatLog } from '@/components/simulador/CombatLog';
 import { VehiclePanel } from '@/components/simulador/VehiclePanel';
 import { CatalogSearch } from '@/components/simulador/CatalogSearch';
@@ -57,6 +58,13 @@ export function SimuladorPage() {
   // Modo campaña SIEMPRE arranca OFF. Usuario lo activa manualmente.
   const [campaignMode, setCampaignMode] = useState<boolean>(false);
   const prevSubTabRef = useRef<string | null>(null);
+
+  // Modal de ajuste manual de calor/dificultad (armas y componentes)
+  const [adjustTarget, setAdjustTarget] = useState<
+    | (AdjustModTarget & { kind: 'weapon'; id: number })
+    | (AdjustModTarget & { kind: 'crit'; loc: string; slotIdx: number })
+    | null
+  >(null);
 
   // Guarda snapshot actual en FUERZACAMPAÑA + recalcula ESTADOMECHS.
   // Reutilizado por: salir de campaña, autosave 5min, guardado manual, y
@@ -443,7 +451,9 @@ export function SimuladorPage() {
           <div className="col-span-1 md:col-span-3 space-y-4">
             {/* Weapons */}
             <section className="bg-surface-container-low p-4 clip-chamfer border-l-2 border-primary-container/30">
-              <h2 className="font-headline text-sm font-bold text-primary-container tracking-widest uppercase mb-3">Armas</h2>
+              <h2 className="font-headline text-sm font-bold text-primary-container tracking-widest uppercase mb-3">
+                Armas
+              </h2>
               <div className="space-y-1">
                 {ms.weapons.length === 0 ? (
                   <div className="font-mono text-[10px] text-secondary/40 italic py-4 text-center">Sin armas</div>
@@ -452,9 +462,25 @@ export function SimuladorPage() {
                   const isDestroyed = w.slotIndices?.length > 0 && w.slotIndices.every(idx => ss.crits[w.loc]?.[idx]?.hit);
                   const wFam = w.ammoFamilyKey.split(':').slice(2).join(':') || w.ammoFamilyKey;
                   const noAmmo = w.usesAmmo && !ss.ammoBins.some(b => (b.familyKey.split(':').slice(2).join(':') || b.familyKey) === wFam && b.current >= w.ammoUse);
-                  const armMod = (w.loc === 'LA' || w.loc === 'RA') ? sim.armActuatorMod[w.loc] : 0;
-                  const partialMod = ss.weaponPartialRepair?.[w.id] ? 1 : 0;
-                  const weaponToHit = sim.gunneryTotal + armMod + partialMod;
+                  const baseArmMod = (w.loc === 'LA' || w.loc === 'RA') ? sim.armActuatorMod[w.loc] : 0;
+                  // critMods manuales en slots de actuador del brazo → aplica a TODAS armas del brazo (igual que armMod).
+                  const ACTUATOR_NAMES = ['Shoulder', 'Upper Arm Actuator', 'Lower Arm Actuator', 'Hand Actuator'];
+                  const actuatorCritMod = (w.loc === 'LA' || w.loc === 'RA')
+                    ? (ss.crits?.[w.loc] ?? []).reduce((sum, slot, idx) => {
+                        if (!slot || !ACTUATOR_NAMES.includes(slot.name)) return sum;
+                        const m = ss.critMods?.[`${w.loc}:${idx}`];
+                        return sum + (m?.atk ?? 0);
+                      }, 0)
+                    : 0;
+                  const armMod = baseArmMod + actuatorCritMod;
+                  const wMod = ss.weaponMods?.[w.id] || { heat: 0, atk: 0 };
+                  // critMod per-arma: solo los slots de esta arma cuentan.
+                  const slotCritMod = (w.slotIndices ?? []).reduce((acc, idx) => {
+                    const m = ss.critMods?.[`${w.loc}:${idx}`];
+                    return m ? { heat: acc.heat + (m.heat || 0), atk: acc.atk + (m.atk || 0) } : acc;
+                  }, { heat: 0, atk: 0 });
+                  const weaponToHit = sim.gunneryTotal + armMod + wMod.atk + slotCritMod.atk;
+                  const effectiveHeat = w.heat + wMod.heat + slotCritMod.heat;
 
                   return (
                     <div key={w.id}
@@ -462,7 +488,7 @@ export function SimuladorPage() {
                         isDestroyed ? 'opacity-20 border-error line-through'
                         : isActive ? 'bg-error/20 border-error text-error'
                         : noAmmo ? 'opacity-40 border-outline-variant'
-                        : partialMod > 0 ? 'border-amber-400/60 text-secondary'
+                        : (wMod.heat > 0 || wMod.atk > 0) ? 'border-amber-400/60 text-secondary'
                         : 'border-transparent hover:bg-secondary/10 text-secondary'
                       }`}
                     >
@@ -474,32 +500,38 @@ export function SimuladorPage() {
                         <span className="text-[8px] text-secondary/40">{w.loc} • {w.r}</span>
                       </div>
                       <div className="flex items-center gap-2 text-[9px]">
-                        <span>🔥{w.heat}</span>
+                        <span>
+                          🔥{effectiveHeat}
+                          {(wMod.heat > 0 || slotCritMod.heat > 0) && (
+                            <span className="text-amber-400/80"> (+{wMod.heat + slotCritMod.heat})</span>
+                          )}
+                        </span>
                         <span>💥{w.dmg}</span>
-                        {armMod > 0 && !isDestroyed && (
-                          <span className="text-amber-400/80">+{armMod}</span>
+                        {!isDestroyed && (
+                          <span
+                            className="text-secondary/60"
+                            title="Total para impactar (Habilidad + modificadores de movimiento/calor del piloto no incluidos)"
+                          >
+                            🎯{weaponToHit}+
+                          </span>
                         )}
-                        {partialMod > 0 && (
-                          <span className="text-amber-400/80" title="Reparación parcial: +1 al disparo">+1⚠</span>
+                        {armMod > 0 && !isDestroyed && (
+                          <span
+                            className="text-amber-400/80"
+                            title={`Actuador brazo: +${armMod} a impacto (afecta todas las armas del brazo)${actuatorCritMod > 0 ? ` — incluye +${actuatorCritMod} de mod manual en actuador` : ''}`}
+                          >+{armMod}🦾</span>
+                        )}
+                        {wMod.atk > 0 && (
+                          <span className="text-amber-400/80" title={`Dificultad extra (mod arma): +${wMod.atk}`}>+{wMod.atk}⚠</span>
+                        )}
+                        {slotCritMod.atk > 0 && (
+                          <span className="text-amber-400/80" title={`Crítico en slot del arma: +${slotCritMod.atk} a impacto`}>+{slotCritMod.atk}💢</span>
                         )}
                         {w.usesAmmo && (
                           <span className={noAmmo ? 'text-error' : ''}>
                             {ss.ammoBins.filter(b => (b.familyKey.split(':').slice(2).join(':') || b.familyKey) === wFam).reduce((sum, b) => sum + b.current, 0)}
                           </span>
                         )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const isTotal = confirm(
-                              `Reparar ${w.name}\n\nOK = Reparación TOTAL (sin penalización)\nCancelar = Reparación PARCIAL (+1 al disparo permanente)`
-                            );
-                            sim.repairWeapon(w.id, isTotal ? 'total' : 'partial');
-                          }}
-                          title="Reparar arma (total o parcial)"
-                          className="text-secondary/40 hover:text-amber-400 transition-colors"
-                        >
-                          <Wrench size={11} />
-                        </button>
                       </div>
                     </div>
                   );
@@ -512,7 +544,16 @@ export function SimuladorPage() {
 
           {/* Bottom: Critical Matrix */}
           <div className="col-span-1 md:col-span-12">
-            <CriticalMatrix state={ms} session={ss} onToggleCrit={sim.toggleCrit} sysHits={sim.sysHits} />
+            <CriticalMatrix
+              state={ms}
+              session={ss}
+              onToggleCrit={sim.toggleCrit}
+              sysHits={sim.sysHits}
+              onAdjustComponent={(loc, slotIdx, name) => {
+                const mod = ss.critMods?.[`${loc}:${slotIdx}`] || { heat: 0, atk: 0 };
+                setAdjustTarget({ kind: 'crit', loc, slotIdx, label: `${loc} / ${name}`, heat: mod.heat, atk: mod.atk });
+              }}
+            />
           </div>
         </div>
       ) : vs && vss ? (
@@ -648,6 +689,24 @@ export function SimuladorPage() {
           </div>
         );
       })()}
+
+      {/* Modal ajuste manual calor/dificultad — armas y componentes */}
+      {adjustTarget && (
+        <AdjustModModal
+          target={adjustTarget}
+          onClose={() => setAdjustTarget(null)}
+          onChangeHeat={(v) => {
+            if (adjustTarget.kind === 'weapon') sim.setWeaponMod(adjustTarget.id, 'heat', v);
+            else sim.setCritMod(adjustTarget.loc, adjustTarget.slotIdx, 'heat', v);
+            setAdjustTarget(t => t ? { ...t, heat: v } : t);
+          }}
+          onChangeAtk={(v) => {
+            if (adjustTarget.kind === 'weapon') sim.setWeaponMod(adjustTarget.id, 'atk', v);
+            else sim.setCritMod(adjustTarget.loc, adjustTarget.slotIdx, 'atk', v);
+            setAdjustTarget(t => t ? { ...t, atk: v } : t);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -733,7 +792,6 @@ function InfantryView({ sim }: { sim: SimHandle }) {
           />
         </div>
       )}
-
     </div>
   );
 }

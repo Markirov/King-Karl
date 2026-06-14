@@ -6,13 +6,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { TallerModal, genId, getCampaignDateISO } from '@/pages/FinanzasPage';
-import { commitLibroEntryAndTreasury } from '@/lib/sheets-service';
+import { commitLibroEntryAndTreasury, loadPersonal, type PersonalEntry, type PersonalNivel } from '@/lib/sheets-service';
 import { useAppStore } from '@/lib/store';
 import { loadLocalSnapshot } from '@/lib/simulador-persistence';
 import { deriveDamageFromSession } from '@/lib/repair-engine';
 import {
   PRESETS, calcularMinutosDisponibles, aplicarPreset, calcularReparaciones,
   mapearDamageARepairItems, MINUTOS_POR_PUNTO_BLINDAJE,
+  agregarPersonal, bayMultiplier, aplicarMultiplierBay, listarBays,
   type Preset, type OrdenSecundario, type RepairItem, type ResultadoItem,
   type UnidadTiempo,
 } from '@/lib/repair-priority';
@@ -97,6 +98,32 @@ function PrioridadesTab() {
   const [ordenSec, setOrdenSec] = useState<OrdenSecundario>('asc');
   const preset: Preset = PRESETS.find(p => p.id === presetId) ?? PRESETS[0];
 
+  // ── Personal (techs + astechs) ──
+  const [personal, setPersonal] = useState<PersonalEntry[]>([]);
+  useEffect(() => {
+    loadPersonal().then(res => {
+      if (res?.success && Array.isArray((res.data as any)?.entries)) {
+        setPersonal((res.data as any).entries as PersonalEntry[]);
+      }
+    }).catch(() => {});
+  }, []);
+
+  const personalAgg = useMemo(() => agregarPersonal(personal), [personal]);
+  const baysDisponibles = useMemo(() => listarBays(personal), [personal]);
+
+  // Bay del mech actual: por defecto primer bay disponible + 6 astechs (canon).
+  const [bayTechSkill, setBayTechSkill] = useState<PersonalNivel>('regular');
+  const [bayAstechs, setBayAstechs] = useState(6);
+
+  useEffect(() => {
+    if (baysDisponibles.length > 0) {
+      setBayTechSkill(baysDisponibles[0].skill);
+    }
+    setBayAstechs(Math.min(6, personalAgg.totalAstechs));
+  }, [baysDisponibles, personalAgg.totalAstechs]);
+
+  const bayMult = useMemo(() => bayMultiplier(bayTechSkill, bayAstechs), [bayTechSkill, bayAstechs]);
+
   // ── Construir items desde mech seleccionado ──
   const baseItems = useMemo<RepairItem[]>(() => {
     if (simSlotIdx === null) return [];
@@ -107,9 +134,15 @@ function PrioridadesTab() {
     return mapearDamageARepairItems(damage, slot.state.tonnage);
   }, [simSlotIdx]);
 
+  // Aplica multiplier de bay a los tiempos base.
+  const itemsAjustados = useMemo(
+    () => aplicarMultiplierBay(baseItems, bayMult),
+    [baseItems, bayMult],
+  );
+
   const orderedItems = useMemo(
-    () => aplicarPreset(baseItems, preset, ordenSec),
-    [baseItems, preset, ordenSec],
+    () => aplicarPreset(itemsAjustados, preset, ordenSec),
+    [itemsAjustados, preset, ordenSec],
   );
 
   const resultado = useMemo(
@@ -147,7 +180,7 @@ function PrioridadesTab() {
         )}
       </section>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-4 gap-4">
         {/* Time Input */}
         <TimeInputPanel
           valor={valor} setValor={setValor}
@@ -157,6 +190,16 @@ function PrioridadesTab() {
           minutosBase={tiempoCalc.minutosBase}
           minutosExtra={tiempoCalc.minutosExtra}
           minutosDisponibles={tiempoCalc.minutosDisponibles}
+        />
+
+        {/* Bay (equipo reparacion) */}
+        <BayPanel
+          totalTechs={personalAgg.totalTechs}
+          totalAstechs={personalAgg.totalAstechs}
+          techsBySkill={personalAgg.techsBySkill}
+          bayTechSkill={bayTechSkill} setBayTechSkill={setBayTechSkill}
+          bayAstechs={bayAstechs} setBayAstechs={setBayAstechs}
+          bayMult={bayMult}
         />
 
         {/* Preset Selector */}
@@ -285,6 +328,77 @@ function PresetSelector(p: {
 }
 
 // ── BudgetBar ──
+
+// ── BayPanel ──
+
+function BayPanel(p: {
+  totalTechs: number;
+  totalAstechs: number;
+  techsBySkill: Record<PersonalNivel, number>;
+  bayTechSkill: PersonalNivel;
+  setBayTechSkill: (n: PersonalNivel) => void;
+  bayAstechs: number;
+  setBayAstechs: (n: number) => void;
+  bayMult: number;
+}) {
+  const noViable = p.totalTechs === 0;
+  const multPct = Math.round((p.bayMult - 1) * 100);
+  return (
+    <section className="bg-surface-container-low border-l-2 border-primary-container/30 p-3 clip-chamfer">
+      <h2 className="font-headline text-xs font-bold text-primary-container tracking-widest uppercase mb-3">
+        Equipo Reparación
+      </h2>
+      {noViable ? (
+        <p className="font-mono text-[10px] text-error italic">
+          Sin Mech Techs activos. No se puede reparar.
+        </p>
+      ) : (
+        <>
+          <label className="block font-mono text-[9px] uppercase tracking-widest text-secondary/60 mb-1">
+            Tech (skill)
+          </label>
+          <select
+            value={p.bayTechSkill}
+            onChange={e => p.setBayTechSkill(e.target.value as PersonalNivel)}
+            className="w-full bg-surface-container border border-outline-variant/40 px-2 py-1 font-mono text-[11px] text-secondary mb-2"
+          >
+            {(['green', 'regular', 'veteran', 'elite'] as PersonalNivel[]).map(n => (
+              <option key={n} value={n} disabled={(p.techsBySkill[n] ?? 0) === 0}>
+                {n} ({p.techsBySkill[n] ?? 0} disp)
+              </option>
+            ))}
+          </select>
+
+          <label className="block font-mono text-[9px] uppercase tracking-widest text-secondary/60 mb-1">
+            AsTechs asignados (de {p.totalAstechs})
+          </label>
+          <input
+            type="number" min={0} max={p.totalAstechs}
+            value={p.bayAstechs || ''}
+            onFocus={e => e.target.select()}
+            onChange={e => p.setBayAstechs(Math.min(p.totalAstechs, Math.max(0, parseInt(e.target.value) || 0)))}
+            className="w-full bg-surface-container border border-outline-variant/40 px-2 py-1 font-mono text-sm text-secondary mb-2"
+          />
+
+          <div className="font-mono text-[10px] text-secondary/70 space-y-1">
+            <div>
+              Multiplier:{' '}
+              <span className={p.bayMult < 1 ? 'text-primary font-bold' : p.bayMult > 1.25 ? 'text-error font-bold' : 'text-amber-400'}>
+                ×{p.bayMult.toFixed(2)}
+              </span>
+              <span className="text-secondary/50 ml-1">
+                ({multPct > 0 ? `+${multPct}` : multPct}% tiempo)
+              </span>
+            </div>
+            <div className="text-secondary/50 text-[9px]">
+              Canon: 1 Tech + 6 AsTech = ×1.00
+            </div>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
 
 function BudgetBar(p: { minutosBase: number; minutosExtra: number; minutosUsadosTotal: number }) {
   const total = p.minutosBase + p.minutosExtra;

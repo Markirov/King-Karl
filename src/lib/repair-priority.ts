@@ -5,6 +5,7 @@
 // ══════════════════════════════════════════════════════════════
 
 import type { MechRepairDamage } from './repair-engine';
+import type { PersonalEntry, PersonalNivel } from './sheets-service';
 
 // ── Constantes (spec sec 2) ───────────────────────────────────
 
@@ -470,4 +471,79 @@ export function mapearDamageARepairItems(
   }
 
   return items;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  EQUIPOS DE REPARACION (bays) — CamOps p.146-148
+// ══════════════════════════════════════════════════════════════
+
+/** Factor de tiempo segun N AsTechs en el bay. 6 = canon optimo (1.0x). */
+export function astechFactor(astechs: number): number {
+  const n = Math.max(0, Math.floor(astechs));
+  if (n === 0) return 2.00;
+  if (n === 1) return 1.80;
+  if (n === 2) return 1.65;
+  if (n === 3) return 1.50;
+  if (n === 4) return 1.25;
+  if (n === 5) return 1.10;
+  if (n === 6) return 1.00;
+  if (n === 7) return 0.95;
+  return 0.92; // 8+
+}
+
+/** Factor de tiempo segun skill del tech principal del bay. */
+export const TECH_SKILL_FACTOR: Record<PersonalNivel, number> = {
+  green:   1.5,
+  regular: 1.0,
+  veteran: 0.85,
+  elite:   0.70,
+};
+
+/** Multiplier total para el tiempo de un bay (astech × skill). */
+export function bayMultiplier(techSkill: PersonalNivel, astechs: number): number {
+  return astechFactor(astechs) * TECH_SKILL_FACTOR[techSkill];
+}
+
+/** Resumen agregado de personal de reparacion activo. */
+export interface PersonalReparacion {
+  techsBySkill: Record<PersonalNivel, number>;
+  totalTechs:   number;
+  totalAstechs: number;
+}
+
+/** Agrega entries personal -> conteos por rol/skill (solo estado=activo). */
+export function agregarPersonal(personal: PersonalEntry[]): PersonalReparacion {
+  const techsBySkill: Record<PersonalNivel, number> = { green: 0, regular: 0, veteran: 0, elite: 0 };
+  let totalAstechs = 0;
+  let totalTechs = 0;
+  for (const e of personal ?? []) {
+    if (e.estado !== 'activo') continue;
+    const qty = Math.max(1, e.cantidad || 1);
+    if (e.rol === 'mech_tech') {
+      techsBySkill[e.nivel] += qty;
+      totalTechs += qty;
+    } else if (e.rol === 'astech') {
+      totalAstechs += qty;
+    }
+  }
+  return { techsBySkill, totalTechs, totalAstechs };
+}
+
+/** Lista techs activos como bays disponibles, ordenados por skill (elite primero). */
+export function listarBays(personal: PersonalEntry[]): { skill: PersonalNivel }[] {
+  const { techsBySkill } = agregarPersonal(personal);
+  const out: { skill: PersonalNivel }[] = [];
+  for (const skill of ['elite', 'veteran', 'regular', 'green'] as PersonalNivel[]) {
+    for (let i = 0; i < techsBySkill[skill]; i++) out.push({ skill });
+  }
+  return out;
+}
+
+/** Aplica multiplier de bay a un array de RepairItem. Round at 1 min minimo. */
+export function aplicarMultiplierBay(items: RepairItem[], multiplier: number): RepairItem[] {
+  if (multiplier === 1) return items;
+  return items.map(it => ({
+    ...it,
+    tiempoBase: Math.max(1, Math.round(it.tiempoBase * multiplier)),
+  }));
 }

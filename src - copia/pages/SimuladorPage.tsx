@@ -495,6 +495,14 @@ export function SimuladorPage() {
                       <div className="flex items-center gap-2 text-[9px]">
                         <span>🔥{effectiveHeat}{wMod.heat > 0 && <span className="text-amber-400/80"> (+{wMod.heat})</span>}</span>
                         <span>💥{w.dmg}</span>
+                        {!isDestroyed && (
+                          <span
+                            className="text-secondary/60"
+                            title="Total para impactar (Habilidad + modificadores de movimiento/calor del piloto no incluidos)"
+                          >
+                            🎯{weaponToHit}+
+                          </span>
+                        )}
                         {armMod > 0 && !isDestroyed && (
                           <span className="text-amber-400/80">+{armMod}</span>
                         )}
@@ -673,6 +681,24 @@ export function SimuladorPage() {
           </div>
         );
       })()}
+
+      {/* Modal ajuste manual calor/dificultad — armas y componentes */}
+      {adjustTarget && (
+        <AdjustModModal
+          target={adjustTarget}
+          onClose={() => setAdjustTarget(null)}
+          onChangeHeat={(v) => {
+            if (adjustTarget.kind === 'weapon') sim.setWeaponMod(adjustTarget.id, 'heat', v);
+            else sim.setCritMod(adjustTarget.loc, adjustTarget.slotIdx, 'heat', v);
+            setAdjustTarget(t => t ? { ...t, heat: v } : t);
+          }}
+          onChangeAtk={(v) => {
+            if (adjustTarget.kind === 'weapon') sim.setWeaponMod(adjustTarget.id, 'atk', v);
+            else sim.setCritMod(adjustTarget.loc, adjustTarget.slotIdx, 'atk', v);
+            setAdjustTarget(t => t ? { ...t, atk: v } : t);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -758,25 +784,6 @@ function InfantryView({ sim }: { sim: SimHandle }) {
           />
         </div>
       )}
-
-      {/* Modal ajuste manual calor/dificultad — armas y componentes */}
-      {adjustTarget && (
-        <AdjustModModal
-          target={adjustTarget}
-          onClose={() => setAdjustTarget(null)}
-          onChangeHeat={(v) => {
-            if (adjustTarget.kind === 'weapon') sim.setWeaponMod(adjustTarget.id, 'heat', v);
-            else sim.setCritMod(adjustTarget.loc, adjustTarget.slotIdx, 'heat', v);
-            setAdjustTarget(t => t ? { ...t, heat: v } : t);
-          }}
-          onChangeAtk={(v) => {
-            if (adjustTarget.kind === 'weapon') sim.setWeaponMod(adjustTarget.id, 'atk', v);
-            else sim.setCritMod(adjustTarget.loc, adjustTarget.slotIdx, 'atk', v);
-            setAdjustTarget(t => t ? { ...t, atk: v } : t);
-          }}
-        />
-      )}
-
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Wrench } from 'lucide-react';
 import type { MechState, MechSession } from '@/lib/combat-types';
 import { mechIsAmmoCrit } from '@/lib/weapons';
 import { ammoExplosionDmgPerRound, countSystemCritHits } from '@/lib/combat-data';
@@ -8,6 +9,8 @@ interface Props {
   session: MechSession;
   onToggleCrit: (loc: string, slotIdx: number) => void;
   sysHits: { engine: number; gyro: number; sensors: number; lifeSupport: number; heatsinks: number };
+  /** Abre el modal de ajuste manual (calor/dificultad) para un componente no destruido. */
+  onAdjustComponent?: (loc: string, slotIdx: number, name: string) => void;
 }
 
 const MECH_LAYOUT_BIPED = [
@@ -22,7 +25,7 @@ const MECH_LAYOUT_QUAD = [
   [{ key: 'LL', label: 'P. Trasera Izquierda', slots: 6 }, { key: '_DMG', label: 'Control de Daños', slots: 0 }, { key: 'RL', label: 'P. Trasera Derecha', slots: 6 }],
 ];
 
-export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props) {
+export function CriticalMatrix({ state, session, onToggleCrit, sysHits, onAdjustComponent }: Props) {
   const MECH_LAYOUT = state.isQuad ? MECH_LAYOUT_QUAD : MECH_LAYOUT_BIPED;
 
   // Seguro anti accidente: modales de confirmación
@@ -97,11 +100,13 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
                       const ammoBin = !isEmpty && mechIsAmmoCrit(s.name)
                         ? session.ammoBins.find(b => b.loc === col.key && b.slotIdx === idx)
                         : null;
+                      const critMod = !isEmpty ? session.critMods?.[`${col.key}:${idx}`] : null;
                       return (
                         <div key={idx} onClick={() => !isEmpty && handleSlotClick(col.key, idx, s.name, s.hit)}
                           className={`flex items-center gap-1 md:gap-2 px-1.5 md:px-3 py-1 md:py-1.5 text-[9px] md:text-[11px] font-mono transition-colors ${
                             isEmpty ? 'text-secondary/20 cursor-default'
                             : s.hit ? 'bg-error/15 text-error cursor-pointer'
+                            : critMod ? 'bg-amber-400/10 text-on-surface hover:bg-amber-400/20 cursor-pointer'
                             : 'text-on-surface hover:bg-secondary/10 cursor-pointer'
                           }`}
                         >
@@ -115,7 +120,25 @@ export function CriticalMatrix({ state, session, onToggleCrit, sysHits }: Props)
                                     ({ammoBin.current})
                                   </span>
                                 )}
+                                {critMod && (
+                                  <span className="ml-1.5 text-amber-400/80" title={`Ajuste manual: +${critMod.heat} calor, +${critMod.atk} dificultad`}>
+                                    {critMod.heat > 0 && `🔥+${critMod.heat}`}
+                                    {critMod.atk > 0 && ` ⚠+${critMod.atk}`}
+                                  </span>
+                                )}
                               </span>}
+                          {!isEmpty && !s.hit && onAdjustComponent && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onAdjustComponent(col.key, idx, s.name);
+                              }}
+                              title="Ajustar calor/dificultad de este componente"
+                              className="shrink-0 text-secondary/40 hover:text-amber-400 transition-colors"
+                            >
+                              <Wrench size={11} />
+                            </button>
+                          )}
                         </div>
                       );
                     })}
