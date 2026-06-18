@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding ="UTF-8"?>
-<mech name="UrbanMech" model="UM-R93" tons="30" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+<mech name="Urbanmech" model="UM-R93" tons="30" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
     <ssw_savefile_version>3</ssw_savefile_version>
-    <battle_value>852</battle_value>
-    <cost>1985750.0</cost>
+    <battle_value>894</battle_value>
+    <cost>1887525.0</cost>
     <rules_level>3</rules_level>
-    <era>3</era>
-    <productionera>10</productionera>
+    <era>2</era>
+    <productionera>7</productionera>
     <mech_type>BattleMech</mech_type>
-    <techbase manufacturer="Hellespont Industrials" location="Betelgeuse">Inner Sphere</techbase>
-    <year restricted="FALSE">3149</year>
+    <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
+    <year restricted="FALSE">3130</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="2">
         <type>Standard Structure</type>
@@ -22,49 +22,58 @@
         <type>Hardened Armor</type>
         <hd>9</hd>
         <ct>11</ct>
-        <ctr>6</ctr>
+        <ctr>8</ctr>
         <lt>8</lt>
-        <ltr>3</ltr>
+        <ltr>4</ltr>
         <rt>8</rt>
-        <rtr>3</rtr>
+        <rtr>4</rtr>
         <la>10</la>
         <ra>10</ra>
         <ll>12</ll>
         <rl>12</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 2</source>
-        <info>UrbanMech UM-R93 30t, 2/3[2]/3, Std FE, Std; 11.5T/88% Hrdnd Armor; 10 DHS; 1 SNPPC, 1 SXPL</info>
-        <battleforce pv="9" wt="1" mv="2/3j" s="2" m="1" l="0" e="0" ov="0" armor="6" internal="3" abilities="ENE, SRCH, ES, SEAL, SOA" />
+        <source>XTRRepublic II</source>
+        <info>Urbanmech UM-R93 30t, 2/3[2]/2, Std FE, Std; 12.0T/91% Hrdnd Armor; 10 DHS; 1 PR, 1 ERML, 1 ERSL</info>
+        <battleforce pv="9" wt="1" mv="2j" s="2" m="2" l="0" e="0" ov="0" armor="6" internal="3" abilities="ENE, SRCH, ES, SEAL, SOA" />
         <actuators lla="FALSE" lh="FALSE" rla="FALSE" rh="FALSE"/>
         <clancase>FALSE</clancase>
-        <jumpjets number="3">
-            <type>Improved Jump Jet</type>
+        <jumpjets number="2">
+            <type>Standard Jump Jet</type>
+            <location index="11">CT</location>
             <location index="10">CT</location>
-            <location index="9">LT</location>
-            <location index="9">RT</location>
         </jumpjets>
         <heatsinks number="10" techbase="0">
             <type>Double Heat Sink</type>
 
+            <location index="0">RT</location>
             <location index="0">LT</location>
             <location index="2">LA</location>
-            <location index="3">LT</location>
-            <location index="6">LT</location>
             <location index="2">RA</location>
-            <location index="0">RT</location>
+            <location index="3">LT</location>
             <location index="3">RT</location>
+            <location index="6">LT</location>
             <location index="6">RT</location>
         </heatsinks>
         <equipment>
-            <name manufacturer="">(IS) Small X-Pulse Laser</name>
+            <name manufacturer="">(IS) ER Medium Laser</name>
+            <type>energy</type>
+            <location index="9">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) ER Small Laser</name>
             <type>energy</type>
             <location index="5">LA</location>
         </equipment>
         <equipment>
-            <name manufacturer="">(IS) Snub-Nose PPC</name>
+            <name manufacturer="">(IS) Plasma Rifle</name>
             <type>energy</type>
             <location index="5">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ Plasma Rifle</name>
+            <type>ammunition</type>
+            <location index="7">RA</location>
         </equipment>
     </baseloadout>
     <fluff>
@@ -74,7 +83,7 @@
         <deployment></deployment>
         <variants></variants>
         <notables></notables>
-        <additional></additional>
+        <additional>Field Testing Summation: Production UrbanMech Variant:br:Producer/Site: Hellespont Industrials, Betelgeuse:br:Supervising Technician: unknown:br:Project Start Date: 3130 (estimated):br:Non-Production or Recently Introduced Equipment Analysis::br:Hardened Armor:br::br:Notes: Features the following Design Quirks: Extended Torso Twist, Narrow/Low Profile, No/Minimal Arms</additional>
         <jumpjet_model>Unknown</jumpjet_model>
         <commsystem>Unknown</commsystem>
         <tandtsystem>Unknown</tandtsystem>

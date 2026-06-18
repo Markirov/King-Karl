@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding ="UTF-8"?>
 <mech name="Phoenix" model="PX-1R" tons="50" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
     <ssw_savefile_version>3</ssw_savefile_version>
-    <battle_value>900</battle_value>
-    <cost>3825000.0</cost>
+    <battle_value>917</battle_value>
+    <cost>3695250.0</cost>
     <rules_level>4</rules_level>
     <era>0</era>
     <productionera>0</productionera>
     <mech_type>PrimitiveBattleMech</mech_type>
     <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
-    <year restricted="FALSE">2510</year>
+    <year restricted="FALSE">2474</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="0">
         <type>Primitive Structure</type>
@@ -21,34 +21,35 @@
     <armor manufacturer="Unknown" techbase="0">
         <type>Primitive Armor</type>
         <hd>9</hd>
-        <ct>17</ct>
-        <ctr>6</ctr>
+        <ct>18</ct>
+        <ctr>7</ctr>
         <lt>14</lt>
         <ltr>5</ltr>
         <rt>14</rt>
         <rtr>5</rtr>
-        <la>13</la>
-        <ra>13</ra>
-        <ll>18</ll>
-        <rl>18</rl>
+        <la>12</la>
+        <ra>12</ra>
+        <ll>16</ll>
+        <rl>16</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RS3075u</source>
-        <info>Phoenix PX-1R 50t, 4/6/4, Pr FE, Prm; 12.5T/78% Pr. Armor; 10 SHS; 1 PPC, 2 SRM2</info>
-        <battleforce pv="9" wt="2" mv="4j" s="1" m="1" l="1" e="0" ov="1" armor="4" internal="4" abilities="SRCH, ES, SEAL, SOA" />
+        <source>XTRPrimitives V</source>
+        <info>Phoenix PX-1R 50t, 4/6/3, Pr FE, Prm; 12.0T/76% Pr. Armor; 12 SHS; 1 PPC, 2 SRM2</info>
+        <battleforce pv="9" wt="2" mv="4/2j" s="2" m="2" l="1" e="0" ov="0" armor="4" internal="4" abilities="SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="TRUE" rla="FALSE" rh="FALSE"/>
         <clancase>FALSE</clancase>
-        <jumpjets number="4">
+        <jumpjets number="3">
             <type>Standard Jump Jet</type>
-            <location index="0">RT</location>
+            <location index="11">CT</location>
             <location index="0">LT</location>
-            <location index="4">RL</location>
-            <location index="4">LL</location>
+            <location index="0">RT</location>
         </jumpjets>
-        <heatsinks number="10" techbase="2">
+        <heatsinks number="12" techbase="2">
             <type>Single Heat Sink</type>
 
             <location index="10">CT</location>
+            <location index="4">LL</location>
+            <location index="4">RL</location>
         </heatsinks>
         <equipment>
             <name manufacturer="">(IS) SRM-2</name>
@@ -68,11 +69,6 @@
         <equipment>
             <name manufacturer="Unknown">@ SRM-2</name>
             <type>ammunition</type>
-            <location index="4">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ SRM-2</name>
-            <type>ammunition</type>
             <location index="3">LT</location>
         </equipment>
     </baseloadout>
@@ -83,7 +79,7 @@
         <deployment></deployment>
         <variants></variants>
         <notables></notables>
-        <additional></additional>
+        <additional>Field Testing Summation: Original Phoenix Primitive Chassis:br:Producer/Site: Krauss Heavy Industries, Wotan:br:Supervising Engineer: Jack Krauss, Jr.:br:Prototype Introduction Date: 2474:br:Non-Production Equipment Analysis::br:Primitive Armor:br:Primitive Cockpit:br:Primitive Engine:br:Prototype Jump Jets:br::br:Notes: Features the following Design Quirks: EM Interference, Obsolete (2525), Poor Workmanship, Weak Legs.</additional>
         <jumpjet_model>Unknown</jumpjet_model>
         <commsystem>Unknown</commsystem>
         <tandtsystem>Unknown</tandtsystem>

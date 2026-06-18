@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Balac Strike VTOL" model="(LRM)" tons="25" motive="VTOL" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1278</battle_value>
+    <motive type="VTOL" cruise="10" turret="No Turret" />
+    <cost>1532777.777777778</cost>
+    <rules_level>1</rules_level>
+    <era>2</era>
+    <productionera>7</productionera>
+    <techbase manufacturer="New York Vehicle Y2 Facility" location="Trondheim">Clan</techbase>
+    <year restricted="FALSE">3079</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="false" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="250" manufacturer="Consolidated" techbase="2">Fusion Engine</engine>
+    <armor manufacturer="Forging AM15" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>15</front>
+        <left>12</left>
+        <right>12</right>
+        <rear>7</rear>
+        <primaryturret>0</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>2</rotor>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>RS3085u-CE</source>
+        <info>Balac Strike VTOL (LRM) 25t, 10/15, Std FE, 2.5T/38% FF Armor; 10 SHS; 1 StndrdCrgo, 2 LRM15, 1 ERML</info>
+        <battleforce pv="13" wt="1" mv="10v" s="3" m="3" l="2" e="0" ov="0" armor="2" internal="2" abilities="CASE, LRM 1/1/1, IF 1" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="Mk.3">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) LRM-15</name>
+            <type>missile</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) LRM-15</name>
+            <type>missile</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">Cargo, Standard, Vehicular</name>
+            <type>equipment</type>
+            <location>Body</location>
+            <tons>0.5</tons>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Neil 9000 Comm System</commsystem>
+        <tandtsystem>RCA Econotrac</tandtsystem>
+    </fluff>
+</combatvehicle>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding ="UTF-8"?>
-<mech name="Conjurer (Hellhound)" model="" tons="50" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
+<mech name="Conjurer (Hellhound)" model="" tons="50" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
     <ssw_savefile_version>3</ssw_savefile_version>
     <battle_value>1813</battle_value>
     <cost>5293500.0</cost>
@@ -7,10 +7,10 @@
     <era>1</era>
     <productionera>2</productionera>
     <mech_type>BattleMech</mech_type>
-    <techbase manufacturer="Unknown" location="Unknown">Clan</techbase>
-    <year restricted="FALSE">2826</year>
+    <techbase manufacturer="Kallon Industries" location="Thermopolis">Clan</techbase>
+    <year restricted="FALSE">2829</year>
     <motive_type>Biped</motive_type>
-    <structure manufacturer="Unknown" techbase="1">
+    <structure manufacturer="Crucis-C" techbase="1">
         <type>Endo-Steel</type>
         <location index="4">RT</location>
         <location index="4">LL</location>
@@ -20,12 +20,12 @@
         <location index="5">LL</location>
         <location index="5">RL</location>
     </structure>
-    <engine rating="300" manufacturer="Unknown" lsstart="-1" rsstart="-1" techbase="2">Fusion Engine</engine>
+    <engine rating="300" manufacturer="Hermes" lsstart="-1" rsstart="-1" techbase="2">Fusion Engine</engine>
     <gyro techbase="2">Standard Gyro</gyro>
     <cockpit>
         <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
     </cockpit>
-    <armor manufacturer="Unknown" techbase="1">
+    <armor manufacturer="Alpha Plate Special" techbase="1">
         <type>Ferro-Fibrous</type>
         <hd>9</hd>
         <ct>23</ct>
@@ -47,18 +47,18 @@
         <location index="7">RA</location>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RS3055Uu</source>
+        <source>RGiC 5</source>
         <info>Conjurer (Hellhound) 50t, 6/9/6, Std FE, ES; 8.5T/96% FF Armor; 10 DHS; 2 SSRM2, 2 ERML, 1 LPL</info>
         <battleforce pv="18" wt="2" mv="6j" s="3" m="3" l="1" e="0" ov="1" armor="5" internal="4" abilities="CASE, SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
         <clancase>TRUE</clancase>
         <jumpjets number="6">
             <type>Standard Jump Jet</type>
-            <location index="0">RT</location>
             <location index="11">CT</location>
+            <location index="10">CT</location>
             <location index="0">LT</location>
             <location index="1">LT</location>
-            <location index="10">CT</location>
+            <location index="0">RT</location>
             <location index="1">RT</location>
         </jumpjets>
         <heatsinks number="10" techbase="1">
@@ -66,29 +66,29 @@
 
         </heatsinks>
         <equipment>
-            <name manufacturer="">(CL) Large Pulse Laser</name>
+            <name manufacturer="Kolibri Delta Series">(CL) Large Pulse Laser</name>
             <type>energy</type>
             <location index="4">RA</location>
         </equipment>
         <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="2">RT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
+            <name manufacturer="Series 2b">(CL) ER Medium Laser</name>
             <type>energy</type>
             <location index="3">RT</location>
         </equipment>
         <equipment>
-            <name manufacturer="">(CL) Streak SRM-2</name>
-            <type>missile</type>
-            <location index="2">LT</location>
+            <name manufacturer="Series 2b">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location index="2">RT</location>
         </equipment>
         <equipment>
-            <name manufacturer="">(CL) Streak SRM-2</name>
+            <name manufacturer="Pattern J2">(CL) Streak SRM-2</name>
             <type>missile</type>
             <location index="3">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Pattern J2">(CL) Streak SRM-2</name>
+            <type>missile</type>
+            <location index="2">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="Unknown">(CL) @ Streak SRM-2</name>
@@ -103,9 +103,9 @@
         <deployment></deployment>
         <variants></variants>
         <notables></notables>
-        <additional></additional>
-        <jumpjet_model>Unknown</jumpjet_model>
-        <commsystem>Unknown</commsystem>
-        <tandtsystem>Unknown</tandtsystem>
+        <additional>Features the following Design Quirks: Extended Torso Twist.</additional>
+        <jumpjet_model>BMP Mk. XXI</jumpjet_model>
+        <commsystem>Garret T-11b</commsystem>
+        <tandtsystem>Sync Tracker (39-42071)</tandtsystem>
     </fluff>
 </mech>

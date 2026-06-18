@@ -615,7 +615,7 @@
         </equipment>
     </loadout>
     <loadout name="BL" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>Blackmore</source>
+        <source></source>
         <loadout_era>1</loadout_era>
         <loadout_productionera>0</loadout_productionera>
         <loadout_year>2999</loadout_year>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding ="UTF-8"?>
-<mech name="Vanquisher" model="VQR-5V" tons="100" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
+<mech name="Vanquisher" model="VQR-5V" tons="100" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="I:\Battletech\MegaMek\Skunkworks\Fluf Picture\Vanquisher.png">
     <ssw_savefile_version>3</ssw_savefile_version>
     <battle_value>2334</battle_value>
     <cost>2.0334E7</cost>
@@ -7,10 +7,10 @@
     <era>2</era>
     <productionera>6</productionera>
     <mech_type>BattleMech</mech_type>
-    <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
+    <techbase manufacturer="Skobel MechWorks" location="Russia, Terra">Inner Sphere</techbase>
     <year restricted="FALSE">3069</year>
     <motive_type>Biped</motive_type>
-    <structure manufacturer="Unknown" techbase="0">
+    <structure manufacturer="Hollis Alteration Mark VI" techbase="0">
         <type>Endo-Steel</type>
         <location index="4">LT</location>
         <location index="4">LA</location>
@@ -27,12 +27,12 @@
         <location index="10">CT</location>
         <location index="11">RT</location>
     </structure>
-    <engine rating="300" manufacturer="Unknown" lsstart="-1" rsstart="-1" techbase="0">Compact Fusion Engine</engine>
+    <engine rating="300" manufacturer="Vlar" lsstart="-1" rsstart="-1" techbase="0">Compact Fusion Engine</engine>
     <gyro techbase="0">Heavy-Duty Gyro</gyro>
     <cockpit>
         <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
     </cockpit>
-    <armor manufacturer="Unknown" techbase="0">
+    <armor manufacturer="Aldis Plate" techbase="0">
         <type>Ferro-Fibrous</type>
         <hd>9</hd>
         <ct>45</ct>
@@ -61,8 +61,8 @@
         <location index="11">RA</location>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>Battlecorps</source>
-        <info>Vanquisher VQR-5V 100t, 3/5/0, CFE, ES, HD Gyro; 17.0T/99% FF Armor; 12 DHS; 1 HGR, 1 C3I, 2 ERLL, 2 ERML, 2 BPod</info>
+        <source>RS3067u</source>
+        <info>Vanquisher VQR-5V 100t, 3/5/0, CFE, ES, HD Gyro; 17.0T/99% FF Armor; 12 DHS; 1 HGR, 2 ERLL, 1 C3I, 2 ERML, 2 BPod</info>
         <battleforce pv="23" wt="4" mv="3" s="3" m="4" l="2" e="0" ov="1" armor="10" internal="10" abilities="C3I, MHQ2, SRCH, ES, SEAL, SOA" />
         <actuators lla="FALSE" lh="FALSE" rla="FALSE" rh="FALSE"/>
         <clancase>FALSE</clancase>
@@ -71,29 +71,34 @@
 
         </heatsinks>
         <equipment>
-            <name manufacturer="">(IS) ER Large Laser</name>
-            <type>energy</type>
-            <location index="2">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) ER Large Laser</name>
-            <type>energy</type>
-            <location index="2">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="9">CT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) ER Medium Laser</name>
+            <name manufacturer="Diverse Optics">(IS) ER Medium Laser</name>
             <type>energy</type>
             <location index="3">HD</location>
         </equipment>
         <equipment>
-            <name manufacturer="">B-Pod</name>
+            <name manufacturer="Diverse Optics">(IS) ER Medium Laser</name>
+            <type>energy</type>
+            <location index="7">CT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">Improved C3 Computer</name>
             <type>equipment</type>
-            <location index="4">LL</location>
+            <location index="8">CT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Diverse Optics Sunbeam">(IS) ER Large Laser</name>
+            <type>energy</type>
+            <location index="2">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Diverse Optics Sunbeam">(IS) ER Large Laser</name>
+            <type>energy</type>
+            <location index="2">LA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Heavy Gauss Rifle</name>
+            <type>ballistic</type>
+            <location index="0">RT</location>
         </equipment>
         <equipment>
             <name manufacturer="">B-Pod</name>
@@ -101,14 +106,9 @@
             <location index="4">RL</location>
         </equipment>
         <equipment>
-            <name manufacturer="">Improved C3 Computer</name>
+            <name manufacturer="">B-Pod</name>
             <type>equipment</type>
-            <location index="7">CT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) Heavy Gauss Rifle</name>
-            <type>ballistic</type>
-            <location index="0">RT</location>
+            <location index="4">LL</location>
         </equipment>
         <equipment>
             <name manufacturer="Unknown">(IS) @ Heavy Gauss Rifle</name>
@@ -140,7 +140,7 @@
         <notables></notables>
         <additional></additional>
         <jumpjet_model>None</jumpjet_model>
-        <commsystem>Unknown</commsystem>
-        <tandtsystem>Unknown</tandtsystem>
+        <commsystem>Skobel Wave VI Comm</commsystem>
+        <tandtsystem>Falcon 12b Watcher</tandtsystem>
     </fluff>
 </mech>

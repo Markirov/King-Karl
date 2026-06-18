@@ -1,0 +1,5 @@
+{
+  "scriptUrl": "https://script.google.com/macros/s/AKfycbyIDYDFO2UyLJ7I6c0QadLU4O85gQWPoaaYo9HmObQaZloSq8bsy_ET_UevkLvDY61a9w/exec",
+  "updatedAt": "2026-06-09T00:00:00Z",
+  "comment": "URL del Apps Script deployment activo. Editar aquí + commit + push = todos los clientes la recogen al recargar."
+}

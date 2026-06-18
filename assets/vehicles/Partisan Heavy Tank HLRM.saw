@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Partisan Heavy Tank" model="HLRM" tons="80" motive="Tracked" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1259</battle_value>
+    <motive type="Tracked" cruise="3" turret="Single Turret" />
+    <cost>4213000.0</cost>
+    <rules_level>0</rules_level>
+    <era>1</era>
+    <productionera>2</productionera>
+    <techbase manufacturer="Kallon Industries" location="Loyalty, Kirklin, Nanking">Inner Sphere</techbase>
+    <year restricted="FALSE">3017</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="false" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="240" manufacturer="GM SuperLoad" techbase="2">Fusion Engine</engine>
+    <armor manufacturer="StarSlab/7" techbase="2">
+        <type>Standard Armor</type>
+        <front>46</front>
+        <left>36</left>
+        <right>36</right>
+        <rear>29</rear>
+        <primaryturret>37</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>RS3039u</source>
+        <info>Partisan Heavy Tank HLRM 80t, 3/5, Std FE, 11.5T/58% Armor; 10 SHS; 4 LRM15, 2 MG</info>
+        <battleforce pv="13" wt="4" mv="3t" s="3" m="4" l="4" e="0" ov="0" armor="6" internal="4" abilities="TUR(2/4/4, LRM 2/4/4, IF 2/4/4), LRM 2/4/4, IF 4" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="Auto Guns">(IS) Machine Gun</name>
+            <type>ballistic</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Auto Guns">(IS) Machine Gun</name>
+            <type>ballistic</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) LRM-15</name>
+            <type>missile</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) LRM-15</name>
+            <type>missile</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) LRM-15</name>
+            <type>missile</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) LRM-15</name>
+            <type>missile</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">@ Machine Gun</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-15</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>JoLex Systems</commsystem>
+        <tandtsystem>AntiAir Flak Systems-1</tandtsystem>
+    </fluff>
+</combatvehicle>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding ="UTF-8"?>
-<mech name="Archer" model="ARC-4M" tons="70" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+<mech name="Archer" model="ARC-4M" tons="70" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
     <ssw_savefile_version>3</ssw_savefile_version>
     <battle_value>1705</battle_value>
     <cost>7184273.333333335</cost>
@@ -47,7 +47,7 @@
         <rl>30</rl>
     </armor>
     <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>Blackmore</source>
+        <source>RS3085u-PP</source>
         <info>Archer ARC-4M 70t, 4/6/0, Std FE, ES; 13.5T/100% Armor; 10 DHS; 4 ML, 2 LRM20</info>
         <battleforce pv="17" wt="3" mv="4" s="3" m="5" l="4" e="0" ov="0" armor="7" internal="6" abilities="CASE, SRCH, ES, SEAL, SOA, IF 3" />
         <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
@@ -59,7 +59,7 @@
         <equipment>
             <name manufacturer="">(IS) Medium Laser</name>
             <type>energy</type>
-            <location index="4">LA</location>
+            <location index="4">RA</location>
         </equipment>
         <equipment>
             <name manufacturer="">(R) (IS) Medium Laser</name>
@@ -69,7 +69,12 @@
         <equipment>
             <name manufacturer="">(IS) Medium Laser</name>
             <type>energy</type>
-            <location index="4">RA</location>
+            <location index="4">LA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(R) (IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="11">CT</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) LRM-20</name>
@@ -84,12 +89,7 @@
         <equipment>
             <name manufacturer="Unknown">(IS) @ LRM-20 (Artemis IV Capable)</name>
             <type>ammunition</type>
-            <location index="7">RT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">(IS) @ LRM-20 (Artemis IV Capable)</name>
-            <type>ammunition</type>
-            <location index="6">RT</location>
+            <location index="7">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="Unknown">(IS) @ LRM-20 (Artemis IV Capable)</name>
@@ -99,12 +99,12 @@
         <equipment>
             <name manufacturer="Unknown">(IS) @ LRM-20 (Artemis IV Capable)</name>
             <type>ammunition</type>
-            <location index="7">LT</location>
+            <location index="7">RT</location>
         </equipment>
         <equipment>
-            <name manufacturer="">(R) (IS) Medium Laser</name>
-            <type>energy</type>
-            <location index="11">CT</location>
+            <name manufacturer="Unknown">(IS) @ LRM-20 (Artemis IV Capable)</name>
+            <type>ammunition</type>
+            <location index="6">RT</location>
         </equipment>
         <equipment>
             <name manufacturer="">CASE</name>
@@ -125,28 +125,6 @@
         <variants></variants>
         <notables></notables>
         <additional></additional>
-        <quirks>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Battlefists</Name>
-                <Cost>2</Cost>
-                <Description>The Battlefists quirk applies only to â€™Mechs that are equipped with hand actuators. This quirk reflects â€™Mechs that feature hands which are better designed for melee combat as a consequence of their unique configuration (such as the Awesomeâ€™s mace-like fist, or the Pillagerâ€™s sharpened â€œknucklesâ€�). This quirk is only paid for once, even if the â€™Mech has two fists. If the â€™Mech has two hands, and this quirk is only meant to apply to one of those hands, this must be specified (the cost remains the same). A â€™Mech with Battlefists receives a â€“1 Target Number modifier when making Punch attacks.</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Command BattleMech</Name>
-                <Cost>2</Cost>
-                <Description>Each turn one or more of such units are on the battlefield and the MechWarrior is conscious, their battle force receives a +1 modifier to all Initiative rolls. This modifier is not cumulative with a Battle Computer</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Stable</Name>
-                <Cost>2</Cost>
-                <Description>`Mech designs such as the Dragon are exceptionally stable, receiving a -1 target number modifier when forced to make a Piloting Skill roll as a result of a physical attack.</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Ubiquitous</Name>
-                <Cost>1</Cost>
-                <Description>Some â€™Mechs, such as the Archer, Wasp, and Locust, have been in production for literally centuries, with thousands or even tens of thousands produced in that time across multiple nations. For other â€™Mechs, the manufacturer has gone to exceptional lengths to ensure that parts are readily available, such as mass producing them or using parts from other, more common machines. Whatever the case, when attempting to locate replacement parts for these â€™Mechs, apply a â€“2 Target Number modifier.  Note that this quirk does not cross between the Clans and the Inner Sphere. For example, a machine Ubiquitous amongst the Clans would not be Ubiquitous in the Inner Sphere, and vice versa.</Description>
-            </quirk>
-        </quirks>
         <jumpjet_model>None</jumpjet_model>
         <commsystem>Unknown</commsystem>
         <tandtsystem>Unknown</tandtsystem>

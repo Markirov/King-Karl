@@ -8,7 +8,7 @@
     <productionera>0</productionera>
     <mech_type>BattleMech</mech_type>
     <techbase manufacturer="Kallon Industries and SLDF Research Division" location="New Earth">Inner Sphere</techbase>
-    <year restricted="FALSE">2766</year>
+    <year restricted="FALSE">2770</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Crucis XL" techbase="0">
         <type>Endo-Steel</type>
@@ -61,7 +61,7 @@
         <location index="11">LA</location>
     </armor>
     <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RSOK</source>
+        <source>RS3075u-AW</source>
         <info>Wolverine II WVR-7H 55t, 5/8/5, Std FE, ES; 9.0T/87% FF Armor; 10 DHS; 1 UAC5, 1 MPL, 1 SRM6</info>
         <battleforce pv="13" wt="2" mv="5j" s="3" m="3" l="1" e="0" ov="0" armor="5" internal="5" abilities="CASE, SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>

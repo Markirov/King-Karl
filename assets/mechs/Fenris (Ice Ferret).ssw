@@ -6,7 +6,7 @@
     <era>1</era>
     <productionera>0</productionera>
     <mech_type>BattleMech</mech_type>
-    <techbase manufacturer="Assault TEch Industries" location="Donegal">Clan</techbase>
+    <techbase manufacturer="Unknown" location="Unknown">Clan</techbase>
     <year restricted="FALSE">2948</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="1">
@@ -269,7 +269,7 @@
     <loadout name="E" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
         <source>RS3050Uu-C</source>
         <loadout_era>2</loadout_era>
-        <loadout_productionera>5</loadout_productionera>
+        <loadout_productionera>4</loadout_productionera>
         <loadout_year>3056</loadout_year>
         <info>Fenris (Ice Ferret)  E 45t, 8/12/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 1 ERML, 1 ATM9, 1 ERSL</info>
         <battleforce pv="15" wt="2" mv="8" s="4" m="3" l="1" e="0" ov="0" armor="5" internal="2" abilities="OMNI, CASE, SRCH, ES, SEAL, SOA" />
@@ -308,104 +308,10 @@
             <location index="8">LA</location>
         </equipment>
     </loadout>
-    <loadout name="F" ruleslevel="3" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 4</source>
-        <loadout_era>2</loadout_era>
-        <loadout_productionera>7</loadout_productionera>
-        <loadout_year>3084</loadout_year>
-        <info>Fenris (Ice Ferret)  F 45t, 8/12/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 1 WDCEWS, 2 ERLL</info>
-        <battleforce pv="18" wt="2" mv="8" s="2" m="2" l="2" e="0" ov="0" armor="5" internal="2" abilities="OMNI, WAT, ECM, ENE, SRCH, ES, SEAL, SOA" />
-        <battle_value>1771</battle_value>
-        <cost>1.32243625E7</cost>
-        <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
-        <clancase>TRUE</clancase>
-        <equipment>
-            <name manufacturer="">(CL) ER Large Laser</name>
-            <type>energy</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Large Laser</name>
-            <type>energy</type>
-            <location index="4">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">Watchdog CEWS</name>
-            <type>equipment</type>
-            <location index="2">RT</location>
-        </equipment>
-    </loadout>
-    <loadout name="G" ruleslevel="3" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 4</source>
-        <loadout_era>2</loadout_era>
-        <loadout_productionera>8</loadout_productionera>
-        <loadout_year>3088</loadout_year>
-        <info>Fenris (Ice Ferret)  G 45t, 8/12/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 1 LTAG, 4 APGR, 2 ERSPL, 2 SRM4</info>
-        <battleforce pv="12" wt="2" mv="8" s="4" m="4" l="0" e="0" ov="0" armor="5" internal="2" abilities="OMNI, LTAG, CASE, SRCH, ES, SEAL, SOA, SRM 1/1/0" />
-        <battle_value>1196</battle_value>
-        <cost>1.216378125E7</cost>
-        <actuators lla="FALSE" lh="FALSE" rla="FALSE" rh="FALSE"/>
-        <clancase>TRUE</clancase>
-        <equipment>
-            <name manufacturer="">(CL) AP Gauss Rifle</name>
-            <type>ballistic</type>
-            <location index="4">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) AP Gauss Rifle</name>
-            <type>ballistic</type>
-            <location index="3">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) AP Gauss Rifle</name>
-            <type>ballistic</type>
-            <location index="3">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) AP Gauss Rifle</name>
-            <type>ballistic</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) SRM-4</name>
-            <type>missile</type>
-            <location index="2">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) SRM-4</name>
-            <type>missile</type>
-            <location index="2">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Pulse Laser</name>
-            <type>energy</type>
-            <location index="2">RT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Pulse Laser</name>
-            <type>energy</type>
-            <location index="2">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">Light TAG</name>
-            <type>equipment</type>
-            <location index="10">CT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">(CL) @ AP Gauss Rifle</name>
-            <type>ammunition</type>
-            <location index="3">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ SRM-4</name>
-            <type>ammunition</type>
-            <location index="3">RT</location>
-        </equipment>
-    </loadout>
     <loadout name="H" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
         <source>RS3050Uu-C</source>
         <loadout_era>2</loadout_era>
-        <loadout_productionera>5</loadout_productionera>
+        <loadout_productionera>4</loadout_productionera>
         <loadout_year>3061</loadout_year>
         <info>Fenris (Ice Ferret)  H 45t, 8/12/0, XLFE, ES; 7.5T/94% FF Armor; 13 DHS; 1 ERLL, 1 SRM6, 2 HML</info>
         <battleforce pv="16" wt="2" mv="8" s="4" m="4" l="1" e="0" ov="0" armor="5" internal="2" abilities="OMNI, CASE, SRCH, ES, SEAL, SOA" />
@@ -443,187 +349,10 @@
             <location index="6">LA</location>
         </equipment>
     </loadout>
-    <loadout name="I" ruleslevel="3" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 4</source>
-        <loadout_era>2</loadout_era>
-        <loadout_productionera>8</loadout_productionera>
-        <loadout_year>3099</loadout_year>
-        <info>Fenris (Ice Ferret)  I 45t, 8/12/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 1 BlAP, 1 ERSL, 2 SRM6, 2 MPod</info>
-        <battleforce pv="11" wt="2" mv="8" s="3" m="3" l="0" e="0" ov="0" armor="5" internal="2" abilities="OMNI, BH, RCN, CASE, SRCH, ES, SEAL, SOA, SRM 2/2/0" />
-        <techbase>Mixed</techbase>
-        <battle_value>1096</battle_value>
-        <cost>1.2794878125E7</cost>
-        <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
-        <clancase>TRUE</clancase>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="10">CT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) SRM-6</name>
-            <type>missile</type>
-            <location index="4">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) SRM-6</name>
-            <type>missile</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">M-Pod</name>
-            <type>equipment</type>
-            <location index="5">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">M-Pod</name>
-            <type>equipment</type>
-            <location index="5">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">Bloodhound Active Probe</name>
-            <type>equipment</type>
-            <location index="2">RT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ SRM-6</name>
-            <type>ammunition</type>
-            <location index="3">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ SRM-6</name>
-            <type>ammunition</type>
-            <location index="2">LT</location>
-        </equipment>
-    </loadout>
-    <loadout name="J" ruleslevel="3" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 4</source>
-        <loadout_era>2</loadout_era>
-        <loadout_productionera>9</loadout_productionera>
-        <loadout_year>3120</loadout_year>
-        <info>Fenris (Ice Ferret)  J 45t, 8/12[16]/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 2 HMG, 10 ERSL, TC</info>
-        <battleforce pv="17" wt="2" mv="10" s="7" m="6" l="0" e="0" ov="0" armor="5" internal="2" abilities="OMNI, CASE, SRCH, ES, SEAL, SOA" />
-        <battle_value>1739</battle_value>
-        <cost>1.827720625E7</cost>
-        <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
-        <clancase>TRUE</clancase>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="5">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="4">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="6">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="7">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="8">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="5">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="6">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="7">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="8">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) Heavy Machine Gun</name>
-            <type>ballistic</type>
-            <location index="9">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) Heavy Machine Gun</name>
-            <type>ballistic</type>
-            <location index="9">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ Heavy Machine Gun (1/2)</name>
-            <type>ammunition</type>
-            <location index="2">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) Targeting Computer</name>
-            <type>TargetingComputer</type>
-            <location index="10">CT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">Supercharger</name>
-            <type>Supercharger</type>
-            <location index="2">RT</location>
-        </equipment>
-    </loadout>
-    <loadout name="K" ruleslevel="3" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 4</source>
-        <loadout_era>3</loadout_era>
-        <loadout_productionera>10</loadout_productionera>
-        <loadout_year>3135</loadout_year>
-        <info>Fenris (Ice Ferret)  K 45t, 8/12/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 1 LAMS, 2 ERML, 1 ERSL, 1 LPL</info>
-        <battleforce pv="18" wt="2" mv="8" s="3" m="3" l="2" e="0" ov="0" armor="5" internal="2" abilities="OMNI, AMS, ENE, SRCH, ES, SEAL, SOA" />
-        <battle_value>1769</battle_value>
-        <cost>1.2447253125E7</cost>
-        <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
-        <clancase>TRUE</clancase>
-        <equipment>
-            <name manufacturer="">(CL) Laser Anti-Missile System</name>
-            <type>equipment</type>
-            <location index="10">CT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) Large Pulse Laser</name>
-            <type>energy</type>
-            <location index="4">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Small Laser</name>
-            <type>energy</type>
-            <location index="6">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="5">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="4">RA</location>
-        </equipment>
-    </loadout>
     <loadout name="L" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
         <source>RS3050Uu-C</source>
         <loadout_era>2</loadout_era>
-        <loadout_productionera>7</loadout_productionera>
+        <loadout_productionera>6</loadout_productionera>
         <loadout_year>3069</loadout_year>
         <info>Fenris (Ice Ferret)  L 45t, 8/12/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 1 PC, 3 APGR, TC</info>
         <battleforce pv="14" wt="2" mv="8" s="3" m="3" l="2" e="0" ov="0" armor="5" internal="2" abilities="OMNI, CASE, HT1, SRCH, ES, SEAL, SOA" />
@@ -675,48 +404,6 @@
             <name manufacturer="">(CL) Targeting Computer</name>
             <type>TargetingComputer</type>
             <location index="10">CT</location>
-        </equipment>
-    </loadout>
-    <loadout name="T" ruleslevel="3" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 4</source>
-        <loadout_era>3</loadout_era>
-        <loadout_productionera>10</loadout_productionera>
-        <loadout_year>3142</loadout_year>
-        <info>Fenris (Ice Ferret)  T 45t, 8/12[16]/0, XLFE, ES; 7.5T/94% FF Armor; 12 DHS; 1 iHLL, 1 ERML, 1 BAP, 1 SRM2</info>
-        <battleforce pv="18" wt="2" mv="10" s="3" m="3" l="0" e="0" ov="0" armor="5" internal="2" abilities="OMNI, PRB, RCN, CASE, SRCH, ES, SEAL, SOA" />
-        <battle_value>1825</battle_value>
-        <cost>1.93892125E7</cost>
-        <actuators lla="TRUE" lh="FALSE" rla="TRUE" rh="TRUE"/>
-        <clancase>TRUE</clancase>
-        <equipment>
-            <name manufacturer="">(CL) Improved Heavy Large Laser</name>
-            <type>energy</type>
-            <location index="3">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="6">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) SRM-2</name>
-            <type>missile</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">Active Probe</name>
-            <type>equipment</type>
-            <location index="10">CT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ SRM-2</name>
-            <type>ammunition</type>
-            <location index="5">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">Supercharger</name>
-            <type>Supercharger</type>
-            <location index="2">RT</location>
         </equipment>
     </loadout>
     <loadout name="U" ruleslevel="3" fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">

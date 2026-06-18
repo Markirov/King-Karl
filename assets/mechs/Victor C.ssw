@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding ="UTF-8"?>
 <mech name="Victor" model="C" tons="80" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
     <ssw_savefile_version>3</ssw_savefile_version>
-    <battle_value>1950</battle_value>
-    <cost>8440920.0</cost>
+    <battle_value>1925</battle_value>
+    <cost>8253720.000000001</cost>
     <rules_level>3</rules_level>
     <era>1</era>
     <productionera>5</productionera>
@@ -33,11 +33,11 @@
         <rl>20</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>BOTS</source>
-        <info>Victor C 80t, 4/6/4, Std FE, Std; 11.5T/74% Armor; 17 SHS; 1 SSRM4, 2 ERML, 1 GR</info>
-        <battleforce pv="20" wt="4" mv="4j" s="4" m="4" l="2" e="0" ov="0" armor="6" internal="6" abilities="CASE, SRCH, ES, SEAL, SOA" />
+        <source>RS3050Uu-I</source>
+        <info>Victor C 80t, 4/6/4, Std FE, Std; 11.5T/74% Armor; 15 SHS; 1 SSRM4, 2 ERML, 1 GR</info>
+        <battleforce pv="19" wt="4" mv="4j" s="4" m="4" l="2" e="0" ov="0" armor="6" internal="6" abilities="SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="TRUE" rla="FALSE" rh="FALSE"/>
-        <clancase>TRUE</clancase>
+        <clancase>FALSE</clancase>
         <jumpjets number="4">
             <type>Standard Jump Jet</type>
             <location index="5">LL</location>
@@ -45,14 +45,12 @@
             <location index="10">CT</location>
             <location index="11">CT</location>
         </jumpjets>
-        <heatsinks number="17" techbase="2">
+        <heatsinks number="15" techbase="2">
             <type>Single Heat Sink</type>
 
             <location index="4">LL</location>
             <location index="4">RL</location>
             <location index="0">RT</location>
-            <location index="1">LT</location>
-            <location index="0">LT</location>
         </heatsinks>
         <equipment>
             <name manufacturer="">(CL) Gauss Rifle</name>
@@ -77,7 +75,7 @@
         <equipment>
             <name manufacturer="">(CL) Streak SRM-4</name>
             <type>missile</type>
-            <location index="2">LT</location>
+            <location index="0">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="">(CL) ER Medium Laser</name>
@@ -92,7 +90,7 @@
         <equipment>
             <name manufacturer="Unknown">(CL) @ Streak SRM-4</name>
             <type>ammunition</type>
-            <location index="3">LT</location>
+            <location index="1">LT</location>
         </equipment>
     </baseloadout>
     <fluff>

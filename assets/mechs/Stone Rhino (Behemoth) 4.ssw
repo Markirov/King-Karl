@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding ="UTF-8"?>
-<mech name="Stone Rhino (Behemoth)" model="4" tons="100" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
+<mech name="Stone Rhino (Behemoth)" model="4" tons="100" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
     <ssw_savefile_version>3</ssw_savefile_version>
     <battle_value>2601</battle_value>
     <cost>2.3428E7</cost>
@@ -7,18 +7,18 @@
     <era>1</era>
     <productionera>2</productionera>
     <mech_type>BattleMech</mech_type>
-    <techbase manufacturer="Unknown" location="Unknown">Clan</techbase>
+    <techbase manufacturer="Csesztreg Industriplex Alpha" location="Csesztreg">Clan</techbase>
     <year restricted="FALSE">2846</year>
     <motive_type>Biped</motive_type>
-    <structure manufacturer="Unknown" techbase="2">
+    <structure manufacturer="Star League Monster" techbase="2">
         <type>Standard Structure</type>
     </structure>
-    <engine rating="300" manufacturer="Unknown" lsstart="0" rsstart="0" techbase="1">XL Engine</engine>
+    <engine rating="300" manufacturer="Heavy Force" lsstart="0" rsstart="0" techbase="1">XL Engine</engine>
     <gyro techbase="2">Standard Gyro</gyro>
     <cockpit>
         <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
     </cockpit>
-    <armor manufacturer="Unknown" techbase="2">
+    <armor manufacturer="Compound 12A1" techbase="2">
         <type>Standard Armor</type>
         <hd>9</hd>
         <ct>37</ct>
@@ -33,7 +33,7 @@
         <rl>37</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RS3055Uu</source>
+        <source>RGiC 2</source>
         <info>Stone Rhino (Behemoth) 4 100t, 3/5/3, XLFE, Std; 16.5T/86% Armor; 17 SHS; 2 UAC/10, 4 ERML, 4 MG, 4 LRM10</info>
         <battleforce pv="26" wt="4" mv="3j" s="4" m="3" l="2" e="0" ov="4" armor="9" internal="5" abilities="CASE, SRCH, ES, SEAL, SOA, IF 1" />
         <actuators lla="TRUE" lh="FALSE" rla="TRUE" rh="FALSE"/>
@@ -53,6 +53,46 @@
             <location index="4">LL</location>
             <location index="4">RL</location>
         </heatsinks>
+        <equipment>
+            <name manufacturer="">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location index="5">LA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location index="4">LA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location index="4">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ER Medium Laser</name>
+            <type>energy</type>
+            <location index="5">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Machine Gun</name>
+            <type>ballistic</type>
+            <location index="7">LA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Machine Gun</name>
+            <type>ballistic</type>
+            <location index="6">LA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Machine Gun</name>
+            <type>ballistic</type>
+            <location index="6">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Machine Gun</name>
+            <type>ballistic</type>
+            <location index="7">RA</location>
+        </equipment>
         <equipment>
             <name manufacturer="">(CL) LRM-10</name>
             <type>missile</type>
@@ -84,56 +124,6 @@
             <location index="2">LT</location>
         </equipment>
         <equipment>
-            <name manufacturer="">(CL) Machine Gun</name>
-            <type>ballistic</type>
-            <location index="7">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) Machine Gun</name>
-            <type>ballistic</type>
-            <location index="6">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) Machine Gun</name>
-            <type>ballistic</type>
-            <location index="7">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) Machine Gun</name>
-            <type>ballistic</type>
-            <location index="6">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="5">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="4">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(CL) ER Medium Laser</name>
-            <type>energy</type>
-            <location index="5">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ Machine Gun</name>
-            <type>ammunition</type>
-            <location index="8">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ Machine Gun</name>
-            <type>ammunition</type>
-            <location index="8">LA</location>
-        </equipment>
-        <equipment>
             <name manufacturer="Unknown">(CL) @ LRM-10</name>
             <type>ammunition</type>
             <location index="9">LT</location>
@@ -154,14 +144,14 @@
             <location index="9">RT</location>
         </equipment>
         <equipment>
-            <name manufacturer="Unknown">(CL) @ Ultra AC/10</name>
+            <name manufacturer="Unknown">@ Machine Gun</name>
             <type>ammunition</type>
-            <location index="10">LT</location>
+            <location index="8">RA</location>
         </equipment>
         <equipment>
-            <name manufacturer="Unknown">(CL) @ Ultra AC/10</name>
+            <name manufacturer="Unknown">@ Machine Gun</name>
             <type>ammunition</type>
-            <location index="11">RT</location>
+            <location index="8">LA</location>
         </equipment>
         <equipment>
             <name manufacturer="Unknown">(CL) @ Ultra AC/10</name>
@@ -171,7 +161,17 @@
         <equipment>
             <name manufacturer="Unknown">(CL) @ Ultra AC/10</name>
             <type>ammunition</type>
+            <location index="10">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ Ultra AC/10</name>
+            <type>ammunition</type>
             <location index="10">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ Ultra AC/10</name>
+            <type>ammunition</type>
+            <location index="11">RT</location>
         </equipment>
     </baseloadout>
     <fluff>
@@ -181,9 +181,9 @@
         <deployment></deployment>
         <variants></variants>
         <notables></notables>
-        <additional></additional>
-        <jumpjet_model>Unknown</jumpjet_model>
-        <commsystem>Unknown</commsystem>
-        <tandtsystem>Unknown</tandtsystem>
+        <additional>Notes: Features the following Design Quirks: Barrel Fist (LA/RA), Protected Actuators; Oversized, Poor Performance, Weak Head Armor (1).</additional>
+        <jumpjet_model>Grandthrust Mk 5</jumpjet_model>
+        <commsystem>Garret L15</commsystem>
+        <tandtsystem>RCA Instatrac Version 8a</tandtsystem>
     </fluff>
 </mech>

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding ="UTF-8"?>
-<mech name="Marauder" model="MAD-5D" tons="75" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+<mech name="Marauder" model="MAD-5D" tons="75" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
     <ssw_savefile_version>3</ssw_savefile_version>
     <battle_value>1787</battle_value>
     <cost>1.578825E7</cost>
     <rules_level>1</rules_level>
-    <era>1</era>
-    <productionera>4</productionera>
+    <era>2</era>
+    <productionera>3</productionera>
     <mech_type>BattleMech</mech_type>
     <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
-    <year restricted="TRUE">3047</year>
+    <year restricted="FALSE">3047</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="2">
         <type>Standard Structure</type>
     </structure>
-    <engine rating="300" manufacturer="GM" lsstart="0" rsstart="0" techbase="0">XL Engine</engine>
+    <engine rating="300" manufacturer="Unknown" lsstart="0" rsstart="0" techbase="0">XL Engine</engine>
     <gyro techbase="2">Standard Gyro</gyro>
     <cockpit>
         <type ejectionseat="FALSE" commandconsole="FALSE" fhes="FALSE">Standard Cockpit</type>
     </cockpit>
-    <armor manufacturer="Valiant Lamellor" techbase="2">
+    <armor manufacturer="Unknown" techbase="2">
         <type>Standard Armor</type>
         <hd>9</hd>
         <ct>35</ct>
@@ -33,45 +33,45 @@
         <rl>30</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RCiG 6</source>
+        <source>RS3085u-PP</source>
         <info>Marauder MAD-5D 75t, 4/6/4, XLFE, Std; 14.0T/97% Armor; 16 DHS; 1 SSRM2, 2 MPL, 2 ERPPC, 1 LPL</info>
         <battleforce pv="18" wt="3" mv="4j" s="4" m="4" l="2" e="0" ov="1" armor="7" internal="3" abilities="CASE, SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="FALSE" rla="TRUE" rh="FALSE"/>
         <clancase>FALSE</clancase>
         <jumpjets number="4">
             <type>Standard Jump Jet</type>
-            <location index="5">RL</location>
-            <location index="4">RL</location>
             <location index="4">LL</location>
             <location index="5">LL</location>
+            <location index="4">RL</location>
+            <location index="5">RL</location>
         </jumpjets>
         <heatsinks number="16" techbase="0">
             <type>Double Heat Sink</type>
 
-            <location index="6">RT</location>
-            <location index="3">LT</location>
             <location index="3">RT</location>
+            <location index="3">LT</location>
+            <location index="6">RT</location>
             <location index="6">LT</location>
         </heatsinks>
-        <equipment>
-            <name manufacturer="">(IS) ER PPC</name>
-            <type>energy</type>
-            <location index="3">LA</location>
-        </equipment>
         <equipment>
             <name manufacturer="">(IS) ER PPC</name>
             <type>energy</type>
             <location index="3">RA</location>
         </equipment>
         <equipment>
-            <name manufacturer="">(IS) Medium Pulse Laser</name>
+            <name manufacturer="">(IS) ER PPC</name>
             <type>energy</type>
-            <location index="6">LA</location>
+            <location index="3">LA</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) Medium Pulse Laser</name>
             <type>energy</type>
             <location index="6">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Medium Pulse Laser</name>
+            <type>energy</type>
+            <location index="6">LA</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) Large Pulse Laser</name>
@@ -101,9 +101,9 @@
         <deployment></deployment>
         <variants></variants>
         <notables></notables>
-        <additional>Notes: Features the following Design Quirks: Command ’Mech, Directional Torso Mount (RT), Hyper-Extending Actuators Narrow/Low Profile, Exposed Weapon Linkage (LPL).</additional>
-        <jumpjet_model>None</jumpjet_model>
-        <commsystem>Dalban Micronics</commsystem>
-        <tandtsystem>Dalban HiRez</tandtsystem>
+        <additional></additional>
+        <jumpjet_model>Unknown</jumpjet_model>
+        <commsystem>Unknown</commsystem>
+        <tandtsystem>Unknown</tandtsystem>
     </fluff>
 </mech>

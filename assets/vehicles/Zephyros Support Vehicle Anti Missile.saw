@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Zephyros Support Vehicle" model="Anti Missile" tons="25" motive="Wheeled" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>660</battle_value>
+    <motive type="Wheeled" cruise="7" turret="Dual Turret" />
+    <cost>1217125.0000000002</cost>
+    <rules_level>2</rules_level>
+    <era>2</era>
+    <productionera>8</productionera>
+    <techbase manufacturer="Swedenborg Heavy Industries" location="Kirchbach">Clan</techbase>
+    <year restricted="FALSE">3086</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="false" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="175" manufacturer="" techbase="2">Fusion Engine</engine>
+    <armor manufacturer="'Magnum'" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>25</front>
+        <left>20</left>
+        <right>20</right>
+        <rear>17</rear>
+        <primaryturret>21</primaryturret>
+        <secondaryturret>21</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>Blackmore</source>
+        <info>Zephyros Support Vehicle Anti Missile 25t, 7/11, Std FE, 6.5T/98% FF Armor; 10 SHS; 1 ECM, 4 AMS, 1 TAG</info>
+        <battleforce pv="7" wt="1" mv="7w" s="0" m="0" l="0" e="0" ov="0" armor="4" internal="2" abilities="TAG, AMS, ECM, ENE, TUR()" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">TAG</name>
+            <type>equipment</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Anti-Missile System</name>
+            <type>equipment</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Anti-Missile System</name>
+            <type>equipment</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Anti-Missile System</name>
+            <type>equipment</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) Anti-Missile System</name>
+            <type>equipment</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">ECM Suite</name>
+            <type>equipment</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ Anti-Missile System</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ Anti-Missile System</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Build 1685 Tacticom</commsystem>
+        <tandtsystem>Series VI Integrated TTS</tandtsystem>
+    </fluff>
+</combatvehicle>

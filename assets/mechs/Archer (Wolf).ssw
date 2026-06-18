@@ -5,10 +5,10 @@
     <cost>8354173.333333335</cost>
     <rules_level>1</rules_level>
     <era>2</era>
-    <productionera>5</productionera>
+    <productionera>4</productionera>
     <mech_type>BattleMech</mech_type>
     <techbase manufacturer="Unknown" location="Unknown">Clan</techbase>
-    <year restricted="FALSE">3055</year>
+    <year restricted="FALSE">3051</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="1">
         <type>Endo-Steel</type>
@@ -47,7 +47,7 @@
         <location index="11">RT</location>
     </armor>
     <baseloadout fcsa4="TRUE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 10</source>
+        <source>RS3085u-PP</source>
         <info>Archer (Wolf) 70t, 4/6/0, Std FE, ES; 11.0T/97% FF Armor; 15 DHS; 1 ECM, 2 ERLL, 2 SPL, 2 LRM20, 1 AMS</info>
         <battleforce pv="24" wt="3" mv="4" s="5" m="5" l="5" e="0" ov="1" armor="7" internal="6" abilities="AMS, ECM, CASE, SRCH, ES, SEAL, SOA, IF 3" />
         <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
@@ -134,28 +134,6 @@
         <variants></variants>
         <notables></notables>
         <additional></additional>
-        <quirks>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Battlefists</Name>
-                <Cost>2</Cost>
-                <Description>The Battlefists quirk applies only to â€™Mechs that are equipped with hand actuators. This quirk reflects â€™Mechs that feature hands which are better designed for melee combat as a consequence of their unique configuration (such as the Awesomeâ€™s mace-like fist, or the Pillagerâ€™s sharpened â€œknucklesâ€�). This quirk is only paid for once, even if the â€™Mech has two fists. If the â€™Mech has two hands, and this quirk is only meant to apply to one of those hands, this must be specified (the cost remains the same). A â€™Mech with Battlefists receives a â€“1 Target Number modifier when making Punch attacks.</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Command BattleMech</Name>
-                <Cost>2</Cost>
-                <Description>Each turn one or more of such units are on the battlefield and the MechWarrior is conscious, their battle force receives a +1 modifier to all Initiative rolls. This modifier is not cumulative with a Battle Computer</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Stable</Name>
-                <Cost>2</Cost>
-                <Description>`Mech designs such as the Dragon are exceptionally stable, receiving a -1 target number modifier when forced to make a Piloting Skill roll as a result of a physical attack.</Description>
-            </quirk>
-            <quirk postive="true" battlemech="true" industrialmech="true" combatvehicle="false" battlearmor="false" aerospacefighter="false" conventionalfigher="false" dropship="false" jumpship="false" warship="false" spacestation="false" protomech="false" isvariable="false">
-                <Name>Ubiquitous</Name>
-                <Cost>1</Cost>
-                <Description>Some â€™Mechs, such as the Archer, Wasp, and Locust, have been in production for literally centuries, with thousands or even tens of thousands produced in that time across multiple nations. For other â€™Mechs, the manufacturer has gone to exceptional lengths to ensure that parts are readily available, such as mass producing them or using parts from other, more common machines. Whatever the case, when attempting to locate replacement parts for these â€™Mechs, apply a â€“2 Target Number modifier.  Note that this quirk does not cross between the Clans and the Inner Sphere. For example, a machine Ubiquitous amongst the Clans would not be Ubiquitous in the Inner Sphere, and vice versa.</Description>
-            </quirk>
-        </quirks>
         <jumpjet_model>None</jumpjet_model>
         <commsystem>Unknown</commsystem>
         <tandtsystem>Unknown</tandtsystem>

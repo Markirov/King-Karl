@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding ="UTF-8"?>
-<mech name="BattleMaster" model="BLR-3M" tons="85" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+<mech name="Battlemaster" model="BLR-3M" tons="85" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
     <ssw_savefile_version>3</ssw_savefile_version>
     <battle_value>1679</battle_value>
     <cost>8892943.333333334</cost>
     <rules_level>1</rules_level>
-    <era>1</era>
+    <era>2</era>
     <productionera>4</productionera>
     <mech_type>BattleMech</mech_type>
     <techbase manufacturer="Unknown" location="Unknown">Inner Sphere</techbase>
-    <year restricted="TRUE">3049</year>
+    <year restricted="FALSE">3052</year>
     <motive_type>Biped</motive_type>
     <structure manufacturer="Unknown" techbase="2">
         <type>Standard Structure</type>
@@ -33,8 +33,8 @@
         <rl>26</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RGiC 3</source>
-        <info>BattleMaster BLR-3M 85t, 4/6/0, Std FE, Std; 14.5T/88% Armor; 18 DHS; 6 ML, 1 MG, 1 ERPPC, 1 SRM6</info>
+        <source>RS3085u-PP</source>
+        <info>Battlemaster BLR-3M 85t, 4/6/0, Std FE, Std; 14.5T/88% Armor; 18 DHS; 6 ML, 1 MG, 1 SRM6, 1 ERPPC</info>
         <battleforce pv="17" wt="4" mv="4" s="4" m="4" l="1" e="0" ov="0" armor="8" internal="7" abilities="CASE, SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
         <clancase>FALSE</clancase>
@@ -42,20 +42,15 @@
             <type>Double Heat Sink</type>
 
             <location index="0">LT</location>
-            <location index="4">LA</location>
-            <location index="6">RT</location>
             <location index="3">RT</location>
             <location index="0">RT</location>
+            <location index="4">LA</location>
+            <location index="6">RT</location>
         </heatsinks>
         <equipment>
-            <name manufacturer="">(IS) Medium Laser</name>
+            <name manufacturer="">(IS) ER PPC</name>
             <type>energy</type>
-            <location index="5">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) Medium Laser</name>
-            <type>energy</type>
-            <location index="6">LT</location>
+            <location index="4">RA</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) Medium Laser</name>
@@ -65,12 +60,42 @@
         <equipment>
             <name manufacturer="">(IS) Medium Laser</name>
             <type>energy</type>
+            <location index="6">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(R) (IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="7">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="5">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Medium Laser</name>
+            <type>energy</type>
             <location index="10">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(R) (IS) Medium Laser</name>
+            <type>energy</type>
+            <location index="11">RT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) Machine Gun</name>
+            <type>ballistic</type>
+            <location index="7">LA</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) SRM-6</name>
             <type>missile</type>
             <location index="3">LT</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">@ Machine Gun</name>
+            <type>ammunition</type>
+            <location index="8">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="Unknown">@ SRM-6</name>
@@ -81,31 +106,6 @@
             <name manufacturer="Unknown">@ SRM-6</name>
             <type>ammunition</type>
             <location index="10">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) Machine Gun</name>
-            <type>ballistic</type>
-            <location index="7">LA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) ER PPC</name>
-            <type>energy</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="Unknown">@ Machine Gun</name>
-            <type>ammunition</type>
-            <location index="8">LT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(R) (IS) Medium Laser</name>
-            <type>energy</type>
-            <location index="11">RT</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(R) (IS) Medium Laser</name>
-            <type>energy</type>
-            <location index="7">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="">CASE</name>
@@ -120,7 +120,7 @@
         <deployment></deployment>
         <variants></variants>
         <notables></notables>
-        <additional>Notes: Features the following Design Quirks: Command ’Mech; Weak Head Armor (1)</additional>
+        <additional></additional>
         <jumpjet_model>None</jumpjet_model>
         <commsystem>Unknown</commsystem>
         <tandtsystem>Unknown</tandtsystem>

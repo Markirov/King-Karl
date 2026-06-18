@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Balac Strike VTOL" model="(Spotter)" tons="25" motive="VTOL" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>934</battle_value>
+    <motive type="VTOL" cruise="11" turret="No Turret" />
+    <cost>3431666.666666667</cost>
+    <rules_level>1</rules_level>
+    <era>2</era>
+    <productionera>7</productionera>
+    <techbase manufacturer="New York Vehicle Y2 Facility" location="Trondheim">Clan</techbase>
+    <year restricted="FALSE">3079</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="false" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="275" manufacturer="Consolidated" techbase="1">XL Engine</engine>
+    <armor manufacturer="Forging AM15" techbase="1">
+        <type>Ferro-Fibrous</type>
+        <front>15</front>
+        <left>12</left>
+        <right>12</right>
+        <rear>7</rear>
+        <primaryturret>0</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>2</rotor>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>RS3085u-CE</source>
+        <info>Balac Strike VTOL (Spotter) 25t, 11/17, XLFE, 2.5T/38% FF Armor; 10 SHS; 1 ECM, 1 BAP, 2 ATM6, 1 TAG</info>
+        <battleforce pv="9" wt="1" mv="11v" s="3" m="2" l="1" e="0" ov="0" armor="2" internal="2" abilities="TAG, PRB, RCN, ECM, CASE" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">TAG</name>
+            <type>equipment</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ATM-6</name>
+            <type>missile</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(CL) ATM-6</name>
+            <type>missile</type>
+            <location>Front</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">Active Probe</name>
+            <type>equipment</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">ECM Suite</name>
+            <type>equipment</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ ATM-6</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(CL) @ ATM-6</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Neil 9000 Comm System</commsystem>
+        <tandtsystem>RCA Econotrac</tandtsystem>
+    </fluff>
+</combatvehicle>

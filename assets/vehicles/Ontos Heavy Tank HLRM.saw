@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<combatvehicle name="Ontos Heavy Tank" model="HLRM" tons="95" motive="Tracked" omni="FALSE" solaris7id="0" solaris7imageid="0" sswimage="">
+    <ssw_savefile_version>3</ssw_savefile_version>
+    <battle_value>1543</battle_value>
+    <motive type="Tracked" cruise="3" turret="Single Turret" />
+    <cost>5785500.0</cost>
+    <rules_level>0</rules_level>
+    <era>1</era>
+    <productionera>2</productionera>
+    <techbase manufacturer="Grumman Almalgamated, Kallon Weapons Industries" location="Shiro III (Grumman), Nanking (Kallon)">Inner Sphere</techbase>
+    <year restricted="FALSE">2876</year>
+    <structure manufacturer="" techbase="2">
+        <type>Standard Structure</type>
+        <mods flotation="false" limitedamph="false" fullamph="false" dunebuggy="false" enviroseal="false" trailer="false" />
+    </structure>
+    <engine rating="285" manufacturer="HeavyLoad with PowerBoost" techbase="2">Fusion Engine</engine>
+    <armor manufacturer="SimplePlate Manufacturers Standard" techbase="2">
+        <type>Standard Armor</type>
+        <front>68</front>
+        <left>56</left>
+        <right>56</right>
+        <rear>44</rear>
+        <primaryturret>56</primaryturret>
+        <secondaryturret>0</secondaryturret>
+        <rotor>0</rotor>
+    </armor>
+    <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE" turretlimit="0.0" >
+        <source>RS3039u</source>
+        <info>Ontos Heavy Tank HLRM 95t, 3/5, Std FE, 17.5T/75% Armor; 10 SHS; 3 LRM20</info>
+        <battleforce pv="15" wt="4" mv="3t" s="2" m="4" l="4" e="0" ov="0" armor="9" internal="5" abilities="TUR(2/4/4, LRM 2/4/4, IF 2/4/4), LRM 2/4/4, IF 4" />
+        <heatsinks number="10" techbase="2">
+            <type>Single Heat Sink</type>
+        </heatsinks>
+        <equipment>
+            <name manufacturer="">(IS) LRM-20</name>
+            <type>missile</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) LRM-20</name>
+            <type>missile</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">(IS) LRM-20</name>
+            <type>missile</type>
+            <location>Turret</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-20</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-20</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-20</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-20</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ LRM-20</name>
+            <type>ammunition</type>
+            <location>Body</location>
+        </equipment>
+    </baseloadout>
+    <fluff>
+        <overview></overview>
+        <capabilities></capabilities>
+        <battlehistory></battlehistory>
+        <deployment></deployment>
+        <variants></variants>
+        <notables></notables>
+        <additional></additional>
+        <jumpjet_model></jumpjet_model>
+        <commsystem>Easy Talk-2</commsystem>
+        <tandtsystem>GuideRite w/Laser Coordination Link</tandtsystem>
+    </fluff>
+</combatvehicle>

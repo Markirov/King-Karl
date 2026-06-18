@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding ="UTF-8"?>
 <mech name="Shadow Hawk" model="C" tons="55" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
     <ssw_savefile_version>3</ssw_savefile_version>
-    <battle_value>1348</battle_value>
-    <cost>5308956.666666667</cost>
+    <battle_value>1260</battle_value>
+    <cost>4800556.666666667</cost>
     <rules_level>3</rules_level>
     <era>2</era>
     <productionera>4</productionera>
@@ -33,29 +33,26 @@
         <rl>16</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>BoTS</source>
-        <info>Shadow Hawk C 55t, 5/8/5, Std FE, Std; 9.5T/82% Armor; 13 SHS; 1 SSRM2, 1 ERML, 1 LB5, 1 LRM5</info>
-        <battleforce pv="13" wt="2" mv="5j" s="2" m="2" l="1" e="0" ov="0" armor="5" internal="5" abilities="CASE, SRCH, ES, SEAL, SOA" />
+        <source>RS3085u-PP</source>
+        <info>Shadow Hawk C 55t, 5/8/3, Std FE, Std; 9.5T/82% Armor; 12 SHS; 1 SSRM2, 1 ERML, 1 LB5, 1 LRM5</info>
+        <battleforce pv="13" wt="2" mv="5/2j" s="2" m="2" l="1" e="0" ov="0" armor="5" internal="5" abilities="SRCH, ES, SEAL, SOA" />
         <actuators lla="TRUE" lh="TRUE" rla="TRUE" rh="TRUE"/>
-        <clancase>TRUE</clancase>
-        <jumpjets number="5">
+        <clancase>FALSE</clancase>
+        <jumpjets number="3">
             <type>Standard Jump Jet</type>
-            <location index="2">RT</location>
+            <location index="1">RT</location>
             <location index="10">CT</location>
-            <location index="1">LT</location>
-            <location index="3">RT</location>
             <location index="0">LT</location>
         </jumpjets>
-        <heatsinks number="13" techbase="2">
+        <heatsinks number="12" techbase="2">
             <type>Single Heat Sink</type>
 
             <location index="0">RT</location>
-            <location index="1">RT</location>
         </heatsinks>
         <equipment>
             <name manufacturer="">(CL) LB 5-X AC</name>
             <type>ballistic</type>
-            <location index="2">LT</location>
+            <location index="1">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="">(CL) Streak SRM-2</name>
@@ -70,7 +67,7 @@
         <equipment>
             <name manufacturer="Unknown">(CL) @ LB 5-X AC (Slug)</name>
             <type>ammunition</type>
-            <location index="6">LT</location>
+            <location index="5">LT</location>
         </equipment>
         <equipment>
             <name manufacturer="Unknown">(CL) @ Streak SRM-2</name>
@@ -80,12 +77,12 @@
         <equipment>
             <name manufacturer="">(CL) LRM-5</name>
             <type>missile</type>
-            <location index="4">RT</location>
+            <location index="2">RT</location>
         </equipment>
         <equipment>
             <name manufacturer="Unknown">(CL) @ LRM-5</name>
             <type>ammunition</type>
-            <location index="5">RT</location>
+            <location index="3">RT</location>
         </equipment>
     </baseloadout>
     <fluff>

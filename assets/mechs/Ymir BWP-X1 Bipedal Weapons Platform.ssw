@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding ="UTF-8"?>
 <mech name="Ymir" model="BWP-X1 'Bipedal Weapons Platform'" tons="90" omnimech="FALSE" solaris7id="0" solaris7imageid="0" sswimage="../Images/No_Image.png">
     <ssw_savefile_version>3</ssw_savefile_version>
-    <battle_value>1212</battle_value>
-    <cost>7940630.0</cost>
+    <battle_value>1194</battle_value>
+    <cost>7927950.0</cost>
     <rules_level>4</rules_level>
     <era>0</era>
     <productionera>0</productionera>
@@ -33,10 +33,10 @@
         <rl>22</rl>
     </armor>
     <baseloadout fcsa4="FALSE" fcsa5="FALSE" fcsapollo="FALSE">
-        <source>RS3075u</source>
-        <info>Ymir BWP-X1 "Bipedal Weapons Platform" 90t, 3/5/0, Pr FE, Prm; 15.5T/59% Pr. Armor; 16 SHS; 2 Flmr, 2 LRM5, 1 AC5, 1 LL, 4 SRM2</info>
+        <source>XTRPrimitives V</source>
+        <info>Ymir BWP-X1 "Bipedal Weapons Platform" 90t, 3/5/0, Pr FE, Prm; 15.5T/59% Pr. Armor; 16 SHS; 2 Vflmr, 2 LRM5, 1 AC5, 1 LL, 4 SRM2</info>
         <battleforce pv="12" wt="4" mv="3" s="2" m="2" l="1" e="0" ov="1" armor="6" internal="7" abilities="SRCH, ES, SEAL, SOA" />
-        <actuators lla="TRUE" lh="FALSE" rla="TRUE" rh="TRUE"/>
+        <actuators lla="TRUE" lh="FALSE" rla="TRUE" rh="FALSE"/>
         <clancase>FALSE</clancase>
         <heatsinks number="16" techbase="2">
             <type>Single Heat Sink</type>
@@ -48,17 +48,7 @@
         <equipment>
             <name manufacturer="">(IS) Large Laser</name>
             <type>energy</type>
-            <location index="4">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) Flamer</name>
-            <type>energy</type>
-            <location index="7">RA</location>
-        </equipment>
-        <equipment>
-            <name manufacturer="">(IS) Flamer</name>
-            <type>energy</type>
-            <location index="6">RA</location>
+            <location index="3">RA</location>
         </equipment>
         <equipment>
             <name manufacturer="">(IS) LRM-5</name>
@@ -115,6 +105,21 @@
             <type>ammunition</type>
             <location index="4">LT</location>
         </equipment>
+        <equipment>
+            <name manufacturer="">Vehicle Flamer</name>
+            <type>energy</type>
+            <location index="6">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="">Vehicle Flamer</name>
+            <type>energy</type>
+            <location index="5">RA</location>
+        </equipment>
+        <equipment>
+            <name manufacturer="Unknown">(IS) @ Vehicle Flamer</name>
+            <type>ammunition</type>
+            <location index="7">RA</location>
+        </equipment>
     </baseloadout>
     <fluff>
         <overview></overview>
@@ -123,7 +128,7 @@
         <deployment></deployment>
         <variants></variants>
         <notables></notables>
-        <additional></additional>
+        <additional>Field Testing Summation: Original Ymir Primitive Chassis:br:Producer/Site: Coventry Defense Conglomerate, Coventry:br:Supervising Engineer: Luther D’Antangelo:br:Prototype Introduction Date: 2462:br:Non-Production Equipment Analysis::br:Primitive Armor:br:Primitive Cockpit:br:Primitive Engine:br::br:Notes: Features the following Design Quirks: Obsolete (2480), Poor Cooling Jacket (Large Laser and Flamers), Stable.</additional>
         <jumpjet_model>None</jumpjet_model>
         <commsystem>Unknown</commsystem>
         <tandtsystem>Unknown</tandtsystem>
