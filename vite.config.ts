@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/',
+  base: ''/King-Karl/'',
   server: {
     host: true, // bind 0.0.0.0 -> accept 127.0.0.1, localhost, LAN
     port: 5173,
