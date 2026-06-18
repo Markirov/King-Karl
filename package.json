@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.1.14",
     "@xmldom/xmldom": "^0.8.11",
     "d3-delaunay": "^6.0.4",
+    "firebase": "^12.14.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.0",

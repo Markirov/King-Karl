@@ -111,34 +111,16 @@ function PrioridadesTab() {
   const personalAgg = useMemo(() => agregarPersonal(personal), [personal]);
   const baysDisponibles = useMemo(() => listarBays(personal), [personal]);
 
-  // Bay del mech actual: Techs asignados por nivel (varios a la vez) + AsTechs.
-  const [bayTechsAssigned, setBayTechsAssigned] = useState<Record<PersonalNivel, number>>({
-    green: 0, regular: 0, veteran: 0, elite: 0,
-  });
+  // Bay del mech actual: por defecto primer bay disponible + 6 astechs (canon).
+  const [bayTechSkill, setBayTechSkill] = useState<PersonalNivel>('regular');
   const [bayAstechs, setBayAstechs] = useState(6);
 
   useEffect(() => {
-    // Por defecto: 1 tech del mejor skill disponible.
-    const next: Record<PersonalNivel, number> = { green: 0, regular: 0, veteran: 0, elite: 0 };
     if (baysDisponibles.length > 0) {
-      next[baysDisponibles[0].skill] = 1;
+      setBayTechSkill(baysDisponibles[0].skill);
     }
-    setBayTechsAssigned(next);
     setBayAstechs(Math.min(6, personalAgg.totalAstechs));
   }, [baysDisponibles, personalAgg.totalAstechs]);
-
-  // Skill efectivo del bay = el MEJOR nivel con al menos 1 tech asignado (elite > veteran > regular > green).
-  const bayTechSkill = useMemo<PersonalNivel>(() => {
-    for (const skill of ['elite', 'veteran', 'regular', 'green'] as PersonalNivel[]) {
-      if ((bayTechsAssigned[skill] ?? 0) > 0) return skill;
-    }
-    return 'regular';
-  }, [bayTechsAssigned]);
-
-  const bayTechsTotal = useMemo(
-    () => (Object.values(bayTechsAssigned) as number[]).reduce((a, b) => a + b, 0),
-    [bayTechsAssigned]
-  );
 
   const bayMult = useMemo(() => bayMultiplier(bayTechSkill, bayAstechs), [bayTechSkill, bayAstechs]);
 
@@ -215,9 +197,7 @@ function PrioridadesTab() {
           totalTechs={personalAgg.totalTechs}
           totalAstechs={personalAgg.totalAstechs}
           techsBySkill={personalAgg.techsBySkill}
-          bayTechsAssigned={bayTechsAssigned} setBayTechsAssigned={setBayTechsAssigned}
-          bayTechsTotal={bayTechsTotal}
-          bayTechSkill={bayTechSkill}
+          bayTechSkill={bayTechSkill} setBayTechSkill={setBayTechSkill}
           bayAstechs={bayAstechs} setBayAstechs={setBayAstechs}
           bayMult={bayMult}
         />
@@ -355,23 +335,14 @@ function BayPanel(p: {
   totalTechs: number;
   totalAstechs: number;
   techsBySkill: Record<PersonalNivel, number>;
-  bayTechsAssigned: Record<PersonalNivel, number>;
-  setBayTechsAssigned: (v: Record<PersonalNivel, number>) => void;
-  bayTechsTotal: number;
   bayTechSkill: PersonalNivel;
+  setBayTechSkill: (n: PersonalNivel) => void;
   bayAstechs: number;
   setBayAstechs: (n: number) => void;
   bayMult: number;
 }) {
   const noViable = p.totalTechs === 0;
   const multPct = Math.round((p.bayMult - 1) * 100);
-
-  const setSkillQty = (skill: PersonalNivel, qty: number) => {
-    const max = p.techsBySkill[skill] ?? 0;
-    const clamped = Math.min(max, Math.max(0, qty));
-    p.setBayTechsAssigned({ ...p.bayTechsAssigned, [skill]: clamped });
-  };
-
   return (
     <section className="bg-surface-container-low border-l-2 border-primary-container/30 p-3 clip-chamfer">
       <h2 className="font-headline text-xs font-bold text-primary-container tracking-widest uppercase mb-3">
@@ -384,32 +355,19 @@ function BayPanel(p: {
       ) : (
         <>
           <label className="block font-mono text-[9px] uppercase tracking-widest text-secondary/60 mb-1">
-            Techs asignados ({p.bayTechsTotal} de {p.totalTechs})
+            Tech (skill)
           </label>
-          <div className="grid grid-cols-2 gap-1.5 mb-2">
-            {(['green', 'regular', 'veteran', 'elite'] as PersonalNivel[]).map(n => {
-              const disp = p.techsBySkill[n] ?? 0;
-              return (
-                <div key={n} className={disp === 0 ? 'opacity-30' : ''}>
-                  <label className="block font-mono text-[8px] uppercase tracking-widest text-secondary/50 mb-0.5">
-                    {n} ({disp} disp)
-                  </label>
-                  <input
-                    type="number" min={0} max={disp}
-                    value={p.bayTechsAssigned[n] || ''}
-                    placeholder="0"
-                    disabled={disp === 0}
-                    onFocus={e => e.target.select()}
-                    onChange={e => setSkillQty(n, parseInt(e.target.value) || 0)}
-                    className="w-full bg-surface-container border border-outline-variant/40 px-2 py-1 font-mono text-[11px] text-secondary disabled:opacity-40"
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <div className="font-mono text-[9px] text-secondary/50 mb-2">
-            Skill efectivo del bay: <span className="text-primary-container font-bold">{p.bayTechSkill}</span> (el mejor asignado)
-          </div>
+          <select
+            value={p.bayTechSkill}
+            onChange={e => p.setBayTechSkill(e.target.value as PersonalNivel)}
+            className="w-full bg-surface-container border border-outline-variant/40 px-2 py-1 font-mono text-[11px] text-secondary mb-2"
+          >
+            {(['green', 'regular', 'veteran', 'elite'] as PersonalNivel[]).map(n => (
+              <option key={n} value={n} disabled={(p.techsBySkill[n] ?? 0) === 0}>
+                {n} ({p.techsBySkill[n] ?? 0} disp)
+              </option>
+            ))}
+          </select>
 
           <label className="block font-mono text-[9px] uppercase tracking-widest text-secondary/60 mb-1">
             AsTechs asignados (de {p.totalAstechs})
